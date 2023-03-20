@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
   mavenCentral()
@@ -20,12 +20,13 @@ java {
 }
 
 dependencies {
+  api("com.squareup.okhttp3:okhttp:4.10.0")
+  api("com.squareup.okhttp3:okhttp-sse:4.10.0")
+
   implementation("org.slf4j:slf4j-api:2.0.7")
   implementation("org.slf4j:slf4j-simple:2.0.7")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.14.2")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2")
-  implementation("com.squareup.okhttp3:okhttp:4.10.0")
-  implementation("com.squareup.okhttp3:okhttp-sse:4.10.0")
 }
 
 nexusPublishing {

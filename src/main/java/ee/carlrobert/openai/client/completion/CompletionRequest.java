@@ -7,8 +7,6 @@ public class CompletionRequest {
   @JsonProperty("max_tokens")
   private final int maxTokens;
   private final double temperature;
-  @JsonProperty("best_of")
-  private final int bestOf;
   @JsonProperty("frequency_penalty")
   private final double frequencyPenalty;
   @JsonProperty("presence_penalty")
@@ -17,7 +15,6 @@ public class CompletionRequest {
   protected CompletionRequest(Builder builder) {
     this.maxTokens = builder.maxTokens;
     this.temperature = builder.temperature;
-    this.bestOf = builder.bestOf;
     this.frequencyPenalty = builder.frequencyPenalty;
     this.presencePenalty = builder.presencePenalty;
   }
@@ -28,10 +25,6 @@ public class CompletionRequest {
 
   public double getTemperature() {
     return temperature;
-  }
-
-  public int getBestOf() {
-    return bestOf;
   }
 
   public double getFrequencyPenalty() {
@@ -50,7 +43,6 @@ public class CompletionRequest {
 
     private int maxTokens = 1000;
     private double temperature = 0.9;
-    private int bestOf = 1;
     private double frequencyPenalty = 0;
     private double presencePenalty = 0.6;
 
@@ -61,11 +53,6 @@ public class CompletionRequest {
 
     public Builder setTemperature(double temperature) {
       this.temperature = temperature;
-      return this;
-    }
-
-    public Builder setBestOf(int bestOf) {
-      this.bestOf = bestOf;
       return this;
     }
 

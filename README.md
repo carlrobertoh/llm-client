@@ -12,13 +12,13 @@ To use the package, you need to use following Maven dependency:
 <dependency>
     <groupId>ee.carlrobert</groupId>
     <artifactId>openai-client</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 Gradle dependency:
 ```kts
 dependencies {
-  implementation("ee.carlrobert:openai-client:1.0.0")
+  implementation("ee.carlrobert:openai-client:1.0.1")
 }
 ```
 
@@ -62,6 +62,6 @@ call.cancel();
 
 [contributions-welcome-svg]: http://img.shields.io/badge/contributions-welcome-brightgreen
 [contributions-welcome]: https://github.com/JetBrains/ideavim/blob/master/CONTRIBUTING.md
-[maven-shield]: https://img.shields.io/maven-central/v/ee.carlrobert/openai-client/1.0.0
-[maven-url]: https://central.sonatype.com/artifact/ee.carlrobert/openai-client/1.0.0
+[maven-shield]: https://img.shields.io/maven-central/v/ee.carlrobert/openai-client
+[maven-url]: https://central.sonatype.com/namespace/ee.carlrobert
 [portfolio]: https://carlrobert.ee
