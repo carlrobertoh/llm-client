@@ -5,7 +5,6 @@ import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.completion.CompletionClient;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.text.request.TextCompletionRequest;
-import okhttp3.OkHttpClient;
 import okhttp3.sse.EventSource;
 
 public class TextCompletionClient extends CompletionClient {
@@ -15,8 +14,8 @@ public class TextCompletionClient extends CompletionClient {
   }
 
   @Override
-  protected TextCompletionEventSourceListener getEventListener(OkHttpClient client, CompletionEventListener listeners) {
-    return new TextCompletionEventSourceListener(client, listeners);
+  protected TextCompletionEventSourceListener getEventListener(CompletionEventListener listeners) {
+    return new TextCompletionEventSourceListener(listeners);
   }
 
   @Override

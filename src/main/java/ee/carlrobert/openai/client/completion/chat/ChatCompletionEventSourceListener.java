@@ -5,12 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.CompletionEventSourceListener;
 import ee.carlrobert.openai.client.completion.chat.response.ChatCompletionResponse;
-import okhttp3.OkHttpClient;
 
 public class ChatCompletionEventSourceListener extends CompletionEventSourceListener {
 
-  public ChatCompletionEventSourceListener(OkHttpClient client, CompletionEventListener listeners) {
-    super(client, listeners);
+  public ChatCompletionEventSourceListener(CompletionEventListener listeners) {
+    super(listeners);
   }
 
   protected String getMessage(String data) throws JsonProcessingException {

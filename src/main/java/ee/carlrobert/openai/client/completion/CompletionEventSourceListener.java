@@ -4,9 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import okhttp3.internal.http2.StreamResetException;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 import org.jetbrains.annotations.NotNull;
@@ -19,12 +18,10 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
 
   private static final String DEFAULT_ERROR_MSG = "Something went wrong. Please try again later.";
 
-  private final OkHttpClient client;
   private final CompletionEventListener listeners;
   private final StringBuilder messageBuilder = new StringBuilder();
 
-  public CompletionEventSourceListener(OkHttpClient client, CompletionEventListener listeners) {
-    this.client = client;
+  public CompletionEventSourceListener(CompletionEventListener listeners) {
     this.listeners = listeners;
   }
 
@@ -63,7 +60,8 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
       @NotNull EventSource eventSource,
       Throwable ex,
       Response response) {
-    if (isRequestCancelled()) {
+    if (ex instanceof StreamResetException) {
+      LOG.info("Stream was cancelled");
       listeners.onComplete(messageBuilder);
       return;
     }
@@ -88,9 +86,5 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
       LOG.error("Something went wrong.", ex);
       listeners.onFailure(DEFAULT_ERROR_MSG);
     }
-  }
-
-  private boolean isRequestCancelled() {
-    return client.dispatcher().runningCalls().stream().anyMatch(Call::isCanceled);
   }
 }

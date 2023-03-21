@@ -6,7 +6,6 @@ import ee.carlrobert.openai.client.OpenAIClient;
 import java.util.HashMap;
 import okhttp3.Headers;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.sse.EventSource;
@@ -21,7 +20,7 @@ public abstract class CompletionClient extends BaseClient {
     this.url = url;
   }
 
-  protected abstract CompletionEventSourceListener getEventListener(OkHttpClient client, CompletionEventListener listeners);
+  protected abstract CompletionEventSourceListener getEventListener(CompletionEventListener listeners);
 
   protected <T> okhttp3.Request buildRequest(T requestBody) {
     var headers = new HashMap<>(baseHeaders);
@@ -42,10 +41,9 @@ public abstract class CompletionClient extends BaseClient {
   }
 
   protected <T> EventSource createNewEventSource(T requestBody, CompletionEventListener listeners) {
-    var httpClient = buildClient();
     return EventSources.createFactory(buildClient())
         .newEventSource(
             buildRequest(requestBody),
-            getEventListener(httpClient, listeners));
+            getEventListener(listeners));
   }
 }
