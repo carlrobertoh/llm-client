@@ -1,6 +1,7 @@
 package ee.carlrobert.openai.client.completion.text;
 
 import ee.carlrobert.openai.client.completion.CompletionModel;
+import java.util.Arrays;
 
 public enum TextCompletionModel implements CompletionModel {
   ADA("text-ada-001", "Ada - Fastest"),
@@ -22,5 +23,11 @@ public enum TextCompletionModel implements CompletionModel {
 
   public String getDescription() {
     return description;
+  }
+
+  static public TextCompletionModel findByCode(String code) {
+    return Arrays.stream(TextCompletionModel.values())
+        .filter(item -> item.getCode().equals(code))
+        .findFirst().orElseThrow();
   }
 }

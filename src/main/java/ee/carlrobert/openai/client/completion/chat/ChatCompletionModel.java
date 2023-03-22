@@ -1,6 +1,7 @@
 package ee.carlrobert.openai.client.completion.chat;
 
 import ee.carlrobert.openai.client.completion.CompletionModel;
+import java.util.Arrays;
 
 public enum ChatCompletionModel implements CompletionModel {
   GPT_3_5("gpt-3.5-turbo", "ChatGPT(3.5) - Most capable model (Default)"),
@@ -21,6 +22,12 @@ public enum ChatCompletionModel implements CompletionModel {
 
   public String getDescription() {
     return description;
+  }
+
+  static public ChatCompletionModel findByCode(String code) {
+    return Arrays.stream(ChatCompletionModel.values())
+        .filter(item -> item.getCode().equals(code))
+        .findFirst().orElseThrow();
   }
 }
 
