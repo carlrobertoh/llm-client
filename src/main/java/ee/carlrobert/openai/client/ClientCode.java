@@ -3,7 +3,7 @@ package ee.carlrobert.openai.client;
 public enum ClientCode {
   CHAT_COMPLETION("chat.completion"),
   TEXT_COMPLETION("text.completion"),
-  BILLING("billing");
+  DASHBOARD("dashboard");
 
   private final String code;
 

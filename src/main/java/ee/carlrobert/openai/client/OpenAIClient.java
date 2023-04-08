@@ -1,6 +1,6 @@
 package ee.carlrobert.openai.client;
 
-import ee.carlrobert.openai.client.billing.BillingClient;
+import ee.carlrobert.openai.client.dashboard.DashboardClient;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionClient;
 import ee.carlrobert.openai.client.completion.text.TextCompletionClient;
 import java.net.Proxy;
@@ -70,8 +70,8 @@ public class OpenAIClient {
       return new TextCompletionClient(new OpenAIClient(this));
     }
 
-    public BillingClient buildBillingClient() {
-      return new BillingClient(new OpenAIClient(this));
+    public DashboardClient buildDashboardClient() {
+      return new DashboardClient(new OpenAIClient(this));
     }
   }
 }

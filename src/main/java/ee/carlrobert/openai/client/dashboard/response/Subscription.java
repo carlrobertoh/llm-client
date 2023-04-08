@@ -1,4 +1,4 @@
-package ee.carlrobert.openai.client.billing.response;
+package ee.carlrobert.openai.client.dashboard.response;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

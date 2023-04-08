@@ -12,13 +12,13 @@ To use the package, you need to use following Maven dependency:
 <dependency>
     <groupId>ee.carlrobert</groupId>
     <artifactId>openai-client</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
 </dependency>
 ```
 Gradle dependency:
 ```kts
 dependencies {
-  implementation("ee.carlrobert:openai-client:1.0.3")
+  implementation("ee.carlrobert:openai-client:1.0.4")
 }
 ```
 
@@ -33,12 +33,11 @@ var builder = new OpenAIClient.Builder(System.getenv("MY_SECRET_KEY"))
     .setProxyAuthenticator(new ProxyAuthenticator("proxyUsername", "proxyPassword"));
 ```
 
-#### Billing client
+#### Dashboard client
 ```java
-BillingClient billingClient = clientBuilder.buildBillingClient();
-billingClient.getCreditUsageAsync(creditUsage -> {
-  System.out.println(creditUsage.getTotalGranted());
-  System.out.println(creditUsage.getTotalUsed());
+DashboardClient dashboardClient = clientBuilder.buildDashboardClient();
+dashboardClient.getSubscriptionAsync(subscription -> {
+  System.out.println(subscription.getAccountName());
 });
 ```
 

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "1.0.3"
+version = "1.0.4"
 
 repositories {
   mavenCentral()
@@ -27,6 +27,7 @@ dependencies {
   implementation("org.slf4j:slf4j-simple:2.0.7")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.14.2")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2")
+  implementation("com.knuddels:jtokkit:0.2.0")
 }
 
 nexusPublishing {

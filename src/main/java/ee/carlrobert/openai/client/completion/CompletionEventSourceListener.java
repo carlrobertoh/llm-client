@@ -28,11 +28,11 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
   protected abstract String getMessage(String data) throws JsonProcessingException;
 
   public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
-    // TODO
+    LOG.info("Request opened.");
   }
 
   public void onClosed(@NotNull EventSource eventSource) {
-    // TODO
+    LOG.info("Request closed.");
   }
 
   public void onEvent(
@@ -74,7 +74,7 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
     try {
       if (response == null) {
         listeners.onFailure(DEFAULT_ERROR_MSG);
-        return;
+        throw new IOException(ex);
       }
 
       var body = response.body();
