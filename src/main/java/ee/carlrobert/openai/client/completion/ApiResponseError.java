@@ -17,24 +17,4 @@ public class ApiResponseError {
   public ErrorDetails getError() {
     return error;
   }
-
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  static class ErrorDetails {
-    private final String message;
-    private final String type;
-
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public ErrorDetails(@JsonProperty("message") String message, @JsonProperty("type") String type) {
-      this.message = message;
-      this.type = type;
-    }
-
-    public String getMessage() {
-      return message;
-    }
-
-    public String getType() {
-      return type;
-    }
-  }
 }

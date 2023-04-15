@@ -32,7 +32,6 @@ public class ChatCompletionRequest extends CompletionRequest {
       this.messages = messages;
     }
 
-
     public Builder setModel(ChatCompletionModel model) {
       this.model = model.getCode();
       return this;
@@ -43,6 +42,7 @@ public class ChatCompletionRequest extends CompletionRequest {
       return this;
     }
 
+    @Override
     public ChatCompletionRequest build() {
       return new ChatCompletionRequest(this);
     }

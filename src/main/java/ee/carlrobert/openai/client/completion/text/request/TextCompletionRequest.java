@@ -64,11 +64,12 @@ public class TextCompletionRequest extends CompletionRequest {
       return this;
     }
 
-    public CompletionRequest.Builder setBestOf(int bestOf) {
+    public Builder setBestOf(int bestOf) {
       this.bestOf = bestOf;
       return this;
     }
 
+    @Override
     public TextCompletionRequest build() {
       return new TextCompletionRequest(this);
     }

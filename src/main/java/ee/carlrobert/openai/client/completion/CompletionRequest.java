@@ -2,7 +2,7 @@ package ee.carlrobert.openai.client.completion;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class CompletionRequest {
+public abstract class CompletionRequest {
 
   @JsonProperty("max_tokens")
   private final int maxTokens;
@@ -39,7 +39,7 @@ public class CompletionRequest {
     return true;
   }
 
-  protected static class Builder {
+  public abstract static class Builder {
 
     private int maxTokens = 1000;
     private double temperature = 0.9;
@@ -65,5 +65,7 @@ public class CompletionRequest {
       this.presencePenalty = presencePenalty;
       return this;
     }
+
+    public abstract CompletionRequest build();
   }
 }

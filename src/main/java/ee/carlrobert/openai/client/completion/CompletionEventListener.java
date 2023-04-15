@@ -8,6 +8,6 @@ public interface CompletionEventListener {
   default void onComplete(StringBuilder messageBuilder) {
   }
 
-  default void onFailure(String errorMessage) {
+  default void onError(ErrorDetails error) {
   }
 }

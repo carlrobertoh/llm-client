@@ -16,8 +16,6 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
 
   private static final Logger LOG = LoggerFactory.getLogger(CompletionEventSourceListener.class);
 
-  private static final String DEFAULT_ERROR_MSG = "Something went wrong. Please try again later.";
-
   private final CompletionEventListener listeners;
   private final StringBuilder messageBuilder = new StringBuilder();
 
@@ -67,24 +65,24 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
     }
 
     if (ex instanceof SocketTimeoutException) {
-      listeners.onFailure("Request timed out. This may be due to the server being overloaded.");
+      listeners.onError(new ErrorDetails("Request timed out. This may be due to the server being overloaded."));
       return;
     }
 
     try {
       if (response == null) {
-        listeners.onFailure(DEFAULT_ERROR_MSG);
+        listeners.onError(ErrorDetails.DEFAULT_ERROR);
         throw new IOException(ex);
       }
 
       var body = response.body();
       if (body != null) {
-        var error = new ObjectMapper().readValue(body.string(), ApiResponseError.class);
-        listeners.onFailure(error.getError().getMessage());
+        var responseError = new ObjectMapper().readValue(body.string(), ApiResponseError.class);
+        listeners.onError(responseError.getError());
       }
     } catch (IOException e) {
       LOG.error("Something went wrong.", ex);
-      listeners.onFailure(DEFAULT_ERROR_MSG);
+      listeners.onError(ErrorDetails.DEFAULT_ERROR);
     }
   }
 }
