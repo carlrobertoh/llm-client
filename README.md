@@ -12,13 +12,13 @@ To use the package, you need to use following Maven dependency:
 <dependency>
     <groupId>ee.carlrobert</groupId>
     <artifactId>openai-client</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
 </dependency>
 ```
 Gradle dependency:
 ```kts
 dependencies {
-  implementation("ee.carlrobert:openai-client:1.0.5")
+  implementation("ee.carlrobert:openai-client:1.0.6")
 }
 ```
 
@@ -26,7 +26,7 @@ dependencies {
 
 ### Client Builder
 ```java
-var builder = new OpenAIClient.Builder(System.getenv("MY_SECRET_KEY"))
+OpenAIClient.Builder builder = new OpenAIClient.Builder(System.getenv("MY_SECRET_KEY"))
     .setConnectTimeout(60L, TimeUnit.SECONDS)
     .setReadTimeout(30L, TimeUnit.SECONDS)
     .setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 1234)))
