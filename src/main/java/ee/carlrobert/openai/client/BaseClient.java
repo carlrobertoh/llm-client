@@ -1,21 +1,26 @@
 package ee.carlrobert.openai.client;
 
+import java.util.HashMap;
 import java.util.Map;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 
 public abstract class BaseClient {
 
-  protected final Map<String, String> baseHeaders;
+  protected final Map<String, String> headers;
   private final OpenAIClient client;
 
   protected abstract ClientCode getClientCode();
 
   public BaseClient(OpenAIClient client) {
     this.client = client;
-    this.baseHeaders = Map.of(
+    this.headers = new HashMap<>(Map.of(
         "Content-Type", "application/json",
-        "Authorization", "Bearer " + client.apiKey);
+        "Authorization", "Bearer " + client.apiKey));
+    var organization = client.organization;
+    if (organization != null && !organization.isEmpty()) {
+      this.headers.put("OpenAI-Organization", organization);
+    }
   }
 
   protected OkHttpClient buildClient() {

@@ -71,7 +71,6 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
 
     try {
       if (response == null) {
-        listeners.onError(ErrorDetails.DEFAULT_ERROR);
         throw new IOException(ex);
       }
 

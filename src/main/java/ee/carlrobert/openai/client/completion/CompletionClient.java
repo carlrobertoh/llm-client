@@ -3,7 +3,6 @@ package ee.carlrobert.openai.client.completion;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.openai.client.BaseClient;
 import ee.carlrobert.openai.client.OpenAIClient;
-import java.util.HashMap;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -23,7 +22,6 @@ public abstract class CompletionClient extends BaseClient {
   protected abstract CompletionEventSourceListener getEventListener(CompletionEventListener listeners);
 
   protected <T> okhttp3.Request buildRequest(T requestBody) {
-    var headers = new HashMap<>(baseHeaders);
     headers.put("Accept", "text/event-stream");
     try {
       return new Request.Builder()

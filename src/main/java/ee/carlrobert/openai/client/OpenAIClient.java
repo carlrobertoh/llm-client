@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 public class OpenAIClient {
 
   final String apiKey;
+  final String organization;
   final Proxy proxy;
   final ProxyAuthenticator proxyAuthenticator;
   final Long connectTimeout;
@@ -18,6 +19,7 @@ public class OpenAIClient {
 
   private OpenAIClient(Builder builder) {
     this.apiKey = builder.apiKey;
+    this.organization = builder.organization;
     this.proxy = builder.proxy;
     this.proxyAuthenticator = builder.proxyAuthenticator;
     this.connectTimeout = builder.connectTimeout;
@@ -29,6 +31,7 @@ public class OpenAIClient {
   public static class Builder {
 
     private final String apiKey;
+    private String organization;
     private Proxy proxy;
     private ProxyAuthenticator proxyAuthenticator;
     private Long connectTimeout;
@@ -38,6 +41,11 @@ public class OpenAIClient {
 
     public Builder(String apiKey) {
       this.apiKey = apiKey;
+    }
+
+    public Builder setOrganization(String organization) {
+      this.organization = organization;
+      return this;
     }
 
     public Builder setProxy(Proxy proxy) {

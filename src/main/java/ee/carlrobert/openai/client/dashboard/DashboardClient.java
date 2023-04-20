@@ -30,7 +30,7 @@ public class DashboardClient extends BaseClient {
   private Request buildGetRequest(String url) {
     return new Request.Builder()
         .url(url)
-        .headers(Headers.of(baseHeaders))
+        .headers(Headers.of(headers))
         .get()
         .build();
   }
