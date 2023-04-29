@@ -41,7 +41,8 @@ public abstract class BaseClient {
         builder.proxyAuthenticator((route, response) ->
             response.request()
                 .newBuilder()
-                .header("Proxy-Authorization", Credentials.basic(authenticator.getUsername(), authenticator.getPassword()))
+                .header("Proxy-Authorization",
+                    Credentials.basic(authenticator.getUsername(), authenticator.getPassword()))
                 .build());
       }
     }

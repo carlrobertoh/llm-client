@@ -65,7 +65,8 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
     }
 
     if (ex instanceof SocketTimeoutException) {
-      listeners.onError(new ErrorDetails("Request timed out. This may be due to the server being overloaded."));
+      listeners.onError(
+          new ErrorDetails("Request timed out. This may be due to the server being overloaded."));
       return;
     }
 
@@ -80,7 +81,7 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
         listeners.onError(responseError.getError());
       }
     } catch (IOException e) {
-      LOG.error("Something went wrong.", ex);
+      LOG.error("Something went wrong.", e);
       listeners.onError(ErrorDetails.DEFAULT_ERROR);
     }
   }

@@ -1,5 +1,6 @@
 package ee.carlrobert.openai.client.dashboard;
 
+import ee.carlrobert.openai.PropertiesLoader;
 import ee.carlrobert.openai.client.BaseClient;
 import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.OpenAIClient;
@@ -10,10 +11,12 @@ import okhttp3.Request;
 
 public class DashboardClient extends BaseClient {
 
-  private static final String baseUrl = "https://api.openai.com/dashboard/billing";
+  private static final String BASE_URL = PropertiesLoader.getValue("openai.baseUrl");
+  private final String baseUrl;
 
   public DashboardClient(OpenAIClient client) {
     super(client);
+    this.baseUrl = client.getHost() == null ? BASE_URL : client.getHost();
   }
 
   @Override
@@ -23,7 +26,7 @@ public class DashboardClient extends BaseClient {
 
   public void getSubscriptionAsync(Consumer<Subscription> responseConsumer) {
     buildClient()
-        .newCall(buildGetRequest(baseUrl + "/subscription"))
+        .newCall(buildGetRequest(baseUrl + "/dashboard/billing/subscription"))
         .enqueue(new DashboardResponseCallback<>(responseConsumer, Subscription.class));
   }
 

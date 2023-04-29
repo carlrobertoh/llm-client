@@ -14,12 +14,13 @@ public abstract class CompletionClient extends BaseClient {
 
   private final String url;
 
-  public CompletionClient(OpenAIClient client, String url) {
+  public CompletionClient(OpenAIClient client, String host, String path) {
     super(client);
-    this.url = url;
+    this.url = host + path;
   }
 
-  protected abstract CompletionEventSourceListener getEventListener(CompletionEventListener listeners);
+  protected abstract CompletionEventSourceListener getEventListener(
+      CompletionEventListener listeners);
 
   protected <T> okhttp3.Request buildRequest(T requestBody) {
     headers.put("Accept", "text/event-stream");
