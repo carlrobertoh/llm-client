@@ -1,10 +1,10 @@
-package http;
+package ee.carlrobert.openai.http;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import http.expectation.BasicExpectation;
-import http.expectation.Expectation;
-import http.expectation.StreamExpectation;
+import ee.carlrobert.openai.http.expectation.BasicExpectation;
+import ee.carlrobert.openai.http.expectation.Expectation;
+import ee.carlrobert.openai.http.expectation.StreamExpectation;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;

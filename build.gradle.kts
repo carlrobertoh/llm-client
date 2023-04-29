@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "1.0.10"
+version = "1.0.11"
 
 repositories {
     mavenCentral()
@@ -92,6 +92,13 @@ tasks {
         useJUnitPlatform()
         testLogging {
             events("passed", "skipped", "failed")
+        }
+    }
+    jar {
+        from(sourceSets["main"].output)
+        from(sourceSets["test"].output) {
+            include("**/http/**")
+            include("**/util/**")
         }
     }
 }

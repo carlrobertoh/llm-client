@@ -1,6 +1,6 @@
-package http.expectation;
+package ee.carlrobert.openai.http.expectation;
 
-import http.exchange.StreamHttpExchange;
+import ee.carlrobert.openai.http.exchange.StreamHttpExchange;
 
 public class StreamExpectation extends Expectation {
 

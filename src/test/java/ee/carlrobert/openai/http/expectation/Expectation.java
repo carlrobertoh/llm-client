@@ -1,4 +1,4 @@
-package http.expectation;
+package ee.carlrobert.openai.http.expectation;
 
 public class Expectation {
 

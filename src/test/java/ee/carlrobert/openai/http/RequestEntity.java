@@ -1,4 +1,4 @@
-package http;
+package ee.carlrobert.openai.http;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

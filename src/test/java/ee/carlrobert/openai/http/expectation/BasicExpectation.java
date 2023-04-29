@@ -1,6 +1,6 @@
-package http.expectation;
+package ee.carlrobert.openai.http.expectation;
 
-import http.exchange.BasicHttpExchange;
+import ee.carlrobert.openai.http.exchange.BasicHttpExchange;
 
 public class BasicExpectation extends Expectation {
 

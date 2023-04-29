@@ -1,8 +1,10 @@
-import http.LocalCallbackServer;
-import http.exchange.BasicHttpExchange;
-import http.exchange.StreamHttpExchange;
-import http.expectation.BasicExpectation;
-import http.expectation.StreamExpectation;
+package ee.carlrobert.openai;
+
+import ee.carlrobert.openai.http.LocalCallbackServer;
+import ee.carlrobert.openai.http.exchange.BasicHttpExchange;
+import ee.carlrobert.openai.http.exchange.StreamHttpExchange;
+import ee.carlrobert.openai.http.expectation.BasicExpectation;
+import ee.carlrobert.openai.http.expectation.StreamExpectation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 

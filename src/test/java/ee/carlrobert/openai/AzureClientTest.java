@@ -1,11 +1,14 @@
+package ee.carlrobert.openai;
+
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static util.JSONUtil.jsonArray;
-import static util.JSONUtil.jsonMap;
-import static util.JSONUtil.jsonMapResponse;
+import static ee.carlrobert.openai.util.JSONUtil.jsonArray;
+import static ee.carlrobert.openai.util.JSONUtil.jsonMap;
+import static ee.carlrobert.openai.util.JSONUtil.jsonMapResponse;
 
 import ee.carlrobert.openai.client.OpenAIClient;
+import ee.carlrobert.openai.client.azure.AzureClientRequestParams;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
@@ -16,15 +19,16 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-class OpenAIClientTest extends BaseTest {
+class AzureClientTest extends BaseTest {
 
   @Test
-  void shouldStreamChatCompletion() {
+  void shouldStreamAzureChatCompletion() {
     var prompt = "TEST_PROMPT";
     var resultMessageBuilder = new StringBuilder();
-    expectStreamRequest("/v1/chat/completions", request -> {
+    expectStreamRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
-      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Authorization").get(0))
+          .isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getBody())
           .extracting(
               "model",
@@ -49,7 +53,8 @@ class OpenAIClientTest extends BaseTest {
     });
 
     new OpenAIClient.Builder("TEST_API_KEY")
-        .buildChatCompletionClient()
+        .buildAzureChatCompletionClient(
+            new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .stream(
             (ChatCompletionRequest) new ChatCompletionRequest.Builder(
                 List.of(new ChatCompletionMessage("user", prompt)))
@@ -75,12 +80,13 @@ class OpenAIClientTest extends BaseTest {
   }
 
   @Test
-  void shouldStreamTextCompletion() {
+  void shouldStreamAzureTextCompletion() {
     var prompt = "TEST_PROMPT";
     var resultMessageBuilder = new StringBuilder();
-    expectStreamRequest("/v1/completions", request -> {
+    expectStreamRequest("/openai/deployments/TEST_DEPLOYMENT_ID/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
-      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Authorization").get(0))
+          .isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getBody())
           .extracting(
               "model",
@@ -92,7 +98,7 @@ class OpenAIClientTest extends BaseTest {
               "frequency_penalty",
               "presence_penalty")
           .containsExactly(
-              "text-curie-001",
+              "text-davinci-003",
               prompt,
               List.of(" Human:", " AI:"),
               0.1,
@@ -107,10 +113,11 @@ class OpenAIClientTest extends BaseTest {
     });
 
     new OpenAIClient.Builder("TEST_API_KEY")
-        .buildTextCompletionClient()
+        .buildAzureTextCompletionClient(
+            new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .stream(
             (TextCompletionRequest) new TextCompletionRequest.Builder(prompt)
-                .setModel(TextCompletionModel.CURIE)
+                .setModel(TextCompletionModel.DAVINCI)
                 .setStop(List.of(" Human:", " AI:"))
                 .setMaxTokens(1000)
                 .setTemperature(0.1)
@@ -130,23 +137,5 @@ class OpenAIClientTest extends BaseTest {
             });
 
     await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
-  }
-
-  @Test
-  void shouldFetchSubscriptionAsync() {
-    StringBuilder accountName = new StringBuilder();
-    expectRequest("/dashboard/billing/subscription", request -> {
-      assertThat(request.getMethod()).isEqualTo("GET");
-      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
-      return jsonMapResponse("account_name", "TEST_ACCOUNT_NAME");
-    });
-
-    new OpenAIClient.Builder("TEST_API_KEY")
-        .buildDashboardClient()
-        .getSubscriptionAsync(subscription -> {
-          accountName.append(subscription.getAccountName());
-        });
-
-    await().atMost(5, SECONDS).until(() -> "TEST_ACCOUNT_NAME".contentEquals(accountName));
   }
 }

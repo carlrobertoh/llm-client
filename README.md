@@ -12,13 +12,13 @@ To use the package, you need to use following Maven dependency:
 <dependency>
     <groupId>ee.carlrobert</groupId>
     <artifactId>openai-client</artifactId>
-    <version>1.0.10</version>
+    <version>1.0.11</version>
 </dependency>
 ```
 Gradle dependency:
 ```kts
 dependencies {
-  implementation("ee.carlrobert:openai-client:1.0.10")
+  implementation("ee.carlrobert:openai-client:1.0.11")
 }
 ```
 

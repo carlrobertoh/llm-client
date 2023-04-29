@@ -1,4 +1,4 @@
-package util;
+package ee.carlrobert.openai.util;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
