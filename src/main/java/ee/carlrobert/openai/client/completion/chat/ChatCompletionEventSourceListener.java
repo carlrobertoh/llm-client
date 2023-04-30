@@ -2,7 +2,7 @@ package ee.carlrobert.openai.client.completion.chat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.carlrobert.openai.client.BaseApiResponseError;
+import ee.carlrobert.openai.client.completion.BaseApiResponseError;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.CompletionEventSourceListener;
 import ee.carlrobert.openai.client.completion.chat.response.ChatCompletionResponse;

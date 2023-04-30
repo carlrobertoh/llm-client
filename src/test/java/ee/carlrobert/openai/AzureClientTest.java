@@ -8,10 +8,10 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.azure.AzureClientRequestParams;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
-import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
@@ -143,14 +143,13 @@ class AzureClientTest extends BaseTest {
   }
 
   @Test
-  void shouldListenForInvalidErrorResponse() {
+  void shouldListenForInvalidTokenErrorResponse() {
     var errorMessageBuilder = new StringBuilder();
+    var errorResponse = jsonMapResponse(
+        e("statusCode", 401),
+        e("message", "Token is invalid"));
     expectRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions",
-        request -> new ResponseEntity(
-            401,
-            jsonMapResponse(
-                e("statusCode", 401),
-                e("message", "Token is invalid"))));
+        request -> new ResponseEntity(401, errorResponse));
 
     new OpenAIClient.Builder("TEST_API_KEY")
         .buildAzureChatCompletionClient(
@@ -168,5 +167,32 @@ class AzureClientTest extends BaseTest {
             });
 
     await().atMost(5, SECONDS).until(() -> "Token is invalid".contentEquals(errorMessageBuilder));
+  }
+
+  @Test
+  void shouldListenForInvalidResourceErrorResponse() {
+    var errorMessageBuilder = new StringBuilder();
+    var errorResponse = jsonMapResponse("error", jsonMap(
+        e("message", "Resource not found"),
+        e("code", "404")));
+    expectRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions",
+        request -> new ResponseEntity(404, errorResponse));
+
+    new OpenAIClient.Builder("TEST_API_KEY")
+        .buildAzureChatCompletionClient(
+            new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+        .stream(
+            new ChatCompletionRequest.Builder(
+                List.of(new ChatCompletionMessage("user", "TEST_PROMPT")))
+                .setModel(ChatCompletionModel.GPT_3_5)
+                .build(),
+            new CompletionEventListener() {
+              @Override
+              public void onError(ErrorDetails error) {
+                errorMessageBuilder.append(error.getMessage());
+              }
+            });
+
+    await().atMost(5, SECONDS).until(() -> "Resource not found".contentEquals(errorMessageBuilder));
   }
 }

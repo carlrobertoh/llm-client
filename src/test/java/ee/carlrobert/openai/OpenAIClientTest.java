@@ -5,14 +5,12 @@ import static ee.carlrobert.openai.util.JSONUtil.jsonArray;
 import static ee.carlrobert.openai.util.JSONUtil.jsonMap;
 import static ee.carlrobert.openai.util.JSONUtil.jsonMapResponse;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import ee.carlrobert.openai.client.OpenAIClient;
-import ee.carlrobert.openai.client.azure.AzureClientRequestParams;
-import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.ErrorDetails;
+import ee.carlrobert.openai.client.OpenAIClient;
+import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
@@ -158,15 +156,14 @@ class OpenAIClientTest extends BaseTest {
   }
 
   @Test
-  void shouldListenForInvalidErrorResponse() {
+  void shouldHandleInvalidApiKeyError() {
     var errorMessageBuilder = new StringBuilder();
+    var errorResponse = jsonMapResponse("error", jsonMap(
+        e("message", "Incorrect API key provided"),
+        e("type", "invalid_request_error"),
+        e("code", "invalid_api_key")));
     expectRequest("/v1/chat/completions",
-        request -> new ResponseEntity(
-            401,
-            jsonMapResponse("error", jsonMap(
-                e("message", "Incorrect API key provided"),
-                e("type", "invalid_request_error"),
-                e("code", "invalid_api_key")))));
+        request -> new ResponseEntity(401, errorResponse));
 
     new OpenAIClient.Builder("TEST_API_KEY")
         .buildChatCompletionClient()
@@ -184,6 +181,34 @@ class OpenAIClientTest extends BaseTest {
               }
             });
 
-    await().atMost(5, SECONDS).until(() -> "Incorrect API key provided".contentEquals(errorMessageBuilder));
+    await().atMost(5, SECONDS)
+        .until(() -> "Incorrect API key provided".contentEquals(errorMessageBuilder));
+  }
+
+  @Test
+  void shouldHandleUnknownApiError() {
+    var errorMessageBuilder = new StringBuilder();
+    var errorResponse = jsonMapResponse("error_details", "Server error");
+    expectRequest("/v1/chat/completions",
+        request -> new ResponseEntity(500, errorResponse));
+
+    new OpenAIClient.Builder("TEST_API_KEY")
+        .buildChatCompletionClient()
+        .stream(
+            new ChatCompletionRequest.Builder(
+                List.of(new ChatCompletionMessage("user", "TEST_PROMPT")))
+                .setModel(ChatCompletionModel.GPT_3_5)
+                .build(),
+            new CompletionEventListener() {
+              @Override
+              public void onError(ErrorDetails error) {
+                errorMessageBuilder.append(error.getMessage());
+              }
+            });
+
+    await().atMost(5, SECONDS)
+        .until(() -> ("Unknown API response. "
+            + "Code: 500, "
+            + "Body: {\"error_details\":\"Server error\"}").contentEquals(errorMessageBuilder));
   }
 }

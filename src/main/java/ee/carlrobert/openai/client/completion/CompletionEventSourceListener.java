@@ -1,8 +1,9 @@
 package ee.carlrobert.openai.client.completion;
 
+import static java.lang.String.format;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.carlrobert.openai.client.BaseApiResponseError;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import okhttp3.Response;
@@ -82,8 +83,15 @@ public abstract class CompletionEventSourceListener<E extends BaseApiResponseErr
 
       var body = response.body();
       if (body != null) {
-        var responseError = new ObjectMapper().readValue(body.string(), errorType);
-        listeners.onError(responseError.getError());
+        var jsonBody = body.string();
+        var errorDetails = new ObjectMapper().readValue(jsonBody, errorType).getError();
+        if (errorDetails == null ||
+            errorDetails.getMessage() == null || errorDetails.getMessage().isEmpty()) {
+          listeners.onError(new ErrorDetails(
+              format("Unknown API response. Code: %s, Body: %s", response.code(), jsonBody)));
+        } else {
+          listeners.onError(errorDetails);
+        }
       }
     } catch (IOException e) {
       LOG.error("Something went wrong.", e);
