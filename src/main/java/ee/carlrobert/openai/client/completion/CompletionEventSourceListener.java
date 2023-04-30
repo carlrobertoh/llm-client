@@ -2,6 +2,7 @@ package ee.carlrobert.openai.client.completion;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.carlrobert.openai.client.BaseApiResponseError;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import okhttp3.Response;
@@ -12,15 +13,19 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class CompletionEventSourceListener extends EventSourceListener {
+public abstract class CompletionEventSourceListener<E extends BaseApiResponseError> extends
+    EventSourceListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(CompletionEventSourceListener.class);
 
   private final CompletionEventListener listeners;
   private final StringBuilder messageBuilder = new StringBuilder();
+  private final Class<E> errorType;
 
-  public CompletionEventSourceListener(CompletionEventListener listeners) {
+  public CompletionEventSourceListener(
+      CompletionEventListener listeners, Class<E> errorType) {
     this.listeners = listeners;
+    this.errorType = errorType;
   }
 
   protected abstract String getMessage(String data) throws JsonProcessingException;
@@ -77,7 +82,7 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
 
       var body = response.body();
       if (body != null) {
-        var responseError = new ObjectMapper().readValue(body.string(), ApiResponseError.class);
+        var responseError = new ObjectMapper().readValue(body.string(), errorType);
         listeners.onError(responseError.getError());
       }
     } catch (IOException e) {

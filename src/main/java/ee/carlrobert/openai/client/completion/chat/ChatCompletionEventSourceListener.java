@@ -2,14 +2,16 @@ package ee.carlrobert.openai.client.completion.chat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.carlrobert.openai.client.BaseApiResponseError;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.CompletionEventSourceListener;
 import ee.carlrobert.openai.client.completion.chat.response.ChatCompletionResponse;
 
-public class ChatCompletionEventSourceListener extends CompletionEventSourceListener {
+public class ChatCompletionEventSourceListener<E extends BaseApiResponseError>
+    extends CompletionEventSourceListener<E> {
 
-  public ChatCompletionEventSourceListener(CompletionEventListener listeners) {
-    super(listeners);
+  public ChatCompletionEventSourceListener(CompletionEventListener listeners, Class<E> errorType) {
+    super(listeners, errorType);
   }
 
   protected String getMessage(String data) throws JsonProcessingException {

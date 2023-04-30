@@ -19,8 +19,9 @@ public class AzureChatCompletionClient extends AzureCompletionClient {
   }
 
   @Override
-  protected CompletionEventSourceListener getEventListener(CompletionEventListener listeners) {
-    return new ChatCompletionEventSourceListener(listeners);
+  protected CompletionEventSourceListener<AzureApiResponseError> getEventListener(
+      CompletionEventListener listeners) {
+    return new ChatCompletionEventSourceListener<>(listeners, AzureApiResponseError.class);
   }
 
   public EventSource stream(ChatCompletionRequest requestBody, CompletionEventListener listeners) {

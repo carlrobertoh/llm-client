@@ -1,19 +1,24 @@
 package ee.carlrobert.openai;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import static ee.carlrobert.openai.util.JSONUtil.e;
 import static ee.carlrobert.openai.util.JSONUtil.jsonArray;
 import static ee.carlrobert.openai.util.JSONUtil.jsonMap;
 import static ee.carlrobert.openai.util.JSONUtil.jsonMapResponse;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.as;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import ee.carlrobert.openai.client.OpenAIClient;
+import ee.carlrobert.openai.client.azure.AzureClientRequestParams;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
+import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
 import ee.carlrobert.openai.client.completion.text.TextCompletionModel;
 import ee.carlrobert.openai.client.completion.text.request.TextCompletionRequest;
+import ee.carlrobert.openai.http.ResponseEntity;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -140,7 +145,7 @@ class OpenAIClientTest extends BaseTest {
     expectRequest("/dashboard/billing/subscription", request -> {
       assertThat(request.getMethod()).isEqualTo("GET");
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
-      return jsonMapResponse("account_name", "TEST_ACCOUNT_NAME");
+      return new ResponseEntity(jsonMapResponse("account_name", "TEST_ACCOUNT_NAME"));
     });
 
     new OpenAIClient.Builder("TEST_API_KEY")
@@ -150,5 +155,35 @@ class OpenAIClientTest extends BaseTest {
         });
 
     await().atMost(5, SECONDS).until(() -> "TEST_ACCOUNT_NAME".contentEquals(accountName));
+  }
+
+  @Test
+  void shouldListenForInvalidErrorResponse() {
+    var errorMessageBuilder = new StringBuilder();
+    expectRequest("/v1/chat/completions",
+        request -> new ResponseEntity(
+            401,
+            jsonMapResponse("error", jsonMap(
+                e("message", "Incorrect API key provided"),
+                e("type", "invalid_request_error"),
+                e("code", "invalid_api_key")))));
+
+    new OpenAIClient.Builder("TEST_API_KEY")
+        .buildChatCompletionClient()
+        .stream(
+            new ChatCompletionRequest.Builder(
+                List.of(new ChatCompletionMessage("user", "TEST_PROMPT")))
+                .setModel(ChatCompletionModel.GPT_3_5)
+                .build(),
+            new CompletionEventListener() {
+              @Override
+              public void onError(ErrorDetails error) {
+                assertThat(error.getCode()).isEqualTo("invalid_api_key");
+                assertThat(error.getType()).isEqualTo("invalid_request_error");
+                errorMessageBuilder.append(error.getMessage());
+              }
+            });
+
+    await().atMost(5, SECONDS).until(() -> "Incorrect API key provided".contentEquals(errorMessageBuilder));
   }
 }

@@ -73,10 +73,10 @@ public class LocalCallbackServer {
     exchange.getResponseHeaders().add("Content-Type", "application/json");
 
     var response = expectation.getExchange().getResponse(new RequestEntity(exchange));
-    exchange.sendResponseHeaders(200, response.length());
+    exchange.sendResponseHeaders(response.getStatusCode(), response.getResponse().length());
 
     var responseBody = exchange.getResponseBody();
-    responseBody.write(response.getBytes());
+    responseBody.write(response.getResponse().getBytes());
     responseBody.flush();
     responseBody.close();
   }

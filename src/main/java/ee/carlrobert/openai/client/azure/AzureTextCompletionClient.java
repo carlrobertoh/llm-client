@@ -20,8 +20,9 @@ public class AzureTextCompletionClient extends AzureCompletionClient {
   }
 
   @Override
-  protected CompletionEventSourceListener getEventListener(CompletionEventListener listeners) {
-    return new TextCompletionEventSourceListener(listeners);
+  protected CompletionEventSourceListener<AzureApiResponseError> getEventListener(
+      CompletionEventListener listeners) {
+    return new TextCompletionEventSourceListener<>(listeners, AzureApiResponseError.class);
   }
 
   public EventSource stream(TextCompletionRequest requestBody, CompletionEventListener listeners) {

@@ -3,6 +3,7 @@ package ee.carlrobert.openai.client.completion.text;
 import ee.carlrobert.openai.PropertiesLoader;
 import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.OpenAIClient;
+import ee.carlrobert.openai.client.completion.ApiResponseError;
 import ee.carlrobert.openai.client.completion.CompletionClient;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.text.request.TextCompletionRequest;
@@ -19,8 +20,9 @@ public class TextCompletionClient extends CompletionClient {
   }
 
   @Override
-  protected TextCompletionEventSourceListener getEventListener(CompletionEventListener listeners) {
-    return new TextCompletionEventSourceListener(listeners);
+  protected TextCompletionEventSourceListener<ApiResponseError> getEventListener(
+      CompletionEventListener listeners) {
+    return new TextCompletionEventSourceListener<>(listeners, ApiResponseError.class);
   }
 
   @Override

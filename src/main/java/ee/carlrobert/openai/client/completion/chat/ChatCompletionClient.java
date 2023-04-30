@@ -3,6 +3,7 @@ package ee.carlrobert.openai.client.completion.chat;
 import ee.carlrobert.openai.PropertiesLoader;
 import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.OpenAIClient;
+import ee.carlrobert.openai.client.completion.ApiResponseError;
 import ee.carlrobert.openai.client.completion.CompletionClient;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
@@ -19,8 +20,9 @@ public class ChatCompletionClient extends CompletionClient {
   }
 
   @Override
-  protected ChatCompletionEventSourceListener getEventListener(CompletionEventListener listeners) {
-    return new ChatCompletionEventSourceListener(listeners);
+  protected ChatCompletionEventSourceListener<ApiResponseError> getEventListener(
+      CompletionEventListener listeners) {
+    return new ChatCompletionEventSourceListener<>(listeners, ApiResponseError.class);
   }
 
   @Override
