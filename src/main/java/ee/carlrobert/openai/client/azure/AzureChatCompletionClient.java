@@ -2,12 +2,13 @@ package ee.carlrobert.openai.client.azure;
 
 import static java.lang.String.format;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.CompletionEventSourceListener;
+import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionEventSourceListener;
-import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
-import okhttp3.sse.EventSource;
 
 public class AzureChatCompletionClient extends AzureCompletionClient {
 
@@ -19,12 +20,12 @@ public class AzureChatCompletionClient extends AzureCompletionClient {
   }
 
   @Override
-  protected CompletionEventSourceListener<AzureApiResponseError> getEventListener(
-      CompletionEventListener listeners) {
-    return new ChatCompletionEventSourceListener<>(listeners, AzureApiResponseError.class);
-  }
-
-  public EventSource stream(ChatCompletionRequest requestBody, CompletionEventListener listeners) {
-    return createNewEventSource(requestBody, listeners);
+  protected CompletionEventSourceListener getEventListener(CompletionEventListener listeners) {
+    return new ChatCompletionEventSourceListener(listeners) {
+      @Override
+      protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
+        return new ObjectMapper().readValue(data, AzureApiResponseError.class).getError();
+      }
+    };
   }
 }

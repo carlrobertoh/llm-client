@@ -22,6 +22,11 @@ public abstract class CompletionClient extends BaseClient {
   protected abstract CompletionEventSourceListener getEventListener(
       CompletionEventListener listeners);
 
+  public <T extends CompletionRequest> EventSource stream(
+      T requestBody, CompletionEventListener listeners) {
+    return createNewEventSource(requestBody, listeners);
+  }
+
   protected <T> okhttp3.Request buildRequest(T requestBody) {
     headers.put("Accept", "text/event-stream");
     try {

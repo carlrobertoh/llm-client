@@ -3,7 +3,6 @@ package ee.carlrobert.openai.client.completion;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import okhttp3.Response;
@@ -14,22 +13,20 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class CompletionEventSourceListener<E extends BaseApiResponseError> extends
-    EventSourceListener {
+public abstract class CompletionEventSourceListener extends EventSourceListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(CompletionEventSourceListener.class);
 
   private final CompletionEventListener listeners;
   private final StringBuilder messageBuilder = new StringBuilder();
-  private final Class<E> errorType;
 
-  public CompletionEventSourceListener(
-      CompletionEventListener listeners, Class<E> errorType) {
+  public CompletionEventSourceListener(CompletionEventListener listeners) {
     this.listeners = listeners;
-    this.errorType = errorType;
   }
 
   protected abstract String getMessage(String data) throws JsonProcessingException;
+
+  protected abstract ErrorDetails getErrorDetails(String data) throws JsonProcessingException;
 
   public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
     LOG.info("Request opened.");
@@ -84,7 +81,7 @@ public abstract class CompletionEventSourceListener<E extends BaseApiResponseErr
       var body = response.body();
       if (body != null) {
         var jsonBody = body.string();
-        var errorDetails = new ObjectMapper().readValue(jsonBody, errorType).getError();
+        var errorDetails = getErrorDetails(jsonBody);
         if (errorDetails == null ||
             errorDetails.getMessage() == null || errorDetails.getMessage().isEmpty()) {
           listeners.onError(new ErrorDetails(

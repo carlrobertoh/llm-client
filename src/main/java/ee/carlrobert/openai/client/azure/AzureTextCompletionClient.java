@@ -2,12 +2,13 @@ package ee.carlrobert.openai.client.azure;
 
 import static java.lang.String.format;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.CompletionEventSourceListener;
+import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.completion.text.TextCompletionEventSourceListener;
-import ee.carlrobert.openai.client.completion.text.request.TextCompletionRequest;
-import okhttp3.sse.EventSource;
 
 public class AzureTextCompletionClient extends AzureCompletionClient {
 
@@ -20,12 +21,13 @@ public class AzureTextCompletionClient extends AzureCompletionClient {
   }
 
   @Override
-  protected CompletionEventSourceListener<AzureApiResponseError> getEventListener(
-      CompletionEventListener listeners) {
-    return new TextCompletionEventSourceListener<>(listeners, AzureApiResponseError.class);
-  }
+  protected CompletionEventSourceListener getEventListener(CompletionEventListener listeners) {
 
-  public EventSource stream(TextCompletionRequest requestBody, CompletionEventListener listeners) {
-    return createNewEventSource(requestBody, listeners);
+    return new TextCompletionEventSourceListener(listeners) {
+      @Override
+      protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
+        return new ObjectMapper().readValue(data, AzureApiResponseError.class).getError();
+      }
+    };
   }
 }
