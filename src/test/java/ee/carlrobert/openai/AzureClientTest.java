@@ -8,10 +8,10 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import ee.carlrobert.openai.client.completion.ErrorDetails;
-import ee.carlrobert.openai.client.OpenAIClient;
+import ee.carlrobert.openai.client.AzureClient;
 import ee.carlrobert.openai.client.azure.AzureClientRequestParams;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
+import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
@@ -55,9 +55,10 @@ class AzureClientTest extends BaseTest {
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
 
-    new OpenAIClient.Builder("TEST_API_KEY")
-        .buildAzureChatCompletionClient(
-            new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+    new AzureClient.Builder("TEST_API_KEY",
+        new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+        .setActiveDirectoryAuthentication(true)
+        .buildChatCompletionClient()
         .stream(
             (ChatCompletionRequest) new ChatCompletionRequest.Builder(
                 List.of(new ChatCompletionMessage("user", prompt)))
@@ -88,8 +89,7 @@ class AzureClientTest extends BaseTest {
     var resultMessageBuilder = new StringBuilder();
     expectStreamRequest("/openai/deployments/TEST_DEPLOYMENT_ID/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
-      assertThat(request.getHeaders().get("Authorization").get(0))
-          .isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Api-key").get(0)).isEqualTo("TEST_API_KEY");
       assertThat(request.getBody())
           .extracting(
               "model",
@@ -115,9 +115,9 @@ class AzureClientTest extends BaseTest {
           jsonMapResponse("choices", jsonArray(jsonMap("text", "!"))));
     });
 
-    new OpenAIClient.Builder("TEST_API_KEY")
-        .buildAzureTextCompletionClient(
-            new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+    new AzureClient.Builder("TEST_API_KEY",
+        new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+        .buildTextCompletionClient()
         .stream(
             (TextCompletionRequest) new TextCompletionRequest.Builder(prompt)
                 .setModel(TextCompletionModel.DAVINCI)
@@ -151,9 +151,9 @@ class AzureClientTest extends BaseTest {
     expectRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions",
         request -> new ResponseEntity(401, errorResponse));
 
-    new OpenAIClient.Builder("TEST_API_KEY")
-        .buildAzureChatCompletionClient(
-            new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+    new AzureClient.Builder("TEST_API_KEY",
+        new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+        .buildChatCompletionClient()
         .stream(
             new ChatCompletionRequest.Builder(
                 List.of(new ChatCompletionMessage("user", "TEST_PROMPT")))
@@ -178,9 +178,9 @@ class AzureClientTest extends BaseTest {
     expectRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions",
         request -> new ResponseEntity(404, errorResponse));
 
-    new OpenAIClient.Builder("TEST_API_KEY")
-        .buildAzureChatCompletionClient(
-            new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+    new AzureClient.Builder("TEST_API_KEY",
+        new AzureClientRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+        .buildChatCompletionClient()
         .stream(
             new ChatCompletionRequest.Builder(
                 List.of(new ChatCompletionMessage("user", "TEST_PROMPT")))

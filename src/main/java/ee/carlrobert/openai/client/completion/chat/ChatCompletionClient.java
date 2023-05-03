@@ -1,19 +1,14 @@
 package ee.carlrobert.openai.client.completion.chat;
 
-import ee.carlrobert.openai.PropertiesLoader;
 import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.OpenAIClient;
-import ee.carlrobert.openai.client.completion.CompletionClient;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
+import ee.carlrobert.openai.client.completion.OpenAICompletionClient;
 
-public class ChatCompletionClient extends CompletionClient {
-
-  private static final String BASE_URL = PropertiesLoader.getValue("openai.baseUrl");
+public class ChatCompletionClient extends OpenAICompletionClient {
 
   public ChatCompletionClient(OpenAIClient client) {
-    super(client,
-        client.getHost() == null ? BASE_URL : client.getHost(),
-        "/v1/chat/completions");
+    super(client, "/v1/chat/completions");
   }
 
   @Override
@@ -22,7 +17,7 @@ public class ChatCompletionClient extends CompletionClient {
   }
 
   @Override
-  protected ClientCode getClientCode() {
+  public ClientCode getClientCode() {
     return ClientCode.CHAT_COMPLETION;
   }
 }

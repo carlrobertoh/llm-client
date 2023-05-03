@@ -1,10 +1,9 @@
 package ee.carlrobert.openai.client.azure;
 
-import static java.lang.String.format;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.carlrobert.openai.client.OpenAIClient;
+import ee.carlrobert.openai.client.AzureClient;
+import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.CompletionEventSourceListener;
 import ee.carlrobert.openai.client.completion.ErrorDetails;
@@ -12,11 +11,8 @@ import ee.carlrobert.openai.client.completion.chat.ChatCompletionEventSourceList
 
 public class AzureChatCompletionClient extends AzureCompletionClient {
 
-  public AzureChatCompletionClient(OpenAIClient client, AzureClientRequestParams requestParams) {
-    super(client,
-        requestParams.getResourceName(),
-        format("/openai/deployments/%s/chat/completions?api-version=%s",
-            requestParams.getDeploymentId(), requestParams.getApiVersion()));
+  public AzureChatCompletionClient(AzureClient client) {
+    super(client, "/openai/deployments/%s/chat/completions?api-version=%s");
   }
 
   @Override
@@ -27,5 +23,10 @@ public class AzureChatCompletionClient extends AzureCompletionClient {
         return new ObjectMapper().readValue(data, AzureApiResponseError.class).getError();
       }
     };
+  }
+
+  @Override
+  public ClientCode getClientCode() {
+    return ClientCode.AZURE_CHAT_COMPLETION;
   }
 }

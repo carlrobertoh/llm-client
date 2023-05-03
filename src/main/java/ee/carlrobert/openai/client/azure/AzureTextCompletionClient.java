@@ -1,10 +1,9 @@
 package ee.carlrobert.openai.client.azure;
 
-import static java.lang.String.format;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.carlrobert.openai.client.OpenAIClient;
+import ee.carlrobert.openai.client.AzureClient;
+import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.CompletionEventSourceListener;
 import ee.carlrobert.openai.client.completion.ErrorDetails;
@@ -12,12 +11,8 @@ import ee.carlrobert.openai.client.completion.text.TextCompletionEventSourceList
 
 public class AzureTextCompletionClient extends AzureCompletionClient {
 
-  public AzureTextCompletionClient(OpenAIClient client,
-      AzureClientRequestParams requestParams) {
-    super(client,
-        requestParams.getResourceName(),
-        format("/openai/deployments/%s/completions?api-version=%s",
-            requestParams.getDeploymentId(), requestParams.getApiVersion()));
+  public AzureTextCompletionClient(AzureClient client) {
+    super(client, "/openai/deployments/%s/completions?api-version=%s");
   }
 
   @Override
@@ -29,5 +24,10 @@ public class AzureTextCompletionClient extends AzureCompletionClient {
         return new ObjectMapper().readValue(data, AzureApiResponseError.class).getError();
       }
     };
+  }
+
+  @Override
+  public ClientCode getClientCode() {
+    return ClientCode.AZURE_TEXT_COMPLETION;
   }
 }

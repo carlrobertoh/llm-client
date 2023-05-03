@@ -8,9 +8,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
+import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionModel;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
@@ -30,6 +30,8 @@ class OpenAIClientTest extends BaseTest {
     expectStreamRequest("/v1/chat/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Openai-organization").get(0))
+          .isEqualTo("TEST_ORGANIZATION");
       assertThat(request.getBody())
           .extracting(
               "model",
@@ -54,6 +56,7 @@ class OpenAIClientTest extends BaseTest {
     });
 
     new OpenAIClient.Builder("TEST_API_KEY")
+        .setOrganization("TEST_ORGANIZATION")
         .buildChatCompletionClient()
         .stream(
             (ChatCompletionRequest) new ChatCompletionRequest.Builder(
@@ -86,6 +89,7 @@ class OpenAIClientTest extends BaseTest {
     expectStreamRequest("/v1/completions", request -> {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Openai-organization")).isNull();
       assertThat(request.getBody())
           .extracting(
               "model",
