@@ -34,6 +34,7 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
 
   public void onClosed(@NotNull EventSource eventSource) {
     LOG.info("Request closed.");
+    listeners.onComplete(messageBuilder);
   }
 
   public void onEvent(
@@ -42,8 +43,8 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
       String type,
       @NotNull String data) {
     try {
+      // Redundant end signal so just ignore
       if ("[DONE]".equals(data)) {
-        listeners.onComplete(messageBuilder);
         return;
       }
 
