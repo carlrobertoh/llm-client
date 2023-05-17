@@ -15,12 +15,17 @@ public class ChatCompletionEventSourceListener extends CompletionEventSourceList
   }
 
   protected String getMessage(String data) throws JsonProcessingException {
-    return new ObjectMapper()
+    var choice = new ObjectMapper()
         .readValue(data, ChatCompletionResponse.class)
         .getChoices()
-        .get(0)
-        .getDelta()
-        .getContent();
+        .get(0);
+    if (choice != null) {
+      var delta = choice.getDelta();
+      if (delta != null) {
+        return delta.getContent();
+      }
+    }
+    return "";
   }
 
   @Override
