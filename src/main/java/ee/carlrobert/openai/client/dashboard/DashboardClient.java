@@ -1,10 +1,12 @@
 package ee.carlrobert.openai.client.dashboard;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.openai.PropertiesLoader;
 import ee.carlrobert.openai.client.Client;
 import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.dashboard.response.Subscription;
+import java.io.IOException;
 import java.util.Map;
 import java.util.function.Consumer;
 import okhttp3.Headers;
@@ -29,6 +31,17 @@ public class DashboardClient {
     client.buildHttpClient()
         .newCall(buildGetRequest(baseUrl + "/dashboard/billing/subscription"))
         .enqueue(new DashboardResponseCallback<>(responseConsumer, Subscription.class));
+  }
+
+  public Subscription getSubscription() throws IOException {
+    try (var response = client.buildHttpClient()
+        .newCall(buildGetRequest(baseUrl + "/dashboard/billing/subscription"))
+        .execute()) {
+      if (response.body() != null) {
+        return new ObjectMapper().readValue(response.body().string(), Subscription.class);
+      }
+    }
+    return null;
   }
 
   private Request buildGetRequest(String url) {

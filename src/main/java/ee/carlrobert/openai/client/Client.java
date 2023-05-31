@@ -16,6 +16,7 @@ public abstract class Client {
   final TimeUnit connectTimeoutUnit;
   final Long readTimeout;
   final TimeUnit readTimeoutUnit;
+  final boolean retryOnReadTimeout;
 
   public String getApiKey() {
     return apiKey;
@@ -23,6 +24,10 @@ public abstract class Client {
 
   public String getHost() {
     return host;
+  }
+
+  public boolean isRetryOnReadTimeout() {
+    return retryOnReadTimeout;
   }
 
   protected Client(Builder builder) {
@@ -34,6 +39,7 @@ public abstract class Client {
     this.connectTimeoutUnit = builder.connectTimeoutUnit;
     this.readTimeout = builder.readTimeout;
     this.readTimeoutUnit = builder.readTimeoutUnit;
+    this.retryOnReadTimeout = builder.retryOnReadTimeout;
   }
 
   public OkHttpClient buildHttpClient() {
@@ -45,6 +51,7 @@ public abstract class Client {
     if (readTimeout != null && readTimeoutUnit != null) {
       builder.readTimeout(readTimeout, readTimeoutUnit);
     }
+
 
     if (proxy != null) {
       builder.proxy(proxy);
@@ -72,6 +79,7 @@ public abstract class Client {
     private TimeUnit connectTimeoutUnit;
     private Long readTimeout;
     private TimeUnit readTimeoutUnit;
+    private boolean retryOnReadTimeout;
 
     public Builder(String apiKey) {
       this.apiKey = apiKey;
@@ -101,6 +109,11 @@ public abstract class Client {
     public Builder setReadTimeout(Long timeout, TimeUnit unit) {
       this.readTimeout = timeout;
       this.readTimeoutUnit = unit;
+      return this;
+    }
+
+    public Builder setRetryOnReadTimeout(boolean retryOnReadTimeout) {
+      this.retryOnReadTimeout = retryOnReadTimeout;
       return this;
     }
 

@@ -15,6 +15,10 @@ public class ChatCompletionRequest extends CompletionRequest {
     this.messages = builder.messages;
   }
 
+  public void addMessage(ChatCompletionMessage message) {
+    messages.add(message);
+  }
+
   public List<ChatCompletionMessage> getMessages() {
     return messages;
   }

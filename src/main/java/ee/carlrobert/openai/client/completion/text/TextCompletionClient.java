@@ -4,6 +4,7 @@ import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.OpenAIClient;
 import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.OpenAICompletionClient;
+import java.util.function.Consumer;
 
 public class TextCompletionClient extends OpenAICompletionClient {
 
@@ -12,8 +13,11 @@ public class TextCompletionClient extends OpenAICompletionClient {
   }
 
   @Override
-  protected TextCompletionEventSourceListener getEventListener(CompletionEventListener listeners) {
-    return new TextCompletionEventSourceListener(listeners);
+  protected TextCompletionEventSourceListener getEventListener(
+      CompletionEventListener listeners,
+      boolean retryOnReadTimeout,
+      Consumer<String> onRetry) {
+    return new TextCompletionEventSourceListener(listeners, retryOnReadTimeout, onRetry);
   }
 
   @Override

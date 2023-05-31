@@ -8,6 +8,7 @@ import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.CompletionEventSourceListener;
 import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.completion.text.TextCompletionEventSourceListener;
+import java.util.function.Consumer;
 
 public class AzureTextCompletionClient extends AzureCompletionClient {
 
@@ -16,9 +17,9 @@ public class AzureTextCompletionClient extends AzureCompletionClient {
   }
 
   @Override
-  protected CompletionEventSourceListener getEventListener(CompletionEventListener listeners) {
+  protected CompletionEventSourceListener getEventListener(CompletionEventListener listeners, boolean retryOnReadTimeout, Consumer<String> onRetry) {
 
-    return new TextCompletionEventSourceListener(listeners) {
+    return new TextCompletionEventSourceListener(listeners, retryOnReadTimeout, onRetry) {
       @Override
       protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
         return new ObjectMapper().readValue(data, AzureApiResponseError.class).getError();

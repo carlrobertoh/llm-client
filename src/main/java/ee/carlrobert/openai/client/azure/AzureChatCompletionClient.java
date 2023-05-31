@@ -8,6 +8,7 @@ import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.CompletionEventSourceListener;
 import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionEventSourceListener;
+import java.util.function.Consumer;
 
 public class AzureChatCompletionClient extends AzureCompletionClient {
 
@@ -16,8 +17,8 @@ public class AzureChatCompletionClient extends AzureCompletionClient {
   }
 
   @Override
-  protected CompletionEventSourceListener getEventListener(CompletionEventListener listeners) {
-    return new ChatCompletionEventSourceListener(listeners) {
+  protected CompletionEventSourceListener getEventListener(CompletionEventListener listeners, boolean retryOnReadTimeout, Consumer<String> onRetry) {
+    return new ChatCompletionEventSourceListener(listeners, retryOnReadTimeout, onRetry) {
       @Override
       protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
         return new ObjectMapper().readValue(data, AzureApiResponseError.class).getError();

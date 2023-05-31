@@ -7,11 +7,12 @@ import ee.carlrobert.openai.client.completion.CompletionEventListener;
 import ee.carlrobert.openai.client.completion.CompletionEventSourceListener;
 import ee.carlrobert.openai.client.completion.ErrorDetails;
 import ee.carlrobert.openai.client.completion.chat.response.ChatCompletionResponse;
+import java.util.function.Consumer;
 
 public class ChatCompletionEventSourceListener extends CompletionEventSourceListener {
 
-  public ChatCompletionEventSourceListener(CompletionEventListener listeners) {
-    super(listeners);
+  public ChatCompletionEventSourceListener(CompletionEventListener listeners, boolean retryOnReadTimeout, Consumer<String> onRetry) {
+    super(listeners, retryOnReadTimeout, onRetry);
   }
 
   protected String getMessage(String data) throws JsonProcessingException {

@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.function.Consumer;
 import okhttp3.Response;
 import okhttp3.internal.http2.StreamResetException;
 import okhttp3.sse.EventSource;
@@ -19,9 +20,13 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
 
   private final CompletionEventListener listeners;
   private final StringBuilder messageBuilder = new StringBuilder();
+  private final boolean retryOnReadTimeout;
+  private final Consumer<String> onRetry;
 
-  public CompletionEventSourceListener(CompletionEventListener listeners) {
+  public CompletionEventSourceListener(CompletionEventListener listeners, boolean retryOnReadTimeout, Consumer<String> onRetry) {
     this.listeners = listeners;
+    this.retryOnReadTimeout = retryOnReadTimeout;
+    this.onRetry = onRetry;
   }
 
   protected abstract String getMessage(String data) throws JsonProcessingException;
@@ -69,8 +74,13 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
     }
 
     if (ex instanceof SocketTimeoutException) {
-      listeners.onError(
-          new ErrorDetails("Request timed out. This may be due to the server being overloaded."));
+      if (retryOnReadTimeout) {
+        LOG.info("Retrying request.");
+        onRetry.accept(messageBuilder.toString());
+        return;
+      }
+
+      listeners.onError(new ErrorDetails("Request timed out. This may be due to the server being overloaded."));
       return;
     }
 
@@ -82,18 +92,26 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
       var body = response.body();
       if (body != null) {
         var jsonBody = body.string();
-        var errorDetails = getErrorDetails(jsonBody);
-        if (errorDetails == null ||
-            errorDetails.getMessage() == null || errorDetails.getMessage().isEmpty()) {
-          listeners.onError(new ErrorDetails(
-              format("Unknown API response. Code: %s, Body: %s", response.code(), jsonBody)));
-        } else {
-          listeners.onError(errorDetails);
+        try {
+          var errorDetails = getErrorDetails(jsonBody);
+          if (errorDetails == null ||
+              errorDetails.getMessage() == null || errorDetails.getMessage().isEmpty()) {
+            listeners.onError(toUnknownErrorResponse(response, jsonBody));
+          } else {
+            listeners.onError(errorDetails);
+          }
+        } catch (JsonProcessingException e) {
+          LOG.error("Could not serialize error response", ex);
+          listeners.onError(toUnknownErrorResponse(response, jsonBody));
         }
       }
     } catch (IOException e) {
       LOG.error("Something went wrong.", e);
       listeners.onError(ErrorDetails.DEFAULT_ERROR);
     }
+  }
+
+  private ErrorDetails toUnknownErrorResponse(Response response, String jsonBody) {
+    return new ErrorDetails(format("Unknown API response. Code: %s, Body: %s", response.code(), jsonBody));
   }
 }
