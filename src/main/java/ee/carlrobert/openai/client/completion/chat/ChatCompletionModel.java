@@ -5,9 +5,9 @@ import java.util.Arrays;
 
 public enum ChatCompletionModel implements CompletionModel {
   GPT_3_5("gpt-3.5-turbo", "ChatGPT(3.5) - Most capable model (Default)", 4096),
-  GPT_3_5_SNAPSHOT("gpt-3.5-turbo-0301", "ChatGPT(3.5) - Snapshot of gpt-3.5-turbo from March 1st 2023", 4096),
-  GPT_4("gpt-4", "ChatGPT(4.0) - Most recent model (Requires access)", 8192),
-  GPT_4_32k("gpt-4-32k", "ChatGPT(4.0) - 32k - Same capabilities as the base gpt-4 model but with 4x the context length (Requires access)", 32768);
+  GPT_3_5_16k("gpt-3.5-turbo-16k", "ChatGPT(3.5) - 16k - Same capabilities as the base gpt-3.5 model but with 4x the context", 16384),
+  GPT_4("gpt-4", "ChatGPT(4.0) - Most recent model", 8192),
+  GPT_4_32k("gpt-4-32k", "ChatGPT(4.0) - 32k - Same capabilities as the base gpt-4 model but with 4x the context", 32768);
 
   private final String code;
   private final String description;

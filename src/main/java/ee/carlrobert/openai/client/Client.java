@@ -2,7 +2,14 @@ package ee.carlrobert.openai.client;
 
 import ee.carlrobert.openai.client.completion.CompletionClient;
 import java.net.Proxy;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 
@@ -52,8 +59,8 @@ public abstract class Client {
       builder.readTimeout(readTimeout, readTimeoutUnit);
     }
 
-
     if (proxy != null) {
+      trustAllCertificates(builder);
       builder.proxy(proxy);
 
       if (proxyAuthenticator != null) {
@@ -67,6 +74,34 @@ public abstract class Client {
       }
     }
     return builder.build();
+  }
+
+  private void trustAllCertificates(OkHttpClient.Builder builder) {
+    var trustManager = new TrustManager[] {
+        new X509TrustManager() {
+          @Override
+          public void checkClientTrusted(X509Certificate[] chain, String authType) {
+          }
+
+          @Override
+          public void checkServerTrusted(X509Certificate[] chain, String authType) {
+          }
+
+          @Override
+          public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[] {};
+          }
+        }
+    };
+
+    try {
+      var sslContext = SSLContext.getInstance("SSL");
+      sslContext.init(null, trustManager, new SecureRandom());
+      builder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManager[0]);
+      builder.hostnameVerifier((hostname, session) -> true);
+    } catch (NoSuchAlgorithmException | KeyManagementException e) {
+      throw new RuntimeException("Something went wrong while attempting to trust all certificates: ", e);
+    }
   }
 
   public abstract static class Builder {
