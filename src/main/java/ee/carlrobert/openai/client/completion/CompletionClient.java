@@ -1,5 +1,6 @@
 package ee.carlrobert.openai.client.completion;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.openai.client.Client;
 import ee.carlrobert.openai.client.ClientCode;
@@ -42,17 +43,22 @@ public abstract class CompletionClient {
     return createNewEventSource(requestBody, listeners);
   }
 
-  protected <T> okhttp3.Request buildRequest(T requestBody) {
+  protected <T extends CompletionRequest> okhttp3.Request buildRequest(T requestBody) {
     var headers = new HashMap<>(getRequiredHeaders());
     headers.put("Accept", "text/event-stream");
     try {
+      var mapper = new ObjectMapper();
+      var map = mapper.readValue(mapper.writeValueAsString(requestBody), new TypeReference<Map<String, Object>>() {});
+      var additionalParams = requestBody.getAdditionalParams();
+      if (additionalParams != null && !additionalParams.isEmpty()) {
+        map.putAll(additionalParams);
+      }
+
       return new Request.Builder()
           .url(url)
           .headers(Headers.of(headers))
           .post(RequestBody.create(
-              new ObjectMapper()
-                  .writerWithDefaultPrettyPrinter()
-                  .writeValueAsString(requestBody),
+              mapper.writeValueAsString(map),
               MediaType.parse("application/json")))
           .build();
     } catch (Exception ex) {

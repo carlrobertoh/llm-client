@@ -1,6 +1,9 @@
 package ee.carlrobert.openai.client.completion;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class CompletionRequest {
 
@@ -11,12 +14,15 @@ public abstract class CompletionRequest {
   private final double frequencyPenalty;
   @JsonProperty("presence_penalty")
   private final double presencePenalty;
+  @JsonIgnore
+  private final Map<String, ?> additionalParams;
 
   protected CompletionRequest(Builder builder) {
     this.maxTokens = builder.maxTokens;
     this.temperature = builder.temperature;
     this.frequencyPenalty = builder.frequencyPenalty;
     this.presencePenalty = builder.presencePenalty;
+    this.additionalParams = builder.additionalParams;
   }
 
   public int getMaxTokens() {
@@ -35,6 +41,10 @@ public abstract class CompletionRequest {
     return presencePenalty;
   }
 
+  public Map<String, ?> getAdditionalParams() {
+    return additionalParams;
+  }
+
   public boolean isStream() {
     return true;
   }
@@ -45,6 +55,7 @@ public abstract class CompletionRequest {
     private double temperature = 0.9;
     private double frequencyPenalty = 0;
     private double presencePenalty = 0.6;
+    private Map<String, ?> additionalParams = new HashMap<>();
 
     public Builder setMaxTokens(int maxTokens) {
       this.maxTokens = maxTokens;
@@ -63,6 +74,11 @@ public abstract class CompletionRequest {
 
     public Builder setPresencePenalty(double presencePenalty) {
       this.presencePenalty = presencePenalty;
+      return this;
+    }
+
+    public Builder setAdditionalParams(Map<String, ?> additionalParams) {
+      this.additionalParams = additionalParams;
       return this;
     }
 

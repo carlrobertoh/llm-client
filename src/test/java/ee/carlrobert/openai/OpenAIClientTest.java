@@ -40,7 +40,9 @@ class OpenAIClientTest extends BaseTest {
               "max_tokens",
               "frequency_penalty",
               "presence_penalty",
-              "messages")
+              "messages",
+              "additionalParam1",
+              "additionalParam2")
           .containsExactly(
               "gpt-3.5-turbo",
               0.5,
@@ -48,7 +50,9 @@ class OpenAIClientTest extends BaseTest {
               500,
               0.1,
               0.1,
-              List.of(Map.of("role", "user", "content", prompt)));
+              List.of(Map.of("role", "user", "content", prompt)),
+              10,
+              "testValue");
       return List.of(
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hello")))),
@@ -66,6 +70,9 @@ class OpenAIClientTest extends BaseTest {
                 .setTemperature(0.5)
                 .setPresencePenalty(0.1)
                 .setFrequencyPenalty(0.1)
+                .setAdditionalParams(Map.of(
+                    "additionalParam1", 10,
+                    "additionalParam2", "testValue"))
                 .build(),
             new CompletionEventListener() {
               @Override
