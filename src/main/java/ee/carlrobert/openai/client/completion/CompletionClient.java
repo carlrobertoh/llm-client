@@ -67,7 +67,7 @@ public abstract class CompletionClient {
   }
 
   protected <T extends CompletionRequest> EventSource createNewEventSource(T requestBody, CompletionEventListener listeners) {
-    return EventSources.createFactory(client.buildHttpClient())
+    return EventSources.createFactory(client.getHttpClient())
         .newEventSource(
             buildRequest(requestBody),
             getEventListener(listeners, client.isRetryOnReadTimeout(), (response) -> {

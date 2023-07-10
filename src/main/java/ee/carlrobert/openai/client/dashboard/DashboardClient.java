@@ -28,13 +28,13 @@ public class DashboardClient {
   }
 
   public void getSubscriptionAsync(Consumer<Subscription> responseConsumer) {
-    client.buildHttpClient()
+    client.getHttpClient()
         .newCall(buildGetRequest(baseUrl + "/dashboard/billing/subscription"))
         .enqueue(new DashboardResponseCallback<>(responseConsumer, Subscription.class));
   }
 
   public Subscription getSubscription() throws IOException {
-    try (var response = client.buildHttpClient()
+    try (var response = client.getHttpClient()
         .newCall(buildGetRequest(baseUrl + "/dashboard/billing/subscription"))
         .execute()) {
       if (response.body() != null) {

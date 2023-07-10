@@ -13,8 +13,9 @@ import javax.net.ssl.X509TrustManager;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 
-public abstract class Client {
+public class Client {
 
+  final OkHttpClient httpClient;
   final String apiKey;
   final String host;
   final Proxy proxy;
@@ -24,6 +25,10 @@ public abstract class Client {
   final Long readTimeout;
   final TimeUnit readTimeoutUnit;
   final boolean retryOnReadTimeout;
+
+  public OkHttpClient getHttpClient() {
+    return httpClient;
+  }
 
   public String getApiKey() {
     return apiKey;
@@ -38,6 +43,7 @@ public abstract class Client {
   }
 
   protected Client(Builder builder) {
+    this.httpClient = builder.buildHttpClient();
     this.apiKey = builder.apiKey;
     this.host = builder.host;
     this.proxy = builder.proxy;
@@ -47,61 +53,6 @@ public abstract class Client {
     this.readTimeout = builder.readTimeout;
     this.readTimeoutUnit = builder.readTimeoutUnit;
     this.retryOnReadTimeout = builder.retryOnReadTimeout;
-  }
-
-  public OkHttpClient buildHttpClient() {
-    OkHttpClient.Builder builder = new OkHttpClient.Builder();
-
-    if (connectTimeout != null && connectTimeoutUnit != null) {
-      builder.connectTimeout(connectTimeout, connectTimeoutUnit);
-    }
-    if (readTimeout != null && readTimeoutUnit != null) {
-      builder.readTimeout(readTimeout, readTimeoutUnit);
-    }
-
-    if (proxy != null) {
-      trustAllCertificates(builder);
-      builder.proxy(proxy);
-
-      if (proxyAuthenticator != null) {
-        builder.proxyAuthenticator((route, response) ->
-            response.request()
-                .newBuilder()
-                .header("Proxy-Authorization", Credentials.basic(
-                    proxyAuthenticator.getUsername(),
-                    proxyAuthenticator.getPassword()))
-                .build());
-      }
-    }
-    return builder.build();
-  }
-
-  private void trustAllCertificates(OkHttpClient.Builder builder) {
-    var trustManager = new TrustManager[] {
-        new X509TrustManager() {
-          @Override
-          public void checkClientTrusted(X509Certificate[] chain, String authType) {
-          }
-
-          @Override
-          public void checkServerTrusted(X509Certificate[] chain, String authType) {
-          }
-
-          @Override
-          public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[] {};
-          }
-        }
-    };
-
-    try {
-      var sslContext = SSLContext.getInstance("SSL");
-      sslContext.init(null, trustManager, new SecureRandom());
-      builder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManager[0]);
-      builder.hostnameVerifier((hostname, session) -> true);
-    } catch (NoSuchAlgorithmException | KeyManagementException e) {
-      throw new RuntimeException("Something went wrong while attempting to trust all certificates: ", e);
-    }
   }
 
   public abstract static class Builder {
@@ -155,5 +106,60 @@ public abstract class Client {
     public abstract CompletionClient buildChatCompletionClient();
 
     public abstract CompletionClient buildTextCompletionClient();
+
+    public OkHttpClient buildHttpClient() {
+      OkHttpClient.Builder builder = new OkHttpClient.Builder();
+
+      if (connectTimeout != null && connectTimeoutUnit != null) {
+        builder.connectTimeout(connectTimeout, connectTimeoutUnit);
+      }
+      if (readTimeout != null && readTimeoutUnit != null) {
+        builder.readTimeout(readTimeout, readTimeoutUnit);
+      }
+
+      if (proxy != null) {
+        trustAllCertificates(builder);
+        builder.proxy(proxy);
+
+        if (proxyAuthenticator != null) {
+          builder.proxyAuthenticator((route, response) ->
+              response.request()
+                  .newBuilder()
+                  .header("Proxy-Authorization", Credentials.basic(
+                      proxyAuthenticator.getUsername(),
+                      proxyAuthenticator.getPassword()))
+                  .build());
+        }
+      }
+      return builder.build();
+    }
+
+    private void trustAllCertificates(OkHttpClient.Builder builder) {
+      var trustManager = new TrustManager[] {
+          new X509TrustManager() {
+            @Override
+            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+            }
+
+            @Override
+            public X509Certificate[] getAcceptedIssuers() {
+              return new X509Certificate[] {};
+            }
+          }
+      };
+
+      try {
+        var sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, trustManager, new SecureRandom());
+        builder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManager[0]);
+        builder.hostnameVerifier((hostname, session) -> true);
+      } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        throw new RuntimeException("Something went wrong while attempting to trust all certificates: ", e);
+      }
+    }
   }
 }
