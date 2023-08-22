@@ -149,24 +149,6 @@ class OpenAIClientTest extends BaseTest {
   }
 
   @Test
-  void shouldFetchSubscriptionAsync() {
-    StringBuilder accountName = new StringBuilder();
-    expectRequest("/dashboard/billing/subscription", request -> {
-      assertThat(request.getMethod()).isEqualTo("GET");
-      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
-      return new ResponseEntity(jsonMapResponse("account_name", "TEST_ACCOUNT_NAME"));
-    });
-
-    new OpenAIClient.Builder("TEST_API_KEY")
-        .buildDashboardClient()
-        .getSubscriptionAsync(subscription -> {
-          accountName.append(subscription.getAccountName());
-        });
-
-    await().atMost(5, SECONDS).until(() -> "TEST_ACCOUNT_NAME".contentEquals(accountName));
-  }
-
-  @Test
   void shouldHandleInvalidApiKeyError() {
     var errorMessageBuilder = new StringBuilder();
     var errorResponse = jsonMapResponse("error", jsonMap(
@@ -185,7 +167,7 @@ class OpenAIClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener() {
               @Override
-              public void onError(ErrorDetails error) {
+              public void onError(ErrorDetails error, Throwable t) {
                 assertThat(error.getCode()).isEqualTo("invalid_api_key");
                 assertThat(error.getType()).isEqualTo("invalid_request_error");
                 errorMessageBuilder.append(error.getMessage());
@@ -212,7 +194,7 @@ class OpenAIClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener() {
               @Override
-              public void onError(ErrorDetails error) {
+              public void onError(ErrorDetails error, Throwable t) {
                 errorMessageBuilder.append(error.getMessage());
               }
             });
@@ -221,5 +203,19 @@ class OpenAIClientTest extends BaseTest {
         .until(() -> ("Unknown API response. "
             + "Code: 500, "
             + "Body: {\"error_details\":\"Server error\"}").contentEquals(errorMessageBuilder));
+  }
+
+  @Test
+  void shouldGetEmbeddings() {
+    var embeddingResponse = new double[] {-0.00692, -0.0053, -4.5471, -0.0240};
+    expectRequest("/v1/embeddings", request -> {
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      return new ResponseEntity(200, jsonMapResponse("data", jsonArray(jsonMap("embedding", embeddingResponse))));
+    });
+
+    var result = new OpenAIClient.Builder("TEST_API_KEY").buildEmbeddingsClient().getEmbedding("TEST_PROMPT");
+
+    assertThat(result).isEqualTo(embeddingResponse);
   }
 }

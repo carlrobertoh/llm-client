@@ -14,6 +14,7 @@ public abstract class CompletionRequest {
   private final double frequencyPenalty;
   @JsonProperty("presence_penalty")
   private final double presencePenalty;
+  private final boolean stream;
   @JsonIgnore
   private final Map<String, ?> additionalParams;
 
@@ -23,6 +24,7 @@ public abstract class CompletionRequest {
     this.frequencyPenalty = builder.frequencyPenalty;
     this.presencePenalty = builder.presencePenalty;
     this.additionalParams = builder.additionalParams;
+    this.stream = builder.stream;
   }
 
   public int getMaxTokens() {
@@ -46,7 +48,7 @@ public abstract class CompletionRequest {
   }
 
   public boolean isStream() {
-    return true;
+    return stream;
   }
 
   public abstract static class Builder {
@@ -55,6 +57,7 @@ public abstract class CompletionRequest {
     private double temperature = 0.9;
     private double frequencyPenalty = 0;
     private double presencePenalty = 0.6;
+    private boolean stream = true;
     private Map<String, ?> additionalParams = new HashMap<>();
 
     public Builder setMaxTokens(int maxTokens) {
@@ -74,6 +77,11 @@ public abstract class CompletionRequest {
 
     public Builder setPresencePenalty(double presencePenalty) {
       this.presencePenalty = presencePenalty;
+      return this;
+    }
+
+    public Builder setStream(boolean stream) {
+      this.stream = stream;
       return this;
     }
 

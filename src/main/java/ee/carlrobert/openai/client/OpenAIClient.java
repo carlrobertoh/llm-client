@@ -2,7 +2,7 @@ package ee.carlrobert.openai.client;
 
 import ee.carlrobert.openai.client.completion.chat.ChatCompletionClient;
 import ee.carlrobert.openai.client.completion.text.TextCompletionClient;
-import ee.carlrobert.openai.client.dashboard.DashboardClient;
+import ee.carlrobert.openai.client.embeddings.EmbeddingsClient;
 
 public class OpenAIClient extends Client {
 
@@ -40,8 +40,8 @@ public class OpenAIClient extends Client {
       return new TextCompletionClient(new OpenAIClient(this));
     }
 
-    public DashboardClient buildDashboardClient() {
-      return new DashboardClient(new OpenAIClient(this));
+    public EmbeddingsClient buildEmbeddingsClient() {
+      return new EmbeddingsClient(new OpenAIClient(this));
     }
   }
 }

@@ -12,13 +12,13 @@ To use the package, you need to use following Maven dependency:
 <dependency>
     <groupId>ee.carlrobert</groupId>
     <artifactId>openai-client</artifactId>
-    <version>1.1.7</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 Gradle dependency:
 ```kts
 dependencies {
-  implementation("ee.carlrobert:openai-client:1.1.7")
+  implementation("ee.carlrobert:openai-client:1.2.0")
 }
 ```
 
@@ -33,12 +33,10 @@ OpenAIClient.Builder builder = new OpenAIClient.Builder(System.getenv("MY_SECRET
     .setProxyAuthenticator(new ProxyAuthenticator("proxyUsername", "proxyPassword"));
 ```
 
-#### Dashboard client
+#### Embeddings client
 ```java
-DashboardClient dashboardClient = clientBuilder.buildDashboardClient();
-dashboardClient.getSubscriptionAsync(subscription -> {
-  System.out.println(subscription.getAccountName());
-});
+EmbeddingsClient dashboardClient = clientBuilder.buildEmbeddingsClient();
+embeddingsClient.getEmbedding("Text input");
 ```
 
 #### Chat Completion SSE

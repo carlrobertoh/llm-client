@@ -65,28 +65,30 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
 
   public void onFailure(
       @NotNull EventSource eventSource,
-      Throwable ex,
+      Throwable throwable,
       Response response) {
-    if (ex instanceof StreamResetException) {
+    if (throwable instanceof StreamResetException) {
       LOG.info("Stream was cancelled");
       listeners.onComplete(messageBuilder);
       return;
     }
 
-    if (ex instanceof SocketTimeoutException) {
+    if (throwable instanceof SocketTimeoutException) {
       if (retryOnReadTimeout) {
         LOG.info("Retrying request.");
         onRetry.accept(messageBuilder.toString());
         return;
       }
 
-      listeners.onError(new ErrorDetails("Request timed out. This may be due to the server being overloaded."));
+      listeners.onError(new ErrorDetails("Request timed out. This may be due to the server being overloaded."), throwable);
       return;
     }
 
     try {
       if (response == null) {
-        throw new IOException(ex);
+        LOG.error(throwable.getMessage());
+        listeners.onError(new ErrorDetails("Could not retrieve response."), throwable);
+        return;
       }
 
       var body = response.body();
@@ -96,18 +98,18 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
           var errorDetails = getErrorDetails(jsonBody);
           if (errorDetails == null ||
               errorDetails.getMessage() == null || errorDetails.getMessage().isEmpty()) {
-            listeners.onError(toUnknownErrorResponse(response, jsonBody));
+            listeners.onError(toUnknownErrorResponse(response, jsonBody), new RuntimeException());
           } else {
-            listeners.onError(errorDetails);
+            listeners.onError(errorDetails, new RuntimeException());
           }
         } catch (JsonProcessingException e) {
-          LOG.error("Could not serialize error response", ex);
-          listeners.onError(toUnknownErrorResponse(response, jsonBody));
+          LOG.error("Could not serialize error response", throwable);
+          listeners.onError(toUnknownErrorResponse(response, jsonBody), e);
         }
       }
-    } catch (IOException e) {
-      LOG.error("Something went wrong.", e);
-      listeners.onError(ErrorDetails.DEFAULT_ERROR);
+    } catch (IOException ex) {
+      LOG.error("Something went wrong.", ex);
+      listeners.onError(ErrorDetails.DEFAULT_ERROR, ex);
     }
   }
 

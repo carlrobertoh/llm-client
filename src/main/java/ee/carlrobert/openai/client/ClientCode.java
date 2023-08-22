@@ -1,7 +1,7 @@
 package ee.carlrobert.openai.client;
 
 public enum ClientCode {
-  DASHBOARD("dashboard"),
+  EMBEDDINGS("embeddings"),
   CHAT_COMPLETION("chat.completion"),
   TEXT_COMPLETION("text.completion"),
   AZURE_CHAT_COMPLETION("azure.chat.completion"),

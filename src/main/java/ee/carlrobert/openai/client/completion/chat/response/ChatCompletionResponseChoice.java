@@ -8,13 +8,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ChatCompletionResponseChoice {
 
   private final ChatCompletionResponseChoiceDelta delta;
+  private final ChatCompletionResponseChoiceDelta message;
 
   @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-  public ChatCompletionResponseChoice(@JsonProperty("delta") ChatCompletionResponseChoiceDelta delta) {
+  public ChatCompletionResponseChoice(
+      @JsonProperty("delta") ChatCompletionResponseChoiceDelta delta,
+      @JsonProperty("message") ChatCompletionResponseChoiceDelta message) {
     this.delta = delta;
+    this.message = message;
   }
 
   public ChatCompletionResponseChoiceDelta getDelta() {
     return delta;
+  }
+
+  public ChatCompletionResponseChoiceDelta getMessage() {
+    return message;
   }
 }

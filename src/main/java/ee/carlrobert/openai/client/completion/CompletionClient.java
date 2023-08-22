@@ -1,5 +1,7 @@
 package ee.carlrobert.openai.client.completion;
 
+import static java.util.stream.Collectors.toList;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.openai.client.Client;
@@ -7,6 +9,9 @@ import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
 import ee.carlrobert.openai.client.completion.text.request.TextCompletionRequest;
+import ee.carlrobert.openai.client.embeddings.EmbeddingData;
+import ee.carlrobert.openai.client.embeddings.EmbeddingResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -14,6 +19,7 @@ import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
 
@@ -43,9 +49,20 @@ public abstract class CompletionClient {
     return createNewEventSource(requestBody, listeners);
   }
 
+  public <T extends CompletionRequest> String call(T requestBody) {
+    var request = buildRequest(requestBody);
+    try (var response = client.getHttpClient().newCall(request).execute()) {
+      return response.body().string();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   protected <T extends CompletionRequest> okhttp3.Request buildRequest(T requestBody) {
     var headers = new HashMap<>(getRequiredHeaders());
-    headers.put("Accept", "text/event-stream");
+    if (requestBody.isStream()) {
+      headers.put("Accept", "text/event-stream");
+    }
     try {
       var mapper = new ObjectMapper();
       var map = mapper.readValue(mapper.writeValueAsString(requestBody), new TypeReference<Map<String, Object>>() {});
@@ -72,7 +89,7 @@ public abstract class CompletionClient {
             buildRequest(requestBody),
             getEventListener(listeners, client.isRetryOnReadTimeout(), (response) -> {
               if (retryCounter > MAX_RETRY_COUNT) {
-                listeners.onError(new ErrorDetails("The server may be overloaded as the request has timed out for 3 times."));
+                listeners.onError(new ErrorDetails("The server may be overloaded as the request has timed out for 3 times."), new RuntimeException());
                 return;
               }
 

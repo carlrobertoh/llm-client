@@ -161,7 +161,7 @@ class AzureClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener() {
               @Override
-              public void onError(ErrorDetails error) {
+              public void onError(ErrorDetails error, Throwable t) {
                 errorMessageBuilder.append(error.getMessage());
               }
             });
@@ -188,7 +188,7 @@ class AzureClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener() {
               @Override
-              public void onError(ErrorDetails error) {
+              public void onError(ErrorDetails error, Throwable t) {
                 errorMessageBuilder.append(error.getMessage());
               }
             });

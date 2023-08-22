@@ -22,8 +22,12 @@ public class LocalCallbackServer {
   private final HttpServer server;
 
   public LocalCallbackServer() {
+    this(8000);
+  }
+
+  public LocalCallbackServer(int port) {
     try {
-      server = HttpServer.create(new InetSocketAddress(8000), 0);
+      server = HttpServer.create(new InetSocketAddress(port), 0);
     } catch (IOException e) {
       throw new RuntimeException("Could not create HttpServer", e);
     }
