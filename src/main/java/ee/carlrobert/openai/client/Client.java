@@ -55,7 +55,7 @@ public class Client {
     this.retryOnReadTimeout = builder.retryOnReadTimeout;
   }
 
-  public abstract static class Builder {
+  public static class Builder {
 
     private final String apiKey;
     private String host;
@@ -103,9 +103,13 @@ public class Client {
       return this;
     }
 
-    public abstract CompletionClient buildChatCompletionClient();
+    public CompletionClient buildChatCompletionClient() {
+      throw new RuntimeException("Chat completion client not implemented!");
+    }
 
-    public abstract CompletionClient buildTextCompletionClient();
+    public CompletionClient buildTextCompletionClient() {
+      throw new RuntimeException("Text completion client not implemented!");
+    }
 
     public OkHttpClient buildHttpClient() {
       OkHttpClient.Builder builder = new OkHttpClient.Builder();

@@ -1,7 +1,6 @@
 package ee.carlrobert.openai.client.completion;
 
-import static java.util.stream.Collectors.toList;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.openai.client.Client;
@@ -9,17 +8,15 @@ import ee.carlrobert.openai.client.ClientCode;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionMessage;
 import ee.carlrobert.openai.client.completion.chat.request.ChatCompletionRequest;
 import ee.carlrobert.openai.client.completion.text.request.TextCompletionRequest;
-import ee.carlrobert.openai.client.embeddings.EmbeddingData;
-import ee.carlrobert.openai.client.embeddings.EmbeddingResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
 
@@ -50,43 +47,47 @@ public abstract class CompletionClient {
   }
 
   public <T extends CompletionRequest> String call(T requestBody) {
-    var request = buildRequest(requestBody);
-    try (var response = client.getHttpClient().newCall(request).execute()) {
-      return response.body().string();
+    try (var response = client.getHttpClient().newCall(buildRequest(requestBody)).execute()) {
+      return Objects.requireNonNull(response.body()).string();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  protected <T extends CompletionRequest> okhttp3.Request buildRequest(T requestBody) {
+  protected <T extends CompletionRequest> okhttp3.Request buildRequest(T requestBody) throws JsonProcessingException {
     var headers = new HashMap<>(getRequiredHeaders());
     if (requestBody.isStream()) {
       headers.put("Accept", "text/event-stream");
     }
-    try {
-      var mapper = new ObjectMapper();
-      var map = mapper.readValue(mapper.writeValueAsString(requestBody), new TypeReference<Map<String, Object>>() {});
-      var additionalParams = requestBody.getAdditionalParams();
-      if (additionalParams != null && !additionalParams.isEmpty()) {
-        map.putAll(additionalParams);
-      }
-
-      return new Request.Builder()
-          .url(url)
-          .headers(Headers.of(headers))
-          .post(RequestBody.create(
-              mapper.writeValueAsString(map),
-              MediaType.parse("application/json")))
-          .build();
-    } catch (Exception ex) {
-      throw new RuntimeException("Unable to serialize request payload");
+    var mapper = new ObjectMapper();
+    var map = mapper.readValue(mapper.writeValueAsString(requestBody), new TypeReference<Map<String, Object>>() {});
+    var additionalParams = requestBody.getAdditionalParams();
+    if (additionalParams != null && !additionalParams.isEmpty()) {
+      map.putAll(additionalParams);
     }
+
+    return new Request.Builder()
+        .url(url)
+        .headers(Headers.of(headers))
+        .post(RequestBody.create(
+            mapper.writeValueAsString(map),
+            MediaType.parse("application/json")))
+        .build();
   }
 
   protected <T extends CompletionRequest> EventSource createNewEventSource(T requestBody, CompletionEventListener listeners) {
+    Request request;
+    try {
+      request = buildRequest(requestBody);
+    } catch (JsonProcessingException e) {
+      var error = new RuntimeException("Unable to build request", e);
+      listeners.onError(new ErrorDetails(e.getMessage()), error);
+      throw error;
+    }
+
     return EventSources.createFactory(client.getHttpClient())
         .newEventSource(
-            buildRequest(requestBody),
+            request,
             getEventListener(listeners, client.isRetryOnReadTimeout(), (response) -> {
               if (retryCounter > MAX_RETRY_COUNT) {
                 listeners.onError(new ErrorDetails("The server may be overloaded as the request has timed out for 3 times."), new RuntimeException());

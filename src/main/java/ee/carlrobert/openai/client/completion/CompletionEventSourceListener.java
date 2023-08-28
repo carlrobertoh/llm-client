@@ -86,8 +86,7 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
 
     try {
       if (response == null) {
-        LOG.error(throwable.getMessage());
-        listeners.onError(new ErrorDetails("Could not retrieve response."), throwable);
+        listeners.onError(new ErrorDetails(throwable.getMessage()), throwable);
         return;
       }
 
@@ -108,8 +107,7 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
         }
       }
     } catch (IOException ex) {
-      LOG.error("Something went wrong.", ex);
-      listeners.onError(ErrorDetails.DEFAULT_ERROR, ex);
+      listeners.onError(new ErrorDetails(ex.getMessage()), ex);
     }
   }
 
