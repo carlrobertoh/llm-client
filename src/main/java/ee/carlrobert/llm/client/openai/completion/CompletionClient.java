@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.Client;
-import ee.carlrobert.llm.client.ClientCode;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
@@ -45,8 +44,6 @@ public abstract class CompletionClient {
       CompletionEventListener listeners,
       boolean retryOnReadTimeout,
       Consumer<String> onRetry);
-
-  public abstract ClientCode getClientCode();
 
   public <T extends OpenAICompletionRequest> EventSource stream(T requestBody, CompletionEventListener listeners) {
     return createNewEventSource(requestBody, listeners);

@@ -1,9 +1,8 @@
 package ee.carlrobert.llm.client.openai.completion.text;
 
-import ee.carlrobert.llm.client.ClientCode;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
-import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAICompletionClient;
+import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.function.Consumer;
 
 public class TextCompletionClient extends OpenAICompletionClient {
@@ -18,10 +17,5 @@ public class TextCompletionClient extends OpenAICompletionClient {
       boolean retryOnReadTimeout,
       Consumer<String> onRetry) {
     return new TextCompletionEventSourceListener(listeners, retryOnReadTimeout, onRetry);
-  }
-
-  @Override
-  public ClientCode getClientCode() {
-    return ClientCode.TEXT_COMPLETION;
   }
 }

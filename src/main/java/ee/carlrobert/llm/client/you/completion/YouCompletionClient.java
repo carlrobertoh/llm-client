@@ -2,7 +2,6 @@ package ee.carlrobert.llm.client.you.completion;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.carlrobert.llm.client.ClientCode;
 import ee.carlrobert.llm.client.openai.completion.CompletionClient;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.YouClient;
@@ -69,10 +68,5 @@ public class YouCompletionClient extends CompletionClient {
         return null;
       }
     };
-  }
-
-  @Override
-  public ClientCode getClientCode() {
-    return null;
   }
 }

@@ -3,11 +3,10 @@ package ee.carlrobert.llm.client.azure.completion;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.azure.AzureClient;
-import ee.carlrobert.llm.client.ClientCode;
-import ee.carlrobert.llm.completion.CompletionEventListener;
-import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.chat.ChatCompletionEventSourceListener;
+import ee.carlrobert.llm.completion.CompletionEventListener;
+import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 import java.util.function.Consumer;
 
 public class AzureChatCompletionClient extends AzureCompletionClient {
@@ -24,10 +23,5 @@ public class AzureChatCompletionClient extends AzureCompletionClient {
         return new ObjectMapper().readValue(data, AzureApiResponseError.class).getError();
       }
     };
-  }
-
-  @Override
-  public ClientCode getClientCode() {
-    return ClientCode.AZURE_CHAT_COMPLETION;
   }
 }

@@ -4,10 +4,9 @@ import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.carlrobert.llm.client.Client;
-import ee.carlrobert.llm.client.ClientCode;
-import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.PropertiesLoader;
+import ee.carlrobert.llm.client.Client;
+import ee.carlrobert.llm.client.openai.OpenAIClient;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -25,10 +24,6 @@ public class EmbeddingsClient {
   public EmbeddingsClient(OpenAIClient client) {
     this.client = client;
     this.baseUrl = client.getHost() == null ? BASE_URL : client.getHost();
-  }
-
-  public ClientCode getClientCode() {
-    return ClientCode.EMBEDDINGS;
   }
 
   public double[] getEmbedding(String input) {
