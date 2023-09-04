@@ -1,0 +1,33 @@
+package ee.carlrobert.llm.client.azure.completion;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.carlrobert.llm.client.azure.AzureClient;
+import ee.carlrobert.llm.client.ClientCode;
+import ee.carlrobert.llm.completion.CompletionEventListener;
+import ee.carlrobert.llm.completion.CompletionEventSourceListener;
+import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
+import ee.carlrobert.llm.client.openai.completion.chat.ChatCompletionEventSourceListener;
+import java.util.function.Consumer;
+
+public class AzureChatCompletionClient extends AzureCompletionClient {
+
+  public AzureChatCompletionClient(AzureClient client) {
+    super(client, "/openai/deployments/%s/chat/completions?api-version=%s");
+  }
+
+  @Override
+  protected CompletionEventSourceListener getEventListener(CompletionEventListener listeners, boolean retryOnReadTimeout, Consumer<String> onRetry) {
+    return new ChatCompletionEventSourceListener(listeners, retryOnReadTimeout, onRetry) {
+      @Override
+      protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
+        return new ObjectMapper().readValue(data, AzureApiResponseError.class).getError();
+      }
+    };
+  }
+
+  @Override
+  public ClientCode getClientCode() {
+    return ClientCode.AZURE_CHAT_COMPLETION;
+  }
+}

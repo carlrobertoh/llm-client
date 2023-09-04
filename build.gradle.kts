@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "1.2.1"
+version = "0.0.1"
 
 repositories {
     mavenCentral()
@@ -22,6 +22,7 @@ java {
 dependencies {
     api("com.squareup.okhttp3:okhttp:4.10.0")
     api("com.squareup.okhttp3:okhttp-sse:4.10.0")
+    api("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     implementation("org.slf4j:slf4j-api:2.0.7")
     implementation("org.slf4j:slf4j-simple:2.0.7")
@@ -57,9 +58,9 @@ publishing {
                 }
             }
             pom {
-                name.set("OpenAI Client")
+                name.set("LLM Client")
                 description.set("Java http client wrapped around the OkHttp3 library")
-                url.set("https://github.com/carlrobertoh/openai-client")
+                url.set("https://github.com/carlrobertoh/llm-client")
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
@@ -74,21 +75,21 @@ publishing {
                     }
                 }
                 scm {
-                    url.set("https://github.com/carlrobertoh/openai-client")
-                    connection.set("scm:git://github.com/carlrobertoh/openai-client.git")
-                    developerConnection.set("scm:git://github.com/carlrobertoh/openai-client.git")
+                    url.set("https://github.com/carlrobertoh/llm-client")
+                    connection.set("scm:git://github.com/carlrobertoh/llm-client.git")
+                    developerConnection.set("scm:git://github.com/carlrobertoh/llm-client.git")
                 }
             }
         }
     }
 }
 
-signing {
+/*signing {
     val signingKey = (findProperty("signingKey") ?: "") as String
     val signingPassword = (findProperty("signingPassword") ?: "") as String
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications["mavenJava"])
-}
+}*/
 
 tasks {
     test {
