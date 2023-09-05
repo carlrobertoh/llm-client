@@ -82,7 +82,15 @@ public class YouCompletionClient extends CompletionClient {
       @Override
       protected String getMessage(String data) {
         try {
-          return new ObjectMapper().readValue(data, YouCompletionResponse.class).getYouChatToken();
+          var response = new ObjectMapper().readValue(data, YouCompletionResponse.class);
+          if (eventListener instanceof YouCompletionEventListener) {
+            var serpResults = response.getSerpResults();
+            if (serpResults != null) {
+              ((YouCompletionEventListener) eventListener).onSerpResults(serpResults);
+            }
+          }
+
+          return response.getChatToken();
         } catch (JacksonException e) {
           // ignore
         }
