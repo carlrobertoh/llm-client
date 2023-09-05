@@ -1,1 +1,1 @@
-rootProject.name = "openai-client"
+rootProject.name = "llm-client"
