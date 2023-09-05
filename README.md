@@ -1,6 +1,6 @@
 <a name="readme-top"></a>
-# OpenAI Client
-Java http client wrapped around the OkHttp3 library, providing an easy way to access **OpenAI api** interface.
+# CodeGPT - LLM Client
+A user-friendly Java HTTP client, providing access to the large language model (LLM) APIs and services.
 
 [![Contributions welcome][contributions-welcome-svg]][contributions-welcome]
 [![Maven][maven-shield]][maven-url]
