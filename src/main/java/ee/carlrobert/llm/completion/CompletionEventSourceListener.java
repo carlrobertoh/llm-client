@@ -24,6 +24,10 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
   private final boolean retryOnReadTimeout;
   private final Consumer<String> onRetry;
 
+  public CompletionEventSourceListener(CompletionEventListener listeners) {
+    this(listeners, false, null);
+  }
+
   public CompletionEventSourceListener(CompletionEventListener listeners, boolean retryOnReadTimeout, Consumer<String> onRetry) {
     this.listeners = listeners;
     this.retryOnReadTimeout = retryOnReadTimeout;

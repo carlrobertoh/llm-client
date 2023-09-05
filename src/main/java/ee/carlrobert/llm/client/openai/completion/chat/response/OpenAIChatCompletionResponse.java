@@ -1,4 +1,4 @@
-package ee.carlrobert.llm.client.openai.completion.text.response;
+package ee.carlrobert.llm.client.openai.completion.chat.response;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -6,15 +6,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TextCompletionResponse {
+public class OpenAIChatCompletionResponse {
 
   private final String id;
-  private final List<TextCompletionResponseChoice> choices;
+  private final List<OpenAIChatCompletionResponseChoice> choices;
 
   @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-  public TextCompletionResponse(
+  public OpenAIChatCompletionResponse(
       @JsonProperty("id") String id,
-      @JsonProperty("choices") List<TextCompletionResponseChoice> choices) {
+      @JsonProperty("choices") List<OpenAIChatCompletionResponseChoice> choices) {
     this.id = id;
     this.choices = choices;
   }
@@ -23,7 +23,7 @@ public class TextCompletionResponse {
     return id;
   }
 
-  public List<TextCompletionResponseChoice> getChoices() {
+  public List<OpenAIChatCompletionResponseChoice> getChoices() {
     return choices;
   }
 }

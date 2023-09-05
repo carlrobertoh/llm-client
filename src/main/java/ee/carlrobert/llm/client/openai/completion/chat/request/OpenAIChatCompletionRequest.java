@@ -1,13 +1,13 @@
 package ee.carlrobert.llm.client.openai.completion.chat.request;
 
 import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.chat.ChatCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import java.util.List;
 
 public class OpenAIChatCompletionRequest extends OpenAICompletionRequest {
 
   private final String model;
-  private final List<ChatCompletionMessage> messages;
+  private final List<OpenAIChatCompletionMessage> messages;
 
   private OpenAIChatCompletionRequest(Builder builder) {
     super(builder);
@@ -15,11 +15,11 @@ public class OpenAIChatCompletionRequest extends OpenAICompletionRequest {
     this.messages = builder.messages;
   }
 
-  public void addMessage(ChatCompletionMessage message) {
+  public void addMessage(OpenAIChatCompletionMessage message) {
     messages.add(message);
   }
 
-  public List<ChatCompletionMessage> getMessages() {
+  public List<OpenAIChatCompletionMessage> getMessages() {
     return messages;
   }
 
@@ -29,14 +29,14 @@ public class OpenAIChatCompletionRequest extends OpenAICompletionRequest {
 
   public static class Builder extends OpenAICompletionRequest.Builder {
 
-    private final List<ChatCompletionMessage> messages;
-    private String model = ChatCompletionModel.GPT_3_5.getCode();
+    private final List<OpenAIChatCompletionMessage> messages;
+    private String model = OpenAIChatCompletionModel.GPT_3_5.getCode();
 
-    public Builder(List<ChatCompletionMessage> messages) {
+    public Builder(List<OpenAIChatCompletionMessage> messages) {
       this.messages = messages;
     }
 
-    public Builder setModel(ChatCompletionModel model) {
+    public Builder setModel(OpenAIChatCompletionModel model) {
       this.model = model.getCode();
       return this;
     }

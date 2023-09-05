@@ -3,7 +3,7 @@ package ee.carlrobert.llm.client.openai.completion.text;
 import ee.carlrobert.llm.completion.CompletionModel;
 import java.util.Arrays;
 
-public enum TextCompletionModel implements CompletionModel {
+public enum OpenAITextCompletionModel implements CompletionModel {
   ADA("text-ada-001", "Ada - Fastest", 2049),
   BABBAGE("text-babbage-001", "Babbage - Powerful", 2049),
   CURIE("text-curie-001", "Curie - Fast and efficient", 2049),
@@ -13,7 +13,7 @@ public enum TextCompletionModel implements CompletionModel {
   private final String description;
   private final int maxTokens;
 
-  TextCompletionModel(String code, String description, int maxTokens) {
+  OpenAITextCompletionModel(String code, String description, int maxTokens) {
     this.code = code;
     this.description = description;
     this.maxTokens = maxTokens;
@@ -31,8 +31,8 @@ public enum TextCompletionModel implements CompletionModel {
     return maxTokens;
   }
 
-  static public TextCompletionModel findByCode(String code) {
-    return Arrays.stream(TextCompletionModel.values())
+  static public OpenAITextCompletionModel findByCode(String code) {
+    return Arrays.stream(OpenAITextCompletionModel.values())
         .filter(item -> item.getCode().equals(code))
         .findFirst().orElseThrow();
   }

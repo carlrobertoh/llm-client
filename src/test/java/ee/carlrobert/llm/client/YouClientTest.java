@@ -52,15 +52,16 @@ public class YouClientTest extends BaseTest {
 
     new YouClient.Builder("TEST_SESSION_ID", "TEST_ACCESS_TOKEN")
         .buildChatCompletionClient()
-        .stream(new YouCompletionRequest.Builder("TEST_PROMPT")
-            .setChatHistory(List.of(new YouCompletionRequestMessage("Ping", "Pong")))
-            .buildRequest()
-            .toHttoRequest(), new CompletionEventListener() {
-          @Override
-          public void onMessage(String message) {
-            resultMessageBuilder.append(message);
-          }
-        });
+        .stream(
+            new YouCompletionRequest.Builder("TEST_PROMPT")
+                .setChatHistory(List.of(new YouCompletionRequestMessage("Ping", "Pong")))
+                .build(),
+            new CompletionEventListener() {
+              @Override
+              public void onMessage(String message) {
+                resultMessageBuilder.append(message);
+              }
+            });
 
     await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
   }

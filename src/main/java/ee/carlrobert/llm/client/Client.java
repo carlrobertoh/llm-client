@@ -1,6 +1,6 @@
 package ee.carlrobert.llm.client;
 
-import ee.carlrobert.llm.client.openai.completion.CompletionClient;
+import ee.carlrobert.llm.completion.CompletionClient;
 import java.net.Proxy;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;

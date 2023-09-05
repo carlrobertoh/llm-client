@@ -4,10 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.client.openai.completion.chat.ChatCompletionEventSourceListener;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionEventSourceListener;
+import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
-import java.util.function.Consumer;
+import ee.carlrobert.llm.completion.CompletionRequest;
+import okhttp3.sse.EventSource;
+import okhttp3.sse.EventSources;
 
 public class AzureChatCompletionClient extends AzureCompletionClient {
 
@@ -16,8 +19,14 @@ public class AzureChatCompletionClient extends AzureCompletionClient {
   }
 
   @Override
-  protected CompletionEventSourceListener getEventListener(CompletionEventListener listeners, boolean retryOnReadTimeout, Consumer<String> onRetry) {
-    return new ChatCompletionEventSourceListener(listeners, retryOnReadTimeout, onRetry) {
+  public EventSource stream(CompletionRequest completionRequest, CompletionEventListener completionEventListener) {
+    return EventSources.createFactory(client.getHttpClient())
+        .newEventSource(buildHttpRequest((OpenAIChatCompletionRequest) completionRequest), getEventSourceListener(completionEventListener));
+  }
+
+  @Override
+  protected CompletionEventSourceListener getEventSourceListener(CompletionEventListener listeners) {
+    return new OpenAIChatCompletionEventSourceListener(listeners) {
       @Override
       protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
         return new ObjectMapper().readValue(data, AzureApiResponseError.class).getError();

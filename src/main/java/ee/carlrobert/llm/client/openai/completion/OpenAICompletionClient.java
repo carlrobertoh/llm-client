@@ -1,22 +1,57 @@
 package ee.carlrobert.llm.client.openai.completion;
 
-import ee.carlrobert.llm.client.openai.OpenAIClient;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
+import ee.carlrobert.llm.client.openai.OpenAIClient;
+import ee.carlrobert.llm.completion.CompletionClient;
+import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.HashMap;
 import java.util.Map;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.sse.EventSource;
+import okhttp3.sse.EventSources;
 
 public abstract class OpenAICompletionClient extends CompletionClient {
 
   private static final String BASE_URL = PropertiesLoader.getValue("openai.baseUrl");
-  private final OpenAIClient client;
+
+  protected final OpenAIClient client;
+  protected final String url;
 
   public OpenAICompletionClient(OpenAIClient client, String path) {
-    super(client, client.getHost() == null ? BASE_URL : client.getHost(), path);
+    super(client);
     this.client = client;
+    this.url = (client.getHost() == null ? BASE_URL : client.getHost()) + path;
   }
 
-  @Override
-  protected Map<String, String> getRequiredHeaders() {
+  public EventSource stream(OpenAICompletionRequest completionRequest, CompletionEventListener completionEventListener) {
+    return EventSources.createFactory(client.getHttpClient())
+        .newEventSource(buildHttpRequest(completionRequest), getEventSourceListener(completionEventListener));
+  }
+
+  protected Request buildHttpRequest(OpenAICompletionRequest completionRequest) {
+    var headers = new HashMap<>(getRequiredHeaders());
+    if (completionRequest.isStream()) {
+      headers.put("Accept", "text/event-stream");
+    }
+    try {
+      return new Request.Builder()
+          .url(url)
+          .headers(Headers.of(headers))
+          .post(RequestBody.create(
+              new ObjectMapper().writeValueAsString(completionRequest),
+              MediaType.parse("application/json")))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to process request", e);
+    }
+  }
+
+  private Map<String, String> getRequiredHeaders() {
     var headers = new HashMap<>(Map.of(
         "Authorization", "Bearer " + client.getApiKey()
     ));

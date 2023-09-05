@@ -1,8 +1,8 @@
 package ee.carlrobert.llm.client.openai;
 
 import ee.carlrobert.llm.client.Client;
-import ee.carlrobert.llm.client.openai.completion.chat.ChatCompletionClient;
-import ee.carlrobert.llm.client.openai.completion.text.TextCompletionClient;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionClient;
+import ee.carlrobert.llm.client.openai.completion.text.OpenAITextCompletionClient;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingsClient;
 
 public class OpenAIClient extends Client {
@@ -32,13 +32,13 @@ public class OpenAIClient extends Client {
     }
 
     @Override
-    public ChatCompletionClient buildChatCompletionClient() {
-      return new ChatCompletionClient(new OpenAIClient(this));
+    public OpenAIChatCompletionClient buildChatCompletionClient() {
+      return new OpenAIChatCompletionClient(new OpenAIClient(this));
     }
 
     @Override
-    public TextCompletionClient buildTextCompletionClient() {
-      return new TextCompletionClient(new OpenAIClient(this));
+    public OpenAITextCompletionClient buildTextCompletionClient() {
+      return new OpenAITextCompletionClient(new OpenAIClient(this));
     }
 
     public EmbeddingsClient buildEmbeddingsClient() {

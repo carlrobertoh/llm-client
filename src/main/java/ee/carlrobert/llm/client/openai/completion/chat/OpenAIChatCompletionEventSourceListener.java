@@ -3,21 +3,20 @@ package ee.carlrobert.llm.client.openai.completion.chat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.openai.completion.ApiResponseError;
+import ee.carlrobert.llm.client.openai.completion.chat.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.client.openai.completion.chat.response.ChatCompletionResponse;
-import java.util.function.Consumer;
 
-public class ChatCompletionEventSourceListener extends CompletionEventSourceListener {
+public class OpenAIChatCompletionEventSourceListener extends CompletionEventSourceListener {
 
-  public ChatCompletionEventSourceListener(CompletionEventListener listeners, boolean retryOnReadTimeout, Consumer<String> onRetry) {
-    super(listeners, retryOnReadTimeout, onRetry);
+  public OpenAIChatCompletionEventSourceListener(CompletionEventListener listeners) {
+    super(listeners);
   }
 
   protected String getMessage(String data) throws JsonProcessingException {
     var choice = new ObjectMapper()
-        .readValue(data, ChatCompletionResponse.class)
+        .readValue(data, OpenAIChatCompletionResponse.class)
         .getChoices()
         .get(0);
     if (choice != null) {

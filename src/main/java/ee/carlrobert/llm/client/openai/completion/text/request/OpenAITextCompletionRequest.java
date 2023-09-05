@@ -2,7 +2,7 @@ package ee.carlrobert.llm.client.openai.completion.text.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.text.TextCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.text.OpenAITextCompletionModel;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class OpenAITextCompletionRequest extends OpenAICompletionRequest {
   public static class Builder extends OpenAICompletionRequest.Builder {
 
     private final String prompt;
-    private String model = TextCompletionModel.DAVINCI.getCode();
+    private String model = OpenAITextCompletionModel.DAVINCI.getCode();
     private List<String> stop;
     private int bestOf = 1;
 
@@ -49,7 +49,7 @@ public class OpenAITextCompletionRequest extends OpenAICompletionRequest {
       this.prompt = prompt;
     }
 
-    public Builder setModel(TextCompletionModel model) {
+    public Builder setModel(OpenAITextCompletionModel model) {
       this.model = model.getCode();
       return this;
     }

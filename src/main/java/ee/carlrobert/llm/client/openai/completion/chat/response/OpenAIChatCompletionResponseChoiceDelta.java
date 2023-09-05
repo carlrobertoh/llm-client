@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatCompletionResponseChoiceDelta {
+public class OpenAIChatCompletionResponseChoiceDelta {
 
   private final String role;
   private final String content;
 
   @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-  public ChatCompletionResponseChoiceDelta(
+  public OpenAIChatCompletionResponseChoiceDelta(
       @JsonProperty("role") String role,
       @JsonProperty("content") String content) {
     this.role = role;

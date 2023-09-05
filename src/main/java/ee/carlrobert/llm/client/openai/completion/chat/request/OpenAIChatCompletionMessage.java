@@ -1,11 +1,11 @@
 package ee.carlrobert.llm.client.openai.completion.chat.request;
 
-public class ChatCompletionMessage {
+public class OpenAIChatCompletionMessage {
 
   private final String role;
   private String content;
 
-  public ChatCompletionMessage(String role, String content) {
+  public OpenAIChatCompletionMessage(String role, String content) {
     this.role = role;
     this.content = content;
   }

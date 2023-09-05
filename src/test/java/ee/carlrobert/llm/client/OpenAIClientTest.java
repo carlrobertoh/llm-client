@@ -8,15 +8,15 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.text.request.OpenAITextCompletionRequest;
-import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.client.openai.completion.chat.ChatCompletionModel;
-import ee.carlrobert.llm.client.openai.completion.chat.request.ChatCompletionMessage;
-import ee.carlrobert.llm.client.openai.completion.text.TextCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.text.OpenAITextCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.text.request.OpenAITextCompletionRequest;
+import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -40,9 +40,7 @@ class OpenAIClientTest extends BaseTest {
               "max_tokens",
               "frequency_penalty",
               "presence_penalty",
-              "messages",
-              "additionalParam1",
-              "additionalParam2")
+              "messages")
           .containsExactly(
               "gpt-3.5-turbo",
               0.5,
@@ -50,9 +48,7 @@ class OpenAIClientTest extends BaseTest {
               500,
               0.1,
               0.1,
-              List.of(Map.of("role", "user", "content", prompt)),
-              10,
-              "testValue");
+              List.of(Map.of("role", "user", "content", prompt)));
       return List.of(
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hello")))),
@@ -63,26 +59,18 @@ class OpenAIClientTest extends BaseTest {
         .setOrganization("TEST_ORGANIZATION")
         .buildChatCompletionClient()
         .stream(
-            (OpenAIChatCompletionRequest) new OpenAIChatCompletionRequest.Builder(
-                List.of(new ChatCompletionMessage("user", prompt)))
-                .setModel(ChatCompletionModel.GPT_3_5)
+            new OpenAIChatCompletionRequest.Builder(
+                List.of(new OpenAIChatCompletionMessage("user", prompt)))
+                .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .setMaxTokens(500)
                 .setTemperature(0.5)
                 .setPresencePenalty(0.1)
                 .setFrequencyPenalty(0.1)
-                .setAdditionalParams(Map.of(
-                    "additionalParam1", 10,
-                    "additionalParam2", "testValue"))
                 .build(),
             new CompletionEventListener() {
               @Override
               public void onMessage(String message) {
                 resultMessageBuilder.append(message);
-              }
-
-              @Override
-              public void onComplete(StringBuilder messageBuilder) {
-                assertThat(messageBuilder.toString()).isEqualTo(resultMessageBuilder.toString());
               }
             });
 
@@ -126,7 +114,7 @@ class OpenAIClientTest extends BaseTest {
         .buildTextCompletionClient()
         .stream(
             (OpenAITextCompletionRequest) new OpenAITextCompletionRequest.Builder(prompt)
-                .setModel(TextCompletionModel.CURIE)
+                .setModel(OpenAITextCompletionModel.CURIE)
                 .setStop(List.of(" Human:", " AI:"))
                 .setMaxTokens(1000)
                 .setTemperature(0.1)
@@ -162,8 +150,8 @@ class OpenAIClientTest extends BaseTest {
         .buildChatCompletionClient()
         .stream(
             new OpenAIChatCompletionRequest.Builder(
-                List.of(new ChatCompletionMessage("user", "TEST_PROMPT")))
-                .setModel(ChatCompletionModel.GPT_3_5)
+                List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
+                .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
             new CompletionEventListener() {
               @Override
@@ -189,8 +177,8 @@ class OpenAIClientTest extends BaseTest {
         .buildChatCompletionClient()
         .stream(
             new OpenAIChatCompletionRequest.Builder(
-                List.of(new ChatCompletionMessage("user", "TEST_PROMPT")))
-                .setModel(ChatCompletionModel.GPT_3_5)
+                List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
+                .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
             new CompletionEventListener() {
               @Override
