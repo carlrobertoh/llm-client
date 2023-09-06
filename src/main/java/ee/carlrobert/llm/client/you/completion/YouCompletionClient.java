@@ -46,9 +46,9 @@ public class YouCompletionClient extends CompletionClient {
           .addQueryParameter("count", "10")
           .addQueryParameter("safeSearch", "WebPages,Translations,TimeZone,Computation,RelatedSearches")
           .addQueryParameter("domain", "youchat")
-          .addQueryParameter("queryTraceId", "88ccf267-104c-413d-88ad-68fa859a004e")
+          .addQueryParameter("queryTraceId", request.getQueryTraceId().toString())
           .addQueryParameter("chat", new ObjectMapper().writeValueAsString(request.getMessages()))
-          .addQueryParameter("chatId", "88ccf267-104c-413d-88ad-68fa859a004e");
+          .addQueryParameter("chatId", request.getChatId().toString());
 
       if (port != null && !port.isEmpty()) {
         httpUrlBuilder.port(Integer.parseInt(port));

@@ -10,6 +10,7 @@ import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 public class YouClientTest extends BaseTest {
@@ -17,6 +18,8 @@ public class YouClientTest extends BaseTest {
   @Test
   void shouldStreamYouChatCompletion() {
     var resultMessageBuilder = new StringBuilder();
+    var chatId = UUID.randomUUID();
+    var queryTraceId = UUID.randomUUID();
     expectStreamRequest("/api/streamingSearch", request -> {
       assertThat(request.getMethod()).isEqualTo("GET");
       assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
@@ -26,9 +29,9 @@ public class YouClientTest extends BaseTest {
               "count=10&" +
               "safeSearch=WebPages,Translations,TimeZone,Computation,RelatedSearches&" +
               "domain=youchat&" +
-              "queryTraceId=88ccf267-104c-413d-88ad-68fa859a004e&" +
+              "queryTraceId=" + queryTraceId + "&" +
               "chat=[{\"question\":\"Ping\",\"answer\":\"Pong\"}]&" +
-              "chatId=88ccf267-104c-413d-88ad-68fa859a004e");
+              "chatId=" + chatId);
       assertThat(request.getHeaders())
           .flatExtracting("Host", "Accept", "Connection", "Cookie")
           .containsExactly("localhost:8000",
@@ -55,6 +58,8 @@ public class YouClientTest extends BaseTest {
         .stream(
             new YouCompletionRequest.Builder("TEST_PROMPT")
                 .setChatHistory(List.of(new YouCompletionRequestMessage("Ping", "Pong")))
+                .setChatId(chatId)
+                .setQueryTraceId(queryTraceId)
                 .build(),
             new CompletionEventListener() {
               @Override
