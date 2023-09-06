@@ -29,9 +29,14 @@ public class YouCompletionClient extends CompletionClient {
   }
 
   @Override
-  public EventSource stream(CompletionRequest request, CompletionEventListener completionEventListener) {
+  public EventSource getCompletion(CompletionRequest request, CompletionEventListener completionEventListener) {
     return EventSources.createFactory(client.getHttpClient())
         .newEventSource(buildHttpRequest((YouCompletionRequest) request), getEventSourceListener(completionEventListener));
+  }
+
+  @Override
+  public YouCompletionResponse getCompletion(CompletionRequest request) {
+    throw new RuntimeException("Not implemented!");
   }
 
   public Request buildHttpRequest(YouCompletionRequest request) {
@@ -76,8 +81,7 @@ public class YouCompletionClient extends CompletionClient {
     }
   }
 
-  @Override
-  protected CompletionEventSourceListener getEventSourceListener(CompletionEventListener eventListener) {
+  private CompletionEventSourceListener getEventSourceListener(CompletionEventListener eventListener) {
     return new CompletionEventSourceListener(eventListener) {
       @Override
       protected String getMessage(String data) {

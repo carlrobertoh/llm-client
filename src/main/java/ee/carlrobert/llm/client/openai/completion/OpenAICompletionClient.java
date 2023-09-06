@@ -5,15 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.completion.CompletionClient;
-import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.HashMap;
 import java.util.Map;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.sse.EventSource;
-import okhttp3.sse.EventSources;
 
 public abstract class OpenAICompletionClient extends CompletionClient {
 
@@ -26,11 +23,6 @@ public abstract class OpenAICompletionClient extends CompletionClient {
     super(client);
     this.client = client;
     this.url = (client.getHost() == null ? BASE_URL : client.getHost()) + path;
-  }
-
-  public EventSource stream(OpenAICompletionRequest completionRequest, CompletionEventListener completionEventListener) {
-    return EventSources.createFactory(client.getHttpClient())
-        .newEventSource(buildHttpRequest(completionRequest), getEventSourceListener(completionEventListener));
   }
 
   protected Request buildHttpRequest(OpenAICompletionRequest completionRequest) {

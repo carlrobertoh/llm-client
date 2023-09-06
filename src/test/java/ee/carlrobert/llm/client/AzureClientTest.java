@@ -6,8 +6,10 @@ import static ee.carlrobert.llm.client.util.JSONUtil.jsonMap;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.completion.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.http.ResponseEntity;
@@ -58,8 +60,8 @@ class AzureClientTest extends BaseTest {
     new AzureClient.Builder("TEST_API_KEY", new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .setActiveDirectoryAuthentication(true)
         .buildChatCompletionClient()
-        .stream(
-            (OpenAIChatCompletionRequest) new OpenAIChatCompletionRequest.Builder(
+        .getCompletion(
+            new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .setMaxTokens(500)
@@ -116,8 +118,8 @@ class AzureClientTest extends BaseTest {
 
     new AzureClient.Builder("TEST_API_KEY", new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .buildTextCompletionClient()
-        .stream(
-            (OpenAITextCompletionRequest) new OpenAITextCompletionRequest.Builder(prompt)
+        .getCompletion(
+            new OpenAITextCompletionRequest.Builder(prompt)
                 .setModel(OpenAITextCompletionModel.DAVINCI)
                 .setStop(List.of(" Human:", " AI:"))
                 .setMaxTokens(1000)
@@ -141,6 +143,56 @@ class AzureClientTest extends BaseTest {
   }
 
   @Test
+  void shouldGetAzureChatCompletion() {
+    var prompt = "TEST_PROMPT";
+    expectRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions", request -> {
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0))
+          .isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "temperature",
+              "max_tokens",
+              "frequency_penalty",
+              "presence_penalty",
+              "messages")
+          .containsExactly(
+              "gpt-3.5-turbo",
+              0.5,
+              500,
+              0.1,
+              0.1,
+              List.of(Map.of("role", "user", "content", prompt)));
+
+      return new ResponseEntity(new ObjectMapper().writeValueAsString
+          (Map.of("choices", List.of(
+              Map.of("message", Map.of(
+                  "role", "assistant",
+                  "content", "This is a test"))))));
+    });
+
+    var response = new AzureClient.Builder(
+        "TEST_API_KEY", new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+        .setActiveDirectoryAuthentication(true)
+        .buildChatCompletionClient()
+        .getCompletion(new OpenAIChatCompletionRequest.Builder(
+            List.of(new OpenAIChatCompletionMessage("user", prompt)))
+            .setModel(OpenAIChatCompletionModel.GPT_3_5)
+            .setMaxTokens(500)
+            .setTemperature(0.5)
+            .setPresencePenalty(0.1)
+            .setFrequencyPenalty(0.1)
+            .setStream(false)
+            .build());
+
+    assertThat(response.getChoices())
+        .extracting("message")
+        .extracting("role", "content")
+        .containsExactly(tuple("assistant", "This is a test"));
+  }
+
+  @Test
   void shouldListenForInvalidTokenErrorResponse() {
     var errorMessageBuilder = new StringBuilder();
     var errorResponse = jsonMapResponse(
@@ -151,7 +203,7 @@ class AzureClientTest extends BaseTest {
 
     new AzureClient.Builder("TEST_API_KEY", new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .buildChatCompletionClient()
-        .stream(
+        .getCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
@@ -177,7 +229,7 @@ class AzureClientTest extends BaseTest {
 
     new AzureClient.Builder("TEST_API_KEY", new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .buildChatCompletionClient()
-        .stream(
+        .getCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)

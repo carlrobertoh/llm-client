@@ -3,10 +3,11 @@ package ee.carlrobert.llm.client.openai.completion.text.response;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ee.carlrobert.llm.completion.CompletionResponse;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OpenAITextCompletionResponse {
+public class OpenAITextCompletionResponse implements CompletionResponse {
 
   private final String id;
   private final List<OpenAITextCompletionResponseChoice> choices;

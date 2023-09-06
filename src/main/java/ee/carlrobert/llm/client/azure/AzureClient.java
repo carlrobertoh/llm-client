@@ -4,6 +4,7 @@ import ee.carlrobert.llm.client.Client;
 import ee.carlrobert.llm.client.azure.completion.AzureChatCompletionClient;
 import ee.carlrobert.llm.client.azure.completion.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.azure.completion.AzureTextCompletionClient;
+import ee.carlrobert.llm.client.openai.completion.chat.response.OpenAIChatCompletionResponse;
 
 public class AzureClient extends Client {
 

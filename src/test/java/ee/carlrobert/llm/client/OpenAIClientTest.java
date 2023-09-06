@@ -6,8 +6,10 @@ import static ee.carlrobert.llm.client.util.JSONUtil.jsonMap;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
@@ -58,7 +60,7 @@ class OpenAIClientTest extends BaseTest {
     new OpenAIClient.Builder("TEST_API_KEY")
         .setOrganization("TEST_ORGANIZATION")
         .buildChatCompletionClient()
-        .stream(
+        .getCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
@@ -112,8 +114,8 @@ class OpenAIClientTest extends BaseTest {
 
     new OpenAIClient.Builder("TEST_API_KEY")
         .buildTextCompletionClient()
-        .stream(
-            (OpenAITextCompletionRequest) new OpenAITextCompletionRequest.Builder(prompt)
+        .getCompletion(
+            new OpenAITextCompletionRequest.Builder(prompt)
                 .setModel(OpenAITextCompletionModel.CURIE)
                 .setStop(List.of(" Human:", " AI:"))
                 .setMaxTokens(1000)
@@ -137,6 +139,58 @@ class OpenAIClientTest extends BaseTest {
   }
 
   @Test
+  void shouldGetChatCompletion() {
+    var prompt = "TEST_PROMPT";
+    expectRequest("/v1/chat/completions", request -> {
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Openai-organization").get(0))
+          .isEqualTo("TEST_ORGANIZATION");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "temperature",
+              "stream",
+              "max_tokens",
+              "frequency_penalty",
+              "presence_penalty",
+              "messages")
+          .containsExactly(
+              "gpt-3.5-turbo",
+              0.5,
+              false,
+              500,
+              0.1,
+              0.1,
+              List.of(Map.of("role", "user", "content", prompt)));
+
+      return new ResponseEntity(new ObjectMapper().writeValueAsString
+          (Map.of("choices", List.of(
+              Map.of("message", Map.of(
+                  "role", "assistant",
+                  "content", "This is a test"))))));
+    });
+
+    var response = new OpenAIClient.Builder("TEST_API_KEY")
+        .setOrganization("TEST_ORGANIZATION")
+        .buildChatCompletionClient()
+        .getCompletion(new OpenAIChatCompletionRequest.Builder(
+            List.of(new OpenAIChatCompletionMessage("user", prompt)))
+            .setModel(OpenAIChatCompletionModel.GPT_3_5)
+            .setMaxTokens(500)
+            .setTemperature(0.5)
+            .setPresencePenalty(0.1)
+            .setFrequencyPenalty(0.1)
+            .setStream(false)
+            .build());
+
+    assertThat(response.getChoices())
+        .extracting("message")
+        .extracting("role", "content")
+        .containsExactly(tuple("assistant", "This is a test"));
+  }
+
+  @Test
   void shouldHandleInvalidApiKeyError() {
     var errorMessageBuilder = new StringBuilder();
     var errorResponse = jsonMapResponse("error", jsonMap(
@@ -148,7 +202,7 @@ class OpenAIClientTest extends BaseTest {
 
     new OpenAIClient.Builder("TEST_API_KEY")
         .buildChatCompletionClient()
-        .stream(
+        .getCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
@@ -175,7 +229,7 @@ class OpenAIClientTest extends BaseTest {
 
     new OpenAIClient.Builder("TEST_API_KEY")
         .buildChatCompletionClient()
-        .stream(
+        .getCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)

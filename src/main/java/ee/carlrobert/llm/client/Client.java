@@ -1,6 +1,7 @@
 package ee.carlrobert.llm.client;
 
 import ee.carlrobert.llm.completion.CompletionClient;
+import ee.carlrobert.llm.completion.CompletionResponse;
 import java.net.Proxy;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;

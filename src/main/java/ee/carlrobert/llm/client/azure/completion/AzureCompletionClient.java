@@ -8,7 +8,6 @@ import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
 import ee.carlrobert.llm.completion.CompletionClient;
-import ee.carlrobert.llm.completion.CompletionRequest;
 import java.util.HashMap;
 import java.util.Map;
 import okhttp3.Headers;
@@ -30,7 +29,7 @@ abstract class AzureCompletionClient extends CompletionClient {
   }
 
   // TODO: Shared logic
-  public <R extends CompletionRequest> Request buildHttpRequest(OpenAICompletionRequest completionRequest) {
+  public Request buildHttpRequest(OpenAICompletionRequest completionRequest) {
     var headers = new HashMap<>(getRequiredHeaders());
     if (completionRequest.isStream()) {
       headers.put("Accept", "text/event-stream");

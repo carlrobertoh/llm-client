@@ -3,10 +3,11 @@ package ee.carlrobert.llm.client.you.completion;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ee.carlrobert.llm.completion.CompletionResponse;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class YouCompletionResponse {
+public class YouCompletionResponse implements CompletionResponse {
 
   private final String chatToken;
   private final List<YouSerpResult> serpResults;
