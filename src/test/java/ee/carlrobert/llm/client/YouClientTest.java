@@ -54,8 +54,8 @@ public class YouClientTest extends BaseTest {
     });
 
     new YouClient.Builder("TEST_SESSION_ID", "TEST_ACCESS_TOKEN")
-        .buildChatCompletionClient()
-        .getCompletion(
+        .build()
+        .getChatCompletion(
             new YouCompletionRequest.Builder("TEST_PROMPT")
                 .setChatHistory(List.of(new YouCompletionRequestMessage("Ping", "Pong")))
                 .setChatId(chatId)

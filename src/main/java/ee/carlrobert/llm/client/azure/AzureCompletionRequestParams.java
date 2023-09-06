@@ -1,4 +1,4 @@
-package ee.carlrobert.llm.client.azure.completion;
+package ee.carlrobert.llm.client.azure;
 
 public class AzureCompletionRequestParams {
 

@@ -1,7 +1,5 @@
 package ee.carlrobert.llm.client;
 
-import ee.carlrobert.llm.completion.CompletionClient;
-import ee.carlrobert.llm.completion.CompletionResponse;
 import java.net.Proxy;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -115,12 +113,8 @@ public class Client {
       return this;
     }
 
-    public CompletionClient buildChatCompletionClient() {
-      throw new RuntimeException("Chat completion client not implemented!");
-    }
-
-    public CompletionClient buildTextCompletionClient() {
-      throw new RuntimeException("Text completion client not implemented!");
+    public Client build() {
+      return new Client(this);
     }
 
     public OkHttpClient buildHttpClient() {
