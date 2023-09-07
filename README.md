@@ -12,45 +12,36 @@ To use the package, you need to use following Maven dependency:
 <dependency>
     <groupId>ee.carlrobert</groupId>
     <artifactId>llm-client</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 Gradle dependency:
 ```kts
 dependencies {
-  implementation("ee.carlrobert:llm-client:0.0.1")
+  implementation("ee.carlrobert:llm-client:0.0.2")
 }
 ```
 
 ## Usage
 
-### Client Builder
+### Chat Completion SSE
 ```java
-OpenAIClient.Builder builder = new OpenAIClient.Builder(System.getenv("MY_SECRET_KEY"))
-    .setConnectTimeout(60L, TimeUnit.SECONDS)
-    .setReadTimeout(30L, TimeUnit.SECONDS)
-    .setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 1234)))
-    .setProxyAuthenticator(new ProxyAuthenticator("proxyUsername", "proxyPassword"));
-```
-
-#### Embeddings client
-```java
-EmbeddingsClient dashboardClient = clientBuilder.buildEmbeddingsClient();
-embeddingsClient.getEmbedding("Text input");
-```
-
-#### Chat Completion SSE
-```java
-ChatCompletionClient completionClient = clientBuilder.buildChatCompletionClient();
-ChatCompletionRequest request = new ChatCompletionRequest.Builder(List.of(new ChatCompletionMessage("user", "Hi there!")))
-    .setModel(ChatCompletionModel.GPT_4)
+OpenAIClient client = new OpenAIClient.Builder(System.getenv("OPENAI_API_KEY"))
+    .setOrganization("MY_ORGANIZATION")
     .build();
-EventSource call = completionClient.stream(request, new CompletionEventListener() {
-  @Override
-  public void onMessage(String message) {
-    System.out.println(message);
-  }
-});
+
+EventSource call = client.getChatCompletion(
+    new OpenAIChatCompletionRequest.Builder(List.of(new OpenAIChatCompletionMessage("user", prompt)))
+        .setModel(OpenAIChatCompletionModel.GPT_4)
+        .setTemperature(0.1)
+        .build(),
+    new CompletionEventListener() {
+      @Override
+      public void onMessage(String message) {
+        System.out.println(message);
+      }
+    });
+
 call.cancel();
 ```
 
