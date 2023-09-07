@@ -68,10 +68,14 @@ public class YouClient extends Client {
           .addQueryParameter("count", "10")
           .addQueryParameter("safeSearch", "WebPages,Translations,TimeZone,Computation,RelatedSearches")
           .addQueryParameter("domain", "youchat")
-          .addQueryParameter("queryTraceId", request.getQueryTraceId().toString())
-          .addQueryParameter("chat", new ObjectMapper().writeValueAsString(request.getMessages()))
-          .addQueryParameter("chatId", request.getChatId().toString());
+          .addQueryParameter("chat", new ObjectMapper().writeValueAsString(request.getMessages()));
 
+      if (request.getChatId() != null) {
+        httpUrlBuilder.addQueryParameter("chatId", request.getChatId().toString());
+      }
+      if (request.getQueryTraceId() != null) {
+        httpUrlBuilder.addQueryParameter("queryTraceId", request.getQueryTraceId().toString());
+      }
       if (port != null && !port.isEmpty()) {
         httpUrlBuilder.port(Integer.parseInt(port));
       }

@@ -29,9 +29,9 @@ public class YouClientTest extends BaseTest {
               "count=10&" +
               "safeSearch=WebPages,Translations,TimeZone,Computation,RelatedSearches&" +
               "domain=youchat&" +
-              "queryTraceId=" + queryTraceId + "&" +
               "chat=[{\"question\":\"Ping\",\"answer\":\"Pong\"}]&" +
-              "chatId=" + chatId);
+              "chatId=" + chatId + "&" +
+              "queryTraceId=" + queryTraceId);
       assertThat(request.getHeaders())
           .flatExtracting("Host", "Accept", "Connection", "Cookie")
           .containsExactly("localhost:8000",
