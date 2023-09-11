@@ -78,6 +78,62 @@ class OpenAIClientTest extends BaseTest {
   }
 
   @Test
+  void shouldStreamChatCompletionWithCustomURL() {
+    var prompt = "TEST_PROMPT";
+    var resultMessageBuilder = new StringBuilder();
+    expectStreamRequest("/v1/test/segment", request -> {
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Openai-organization").get(0))
+          .isEqualTo("TEST_ORGANIZATION");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "temperature",
+              "stream",
+              "max_tokens",
+              "frequency_penalty",
+              "presence_penalty",
+              "messages")
+          .containsExactly(
+              "gpt-3.5-turbo",
+              0.5,
+              true,
+              500,
+              0.1,
+              0.1,
+              List.of(Map.of("role", "user", "content", prompt)));
+      return List.of(
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hello")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
+    });
+
+    ((OpenAIClient) new OpenAIClient.Builder("TEST_API_KEY")
+        .setOrganization("TEST_ORGANIZATION")
+        .setHost("http://127.0.0.1:8000")
+        .build())
+        .getChatCompletion(
+            new OpenAIChatCompletionRequest.Builder(
+                List.of(new OpenAIChatCompletionMessage("user", prompt)))
+                .setModel(OpenAIChatCompletionModel.GPT_3_5)
+                .setMaxTokens(500)
+                .setTemperature(0.5)
+                .setPresencePenalty(0.1)
+                .setFrequencyPenalty(0.1)
+                .setOverriddenPath("/v1/test/segment")
+                .build(),
+            new CompletionEventListener() {
+              @Override
+              public void onMessage(String message) {
+                resultMessageBuilder.append(message);
+              }
+            });
+
+    await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
+  }
+
+  @Test
   void shouldGetChatCompletion() {
     var prompt = "TEST_PROMPT";
     expectRequest("/v1/chat/completions", request -> {

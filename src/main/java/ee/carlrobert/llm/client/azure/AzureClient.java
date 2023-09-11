@@ -37,13 +37,13 @@ public class AzureClient extends Client {
 
   public EventSource getChatCompletion(OpenAICompletionRequest request, CompletionEventListener completionEventListener) {
     return EventSources.createFactory(getHttpClient()).newEventSource(
-        buildHttpRequest(request, getChatCompletionPath()),
+        buildHttpRequest(request),
         getEventSourceListener(completionEventListener));
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAICompletionRequest request) {
     try (var response = getHttpClient()
-        .newCall(buildHttpRequest(request, getChatCompletionPath()))
+        .newCall(buildHttpRequest(request))
         .execute()) {
       return new ObjectMapper().readValue(Objects.requireNonNull(response.body()).string(), OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
@@ -51,14 +51,14 @@ public class AzureClient extends Client {
     }
   }
 
-  public Request buildHttpRequest(OpenAICompletionRequest completionRequest, String path) {
+  public Request buildHttpRequest(OpenAICompletionRequest completionRequest) {
     var headers = new HashMap<>(getRequiredHeaders());
     if (completionRequest.isStream()) {
       headers.put("Accept", "text/event-stream");
     }
     try {
       return new Request.Builder()
-          .url(url + path)
+          .url(url + getChatCompletionPath(completionRequest))
           .headers(Headers.of(headers))
           .post(RequestBody.create(
               new ObjectMapper().writeValueAsString(completionRequest),
@@ -75,8 +75,12 @@ public class AzureClient extends Client {
         Map.of("api-key", getApiKey());
   }
 
-  private String getChatCompletionPath() {
-    return String.format("/openai/deployments/%s/chat/completions?api-version=%s", requestParams.getDeploymentId(), requestParams.getApiVersion());
+  private String getChatCompletionPath(OpenAICompletionRequest request) {
+    var overriddenPath = request.getOverriddenPath();
+    if (overriddenPath == null) {
+      return String.format("/openai/deployments/%s/chat/completions?api-version=%s", requestParams.getDeploymentId(), requestParams.getApiVersion());
+    }
+    return overriddenPath;
   }
 
   private OpenAIChatCompletionEventSourceListener getEventSourceListener(CompletionEventListener listeners) {

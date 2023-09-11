@@ -37,11 +37,11 @@ public class OpenAIClient extends Client {
 
   public EventSource getChatCompletion(OpenAICompletionRequest request, CompletionEventListener completionEventListener) {
     return EventSources.createFactory(getHttpClient())
-        .newEventSource(buildHttpRequest(request), new OpenAIChatCompletionEventSourceListener(completionEventListener));
+        .newEventSource(buildCompletionHttpRequest(request), new OpenAIChatCompletionEventSourceListener(completionEventListener));
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAICompletionRequest request) {
-    try (var response = getHttpClient().newCall(buildHttpRequest(request)).execute()) {
+    try (var response = getHttpClient().newCall(buildCompletionHttpRequest(request)).execute()) {
       return new ObjectMapper().readValue(Objects.requireNonNull(response.body()).string(), OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -82,14 +82,16 @@ public class OpenAIClient extends Client {
         .build();
   }
 
-  protected Request buildHttpRequest(OpenAICompletionRequest completionRequest) {
+  protected Request buildCompletionHttpRequest(OpenAICompletionRequest completionRequest) {
     var headers = new HashMap<>(getRequiredHeaders());
     if (completionRequest.isStream()) {
       headers.put("Accept", "text/event-stream");
     }
     try {
+      var host = getHost();
+      var overriddenPath = completionRequest.getOverriddenPath();
       return new Request.Builder()
-          .url((getHost() == null ? BASE_URL : getHost()) + "/v1/chat/completions")
+          .url((host == null ? BASE_URL : host) + (overriddenPath == null ? "/v1/chat/completions" : overriddenPath))
           .headers(Headers.of(headers))
           .post(RequestBody.create(
               new ObjectMapper().writeValueAsString(completionRequest),

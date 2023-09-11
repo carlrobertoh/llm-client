@@ -133,6 +133,67 @@ class AzureClientTest extends BaseTest {
   }
 
   @Test
+  void shouldStreamAzureChatCompletionWithCustomURL() {
+    var prompt = "TEST_PROMPT";
+    var resultMessageBuilder = new StringBuilder();
+    expectStreamRequest("/v1/test/segment", request -> {
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0))
+          .isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "temperature",
+              "stream",
+              "max_tokens",
+              "frequency_penalty",
+              "presence_penalty",
+              "messages")
+          .containsExactly(
+              "gpt-3.5-turbo",
+              0.5,
+              true,
+              500,
+              0.1,
+              0.1,
+              List.of(Map.of("role", "user", "content", prompt)));
+      return List.of(
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hello")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
+    });
+
+    ((AzureClient) new AzureClient.Builder("TEST_API_KEY",
+        new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+        .setActiveDirectoryAuthentication(true)
+        .setHost("http://127.0.0.1:8000")
+        .build())
+        .getChatCompletion(
+            new OpenAIChatCompletionRequest.Builder(
+                List.of(new OpenAIChatCompletionMessage("user", prompt)))
+                .setModel(OpenAIChatCompletionModel.GPT_3_5)
+                .setMaxTokens(500)
+                .setTemperature(0.5)
+                .setPresencePenalty(0.1)
+                .setFrequencyPenalty(0.1)
+                .setOverriddenPath("/v1/test/segment")
+                .build(),
+            new CompletionEventListener() {
+              @Override
+              public void onMessage(String message) {
+                resultMessageBuilder.append(message);
+              }
+
+              @Override
+              public void onComplete(StringBuilder messageBuilder) {
+                assertThat(messageBuilder.toString()).isEqualTo(resultMessageBuilder.toString());
+              }
+            });
+
+    await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
+  }
+
+  @Test
   void shouldListenForInvalidTokenErrorResponse() {
     var errorMessageBuilder = new StringBuilder();
     var errorResponse = jsonMapResponse(

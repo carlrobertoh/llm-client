@@ -1,5 +1,6 @@
 package ee.carlrobert.llm.client.openai.completion;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import ee.carlrobert.llm.completion.CompletionRequest;
 
@@ -13,6 +14,8 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
   @JsonProperty("presence_penalty")
   private final double presencePenalty;
   private final boolean stream;
+  @JsonIgnore
+  private final String overriddenPath;
 
   protected OpenAICompletionRequest(Builder builder) {
     this.maxTokens = builder.maxTokens;
@@ -20,6 +23,7 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
     this.frequencyPenalty = builder.frequencyPenalty;
     this.presencePenalty = builder.presencePenalty;
     this.stream = builder.stream;
+    this.overriddenPath = builder.overriddenPath;
   }
 
   public int getMaxTokens() {
@@ -42,6 +46,10 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
     return stream;
   }
 
+  public String getOverriddenPath() {
+    return overriddenPath;
+  }
+
   public abstract static class Builder {
 
     private int maxTokens = 1000;
@@ -49,6 +57,7 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
     private double frequencyPenalty = 0;
     private double presencePenalty = 0.6;
     private boolean stream = true;
+    private String overriddenPath;
 
     public Builder setMaxTokens(int maxTokens) {
       this.maxTokens = maxTokens;
@@ -72,6 +81,11 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
 
     public Builder setStream(boolean stream) {
       this.stream = stream;
+      return this;
+    }
+
+    public Builder setOverriddenPath(String overriddenPath) {
+      this.overriddenPath = overriddenPath;
       return this;
     }
 
