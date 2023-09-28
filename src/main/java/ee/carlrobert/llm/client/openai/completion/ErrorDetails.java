@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import ee.carlrobert.llm.client.BaseError;
+import java.util.StringJoiner;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrorDetails extends BaseError {
@@ -47,5 +48,15 @@ public class ErrorDetails extends BaseError {
 
   public String getCode() {
     return code;
+  }
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", ErrorDetails.class.getSimpleName() + "[", "]")
+        .add("message='" + message + "'")
+        .add("type='" + type + "'")
+        .add("param='" + param + "'")
+        .add("code='" + code + "'")
+        .toString();
   }
 }
