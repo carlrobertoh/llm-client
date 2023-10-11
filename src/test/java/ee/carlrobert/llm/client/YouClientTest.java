@@ -45,6 +45,7 @@ public class YouClientTest extends BaseTest {
                   "ydc_stytch_session=TEST_SESSION_ID; " +
                   "stytch_session_jwt=TEST_ACCESS_TOKEN; " +
                   "ydc_stytch_session_jwt=TEST_ACCESS_TOKEN; " +
+                  "eg4=false;" +
                   "safesearch_9015f218b47611b62bbbaf61125cd2dac629e65c3d6f47573a2ec0e9b615c691=Moderate; " +
                   "__cf_bm=aN2b3pQMH8XADeMB7bg9s1bJ_bfXBcCHophfOGRg6g0-1693601599-0-AWIt5Mr4Y3xQI4mIJ1lSf4+vijWKDobrty8OopDeBxY+NABe0MRFidF3dCUoWjRt8SVMvBZPI3zkOgcRs7Mz3yazd7f7c58HwW5Xg9jdBjNg;");
       return List.of(
