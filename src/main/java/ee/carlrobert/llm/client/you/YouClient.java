@@ -41,6 +41,7 @@ public class YouClient extends Client {
         .url(buildHttpUrl(request))
         .header("Accept", "text/event-stream")
         .header("Cache-Control", "no-cache")
+        .header("User-Agent", "youide CodeGPT")
         .header("Cookie", (
             "uuid_guest=f9e7e074-54e1-43d9-a12d-30900b066d0c; " + // TODO
                 "safesearch_guest=Moderate; " +
