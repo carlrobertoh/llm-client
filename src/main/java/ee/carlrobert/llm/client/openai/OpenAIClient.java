@@ -35,14 +35,20 @@ public class OpenAIClient extends Client {
     this.organization = builder.organization;
   }
 
-  public EventSource getChatCompletion(OpenAICompletionRequest request, CompletionEventListener completionEventListener) {
+  public EventSource getChatCompletion(
+      OpenAICompletionRequest request,
+      CompletionEventListener completionEventListener) {
     return EventSources.createFactory(getHttpClient())
-        .newEventSource(buildCompletionHttpRequest(request), new OpenAIChatCompletionEventSourceListener(completionEventListener));
+        .newEventSource(
+            buildCompletionHttpRequest(request),
+            new OpenAIChatCompletionEventSourceListener(completionEventListener));
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAICompletionRequest request) {
     try (var response = getHttpClient().newCall(buildCompletionHttpRequest(request)).execute()) {
-      return new ObjectMapper().readValue(Objects.requireNonNull(response.body()).string(), OpenAIChatCompletionResponse.class);
+      return new ObjectMapper().readValue(
+          Objects.requireNonNull(response.body()).string(),
+          OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -91,7 +97,9 @@ public class OpenAIClient extends Client {
       var host = getHost();
       var overriddenPath = completionRequest.getOverriddenPath();
       return new Request.Builder()
-          .url((host == null ? BASE_URL : host) + (overriddenPath == null ? "/v1/chat/completions" : overriddenPath))
+          .url((host == null ? BASE_URL : host) + (overriddenPath == null ?
+              "/v1/chat/completions"
+              : overriddenPath))
           .headers(Headers.of(headers))
           .post(RequestBody.create(
               new ObjectMapper().writeValueAsString(completionRequest),
@@ -103,9 +111,7 @@ public class OpenAIClient extends Client {
   }
 
   private Map<String, String> getRequiredHeaders() {
-    var headers = new HashMap<>(Map.of(
-        "Authorization", "Bearer " + getApiKey()
-    ));
+    var headers = new HashMap<>(Map.of("Authorization", "Bearer " + getApiKey()));
     if (organization != null && !organization.isEmpty()) {
       headers.put("OpenAI-Organization", organization);
     }

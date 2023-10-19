@@ -31,7 +31,12 @@ public enum OpenAIChatCompletionModel implements CompletionModel {
     return maxTokens;
   }
 
-  static public OpenAIChatCompletionModel findByCode(String code) {
+  @Override
+  public String toString() {
+    return description;
+  }
+
+  public static OpenAIChatCompletionModel findByCode(String code) {
     return Arrays.stream(OpenAIChatCompletionModel.values())
         .filter(item -> item.getCode().equals(code))
         .findFirst().orElseThrow();
