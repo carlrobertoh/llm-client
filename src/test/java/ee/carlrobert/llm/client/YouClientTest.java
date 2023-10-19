@@ -3,6 +3,7 @@ package ee.carlrobert.llm.client;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import ee.carlrobert.llm.client.you.YouClient;
@@ -33,10 +34,11 @@ public class YouClientTest extends BaseTest {
               "chatId=" + chatId + "&" +
               "queryTraceId=" + queryTraceId);
       assertThat(request.getHeaders())
-          .flatExtracting("Host", "Accept", "Connection", "Cookie")
+          .flatExtracting("Host", "Accept", "Connection", "User-agent", "Cookie")
           .containsExactly("localhost:8000",
               "text/event-stream",
               "Keep-Alive",
+              "youide CodeGPT",
               "uuid_guest=f9e7e074-54e1-43d9-a12d-30900b066d0c; " +
                   "safesearch_guest=Moderate; " +
                   "youpro_subscription=true; " +
