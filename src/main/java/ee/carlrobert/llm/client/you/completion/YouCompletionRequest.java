@@ -9,6 +9,7 @@ public class YouCompletionRequest implements CompletionRequest {
   private final String prompt;
   private final List<YouCompletionRequestMessage> messages;
   private final UUID chatId;
+  private final UUID userId;
   private final UUID queryTraceId;
   private final boolean useGPT4Model;
 
@@ -16,6 +17,7 @@ public class YouCompletionRequest implements CompletionRequest {
     this.prompt = builder.prompt;
     this.messages = builder.messages;
     this.chatId = builder.chatId;
+    this.userId = builder.userId;
     this.queryTraceId = builder.queryTraceId;
     this.useGPT4Model = builder.useGPT4Model;
   }
@@ -32,6 +34,10 @@ public class YouCompletionRequest implements CompletionRequest {
     return chatId;
   }
 
+  public UUID getUserId() {
+    return userId;
+  }
+
   public UUID getQueryTraceId() {
     return queryTraceId;
   }
@@ -45,6 +51,7 @@ public class YouCompletionRequest implements CompletionRequest {
     private final String prompt;
     private List<YouCompletionRequestMessage> messages;
     private UUID chatId;
+    private UUID userId;
     private UUID queryTraceId;
     private boolean useGPT4Model;
 
@@ -59,6 +66,11 @@ public class YouCompletionRequest implements CompletionRequest {
 
     public Builder setChatId(UUID chatId) {
       this.chatId = chatId;
+      return this;
+    }
+
+    public Builder setUserId(UUID userId) {
+      this.userId = userId;
       return this;
     }
 
