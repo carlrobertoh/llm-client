@@ -51,7 +51,11 @@ public class YouCompletionRequest implements CompletionRequest {
     public Builder(String prompt) {
       this.prompt = prompt;
     }
+    public Builder(String prompt, String chatId) {
 
+      this.prompt = prompt;
+      this.chatId = UUID.fromString(chatId);
+    }
     public Builder setChatHistory(List<YouCompletionRequestMessage> messages) {
       this.messages = messages;
       return this;
