@@ -44,7 +44,8 @@ public class YouClient extends Client {
         .header("Cache-Control", "no-cache")
         .header("User-Agent", "youide CodeGPT")
         .header("Cookie", (
-            "uuid_guest=" + request.getChatId().toString() != null ? request.getChatId().toString() : "-54e1-43d9-a12d-30900b066d0c" + "; " +
+//                "uuid_guest=" + request.getChatId().toString() != null ? request.getChatId().toString() : "f9e7e074-54e1-43d9-a12d-30900b066d0c" + "; " + //didnt work
+                "uuid_guest=f9e7e074-54e1-43d9-a12d-30900b066d0c; " +
                 "safesearch_guest=Moderate; " +
                 "youpro_subscription=true; " +
                 "you_subscription=free; " +
