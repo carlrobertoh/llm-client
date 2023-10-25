@@ -16,6 +16,7 @@ import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
 
+
 public class YouClient extends Client {
 
   private static final String host = PropertiesLoader.getValue("you.url.host");
@@ -24,26 +25,34 @@ public class YouClient extends Client {
 
   private final String sessionId;
   private final String accessToken;
+  private final UTMParameters utmParameters;
 
   private YouClient(YouClient.Builder builder) {
     super(builder);
     this.sessionId = builder.sessionId;
     this.accessToken = builder.accessToken;
+    this.utmParameters = builder.utmParameters;
   }
 
-  public EventSource getChatCompletion(YouCompletionRequest request, CompletionEventListener completionEventListener) {
+  public EventSource getChatCompletion(
+      YouCompletionRequest request,
+      CompletionEventListener completionEventListener) {
     return EventSources.createFactory(getHttpClient())
         .newEventSource(buildHttpRequest(request), getEventSourceListener(completionEventListener));
   }
 
   private Request buildHttpRequest(YouCompletionRequest request) {
+    var guestIdCookie = request.getUserId() != null ?
+        ("uuid_guest=" + request.getUserId().toString() + "; ")
+        : "";
     return new Request.Builder()
         .url(buildHttpUrl(request))
         .header("Accept", "text/event-stream")
         .header("Cache-Control", "no-cache")
         .header("User-Agent", "youide CodeGPT")
         .header("Cookie", (
-            "uuid_guest=f9e7e074-54e1-43d9-a12d-30900b066d0c; " + // TODO
+//                "uuid_guest=" + request.getChatId().toString() != null ? request.getChatId().toString() : "f9e7e074-54e1-43d9-a12d-30900b066d0c" + "; " + //didnt work
+            guestIdCookie +
                 "safesearch_guest=Moderate; " +
                 "youpro_subscription=true; " +
                 "you_subscription=free; " +
@@ -51,7 +60,7 @@ public class YouClient extends Client {
                 "ydc_stytch_session=" + sessionId + "; " +
                 "stytch_session_jwt=" + accessToken + "; " +
                 "ydc_stytch_session_jwt=" + accessToken + "; " +
-                "eg4=" + request.isUseGPT4Model() + ";" +
+                "eg4=" + request.isUseGPT4Model() + "; " +
                 "safesearch_9015f218b47611b62bbbaf61125cd2dac629e65c3d6f47573a2ec0e9b615c691=Moderate; " +
                 "__cf_bm=aN2b3pQMH8XADeMB7bg9s1bJ_bfXBcCHophfOGRg6g0-1693601599-0-AWIt5Mr4Y3xQI4mIJ1lSf4+vijWKDobrty8OopDeBxY+NABe0MRFidF3dCUoWjRt8SVMvBZPI3zkOgcRs7Mz3yazd7f7c58HwW5Xg9jdBjNg;"))
         .get()
@@ -67,8 +76,11 @@ public class YouClient extends Client {
           .addPathSegments("api/streamingSearch")
           .addQueryParameter("q", request.getPrompt())
           .addQueryParameter("page", "1")
+          .addQueryParameter("cfr", "CodeGPT")
           .addQueryParameter("count", "10")
-          .addQueryParameter("safeSearch", "WebPages,Translations,TimeZone,Computation,RelatedSearches")
+          .addQueryParameter(
+              "safeSearch",
+              "WebPages,Translations,TimeZone,Computation,RelatedSearches")
           .addQueryParameter("domain", "youchat")
           .addQueryParameter("chat", new ObjectMapper().writeValueAsString(request.getMessages()));
 
@@ -77,6 +89,9 @@ public class YouClient extends Client {
       }
       if (request.getQueryTraceId() != null) {
         httpUrlBuilder.addQueryParameter("queryTraceId", request.getQueryTraceId().toString());
+      }
+      if (utmParameters != null) {
+        addUTMParameters(httpUrlBuilder);
       }
       if (port != null && !port.isEmpty()) {
         httpUrlBuilder.port(Integer.parseInt(port));
@@ -87,7 +102,29 @@ public class YouClient extends Client {
     }
   }
 
-  private CompletionEventSourceListener getEventSourceListener(CompletionEventListener eventListener) {
+  private void addUTMParameters(HttpUrl.Builder httpUrlBuilder) {
+    if (utmParameters.getId() != null) {
+      httpUrlBuilder.addQueryParameter("utm_id", utmParameters.getId());
+    }
+    if (utmParameters.getSource() != null) {
+      httpUrlBuilder.addQueryParameter("utm_source", utmParameters.getSource());
+    }
+    if (utmParameters.getMedium() != null) {
+      httpUrlBuilder.addQueryParameter("utm_medium", utmParameters.getMedium());
+    }
+    if (utmParameters.getCampaign() != null) {
+      httpUrlBuilder.addQueryParameter("utm_campaign", utmParameters.getCampaign());
+    }
+    if (utmParameters.getContent() != null) {
+      httpUrlBuilder.addQueryParameter("utm_content", utmParameters.getContent());
+    }
+    if (utmParameters.getTerm() != null) {
+      httpUrlBuilder.addQueryParameter("utm_term", utmParameters.getTerm());
+    }
+  }
+
+  private CompletionEventSourceListener getEventSourceListener(
+      CompletionEventListener eventListener) {
     return new CompletionEventSourceListener(eventListener) {
       @Override
       protected String getMessage(String data) {
@@ -118,10 +155,16 @@ public class YouClient extends Client {
 
     private final String sessionId;
     private final String accessToken;
+    private UTMParameters utmParameters;
 
     public Builder(String sessionId, String accessToken) {
       this.sessionId = sessionId;
       this.accessToken = accessToken;
+    }
+
+    public Builder setUTMParameters(UTMParameters utmParameters) {
+      this.utmParameters = utmParameters;
+      return this;
     }
 
     public YouClient build() {
