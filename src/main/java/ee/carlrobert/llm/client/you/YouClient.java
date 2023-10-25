@@ -32,7 +32,9 @@ public class YouClient extends Client {
     this.accessToken = builder.accessToken;
   }
 
-  public EventSource getChatCompletion(YouCompletionRequest request, CompletionEventListener completionEventListener) {
+  public EventSource getChatCompletion(
+      YouCompletionRequest request,
+      CompletionEventListener completionEventListener) {
     return EventSources.createFactory(getHttpClient())
         .newEventSource(buildHttpRequest(request), getEventSourceListener(completionEventListener));
   }
@@ -69,13 +71,15 @@ public class YouClient extends Client {
           .addPathSegments("api/streamingSearch")
           .addQueryParameter("q", request.getPrompt())
           .addQueryParameter("page", "1")
-              .addQueryParameter("utm_source", "ide")
-              .addQueryParameter("utm_medium", "jetbrains")
-              .addQueryParameter("utm_campaign", "0.0.6")
-              .addQueryParameter("utm_content", "CodeGPT")
-              .addQueryParameter("cfr", "CodeGPT")
+          .addQueryParameter("utm_source", "ide")
+          .addQueryParameter("utm_medium", "jetbrains")
+          .addQueryParameter("utm_campaign", "0.0.6")
+          .addQueryParameter("utm_content", "CodeGPT")
+          .addQueryParameter("cfr", "CodeGPT")
           .addQueryParameter("count", "10")
-          .addQueryParameter("safeSearch", "WebPages,Translations,TimeZone,Computation,RelatedSearches")
+          .addQueryParameter(
+              "safeSearch",
+              "WebPages,Translations,TimeZone,Computation,RelatedSearches")
           .addQueryParameter("domain", "youchat")
           .addQueryParameter("chat", new ObjectMapper().writeValueAsString(request.getMessages()));
 
