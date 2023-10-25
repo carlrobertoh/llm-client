@@ -16,6 +16,7 @@ import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
 
+
 public class YouClient extends Client {
 
   private static final String host = PropertiesLoader.getValue("you.url.host");
@@ -67,6 +68,11 @@ public class YouClient extends Client {
           .addPathSegments("api/streamingSearch")
           .addQueryParameter("q", request.getPrompt())
           .addQueryParameter("page", "1")
+              .addQueryParameter("utm_source", "ide")
+              .addQueryParameter("utm_medium", "jetbrains")
+              .addQueryParameter("utm_campaign", "0.0.6")
+              .addQueryParameter("utm_content", "CodeGPT")
+              .addQueryParameter("cfr", "CodeGPT")
           .addQueryParameter("count", "10")
           .addQueryParameter("safeSearch", "WebPages,Translations,TimeZone,Computation,RelatedSearches")
           .addQueryParameter("domain", "youchat")
