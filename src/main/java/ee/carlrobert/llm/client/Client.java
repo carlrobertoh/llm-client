@@ -17,7 +17,7 @@ public class Client {
 
   final OkHttpClient httpClient;
   final String apiKey;
-  protected final String host;
+  final String host;
   final Proxy proxy;
   final ProxyAuthenticator proxyAuthenticator;
   final Long connectTimeout;

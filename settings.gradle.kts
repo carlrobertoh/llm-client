@@ -1,1 +1,1 @@
-rootProject.name = "LLM-Client"
+rootProject.name = "llm-client"
