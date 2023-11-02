@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.function.Consumer;
 import okhttp3.Response;
@@ -28,7 +29,8 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
     this(listeners, false, null);
   }
 
-  public CompletionEventSourceListener(CompletionEventListener listeners, boolean retryOnReadTimeout, Consumer<String> onRetry) {
+  public CompletionEventSourceListener(CompletionEventListener listeners,
+      boolean retryOnReadTimeout, Consumer<String> onRetry) {
     this.listeners = listeners;
     this.retryOnReadTimeout = retryOnReadTimeout;
     this.onRetry = onRetry;
@@ -72,7 +74,8 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
       @NotNull EventSource eventSource,
       Throwable throwable,
       Response response) {
-    if (throwable instanceof StreamResetException) {
+    if (throwable instanceof StreamResetException ||
+        (throwable instanceof SocketException && "Socket closed".equals(throwable.getMessage()))) {
       LOG.info("Stream was cancelled");
       listeners.onComplete(messageBuilder);
       return;
@@ -85,7 +88,9 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
         return;
       }
 
-      listeners.onError(new ErrorDetails("Request timed out. This may be due to the server being overloaded."), throwable);
+      listeners.onError(
+          new ErrorDetails("Request timed out. This may be due to the server being overloaded."),
+          throwable);
       return;
     }
 
@@ -117,6 +122,7 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
   }
 
   private ErrorDetails toUnknownErrorResponse(Response response, String jsonBody) {
-    return new ErrorDetails(format("Unknown API response. Code: %s, Body: %s", response.code(), jsonBody));
+    return new ErrorDetails(
+        format("Unknown API response. Code: %s, Body: %s", response.code(), jsonBody));
   }
 }

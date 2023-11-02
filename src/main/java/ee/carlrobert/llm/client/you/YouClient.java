@@ -11,17 +11,16 @@ import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
+import java.net.MalformedURLException;
+import java.net.URL;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
 
-
 public class YouClient extends Client {
 
-  private static final String host = PropertiesLoader.getValue("you.url.host");
-  private static final String scheme = PropertiesLoader.getValue("you.url.scheme");
-  private static final String port = PropertiesLoader.getValue("you.url.port");
+  private static final String baseUrl = PropertiesLoader.getValue("you.baseUrl");
 
   private final String sessionId;
   private final String accessToken;
@@ -51,7 +50,6 @@ public class YouClient extends Client {
         .header("Cache-Control", "no-cache")
         .header("User-Agent", "youide CodeGPT")
         .header("Cookie", (
-//                "uuid_guest=" + request.getChatId().toString() != null ? request.getChatId().toString() : "f9e7e074-54e1-43d9-a12d-30900b066d0c" + "; " + //didnt work
             guestIdCookie +
                 "safesearch_guest=Moderate; " +
                 "youpro_subscription=true; " +
@@ -69,10 +67,10 @@ public class YouClient extends Client {
 
   private HttpUrl buildHttpUrl(YouCompletionRequest request) {
     try {
+      var url = new URL(getHost() != null ? getHost() : baseUrl);
       var httpUrlBuilder = new HttpUrl.Builder()
-          // .scheme("https")
-          .scheme(scheme == null ? "https" : scheme)
-          .host(host)
+          .scheme(url.getProtocol())
+          .host(url.getHost())
           .addPathSegments("api/streamingSearch")
           .addQueryParameter("q", request.getPrompt())
           .addQueryParameter("page", "1")
@@ -84,6 +82,9 @@ public class YouClient extends Client {
           .addQueryParameter("domain", "youchat")
           .addQueryParameter("chat", new ObjectMapper().writeValueAsString(request.getMessages()));
 
+      if (url.getPort() != -1) {
+        httpUrlBuilder.port(url.getPort());
+      }
       if (request.getChatId() != null) {
         httpUrlBuilder.addQueryParameter("chatId", request.getChatId().toString());
       }
@@ -93,12 +94,11 @@ public class YouClient extends Client {
       if (utmParameters != null) {
         addUTMParameters(httpUrlBuilder);
       }
-      if (port != null && !port.isEmpty()) {
-        httpUrlBuilder.port(Integer.parseInt(port));
-      }
       return httpUrlBuilder.build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to deserialize request messages", e);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("Invalid url", e);
     }
   }
 
