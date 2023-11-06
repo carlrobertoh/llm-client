@@ -32,7 +32,7 @@ public class AzureClient extends Client {
     super(builder);
     this.requestParams = builder.requestParams;
     this.activeDirectoryAuthentication = builder.activeDirectoryAuthentication;
-    this.url = String.format(getHost() == null ? BASE_URL : getHost(), builder.requestParams);
+    this.url = String.format(getHost() == null ? BASE_URL : getHost(), builder.requestParams.getResourceName());
   }
 
   public EventSource getChatCompletion(OpenAICompletionRequest request, CompletionEventListener completionEventListener) {
