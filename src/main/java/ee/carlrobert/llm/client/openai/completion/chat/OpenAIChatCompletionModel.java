@@ -4,6 +4,8 @@ import ee.carlrobert.llm.completion.CompletionModel;
 import java.util.Arrays;
 
 public enum OpenAIChatCompletionModel implements CompletionModel {
+  GPT_3_5_1106_16k("gpt-3.5-turbo-1106", "GPT-3.5 Turbo (Most Recent, 16k)", 16384),
+  GPT_4_1106_128k("gpt-4-1106-preview", "GPT-4 Turbo (Most Recent, 128k)", 128000),
   GPT_3_5("gpt-3.5-turbo", "GPT-3.5 (4k)", 4096),
   GPT_3_5_16k("gpt-3.5-turbo-16k", "GPT-3.5 (16k)", 16384),
   GPT_4("gpt-4", "GPT-4 (8k)", 8192),
