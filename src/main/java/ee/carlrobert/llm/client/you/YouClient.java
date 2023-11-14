@@ -20,7 +20,7 @@ import okhttp3.sse.EventSources;
 
 public class YouClient extends Client {
 
-  private static final String baseUrl = PropertiesLoader.getValue("you.baseUrl");
+  private static final String BASE_URL = PropertiesLoader.getValue("you.baseUrl");
 
   private final String sessionId;
   private final String accessToken;
@@ -67,7 +67,7 @@ public class YouClient extends Client {
 
   private HttpUrl buildHttpUrl(YouCompletionRequest request) {
     try {
-      var url = new URL(getHost() != null ? getHost() : baseUrl);
+      var url = new URL(getHost() != null ? getHost() : BASE_URL);
       var httpUrlBuilder = new HttpUrl.Builder()
           .scheme(url.getProtocol())
           .host(url.getHost())

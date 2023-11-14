@@ -1,13 +1,14 @@
 package ee.carlrobert.llm.client.http.expectation;
 
+import ee.carlrobert.llm.client.http.Service;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 
 public class BasicExpectation extends Expectation {
 
   private final BasicHttpExchange exchange;
 
-  public BasicExpectation(String path, BasicHttpExchange exchange) {
-    super(path);
+  public BasicExpectation(Service service, BasicHttpExchange exchange) {
+    super(service);
     this.exchange = exchange;
   }
 

@@ -1,5 +1,7 @@
 package ee.carlrobert.llm.client.http;
 
+import static java.lang.String.format;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import ee.carlrobert.llm.client.http.expectation.BasicExpectation;
@@ -21,13 +23,9 @@ public class LocalCallbackServer {
   private final List<Expectation> expectations = new CopyOnWriteArrayList<>();
   private final HttpServer server;
 
-  public LocalCallbackServer() {
-    this(8000);
-  }
-
-  public LocalCallbackServer(int port) {
+  public LocalCallbackServer(Service service) {
     try {
-      server = HttpServer.create(new InetSocketAddress(port), 0);
+      server = HttpServer.create(new InetSocketAddress(0), 0);
     } catch (IOException e) {
       throw new RuntimeException("Could not create HttpServer", e);
     }
@@ -35,14 +33,14 @@ public class LocalCallbackServer {
     server.createContext("/", exchange -> {
       try {
         var expectation = expectations.get(currentExpectationIndex.getAndIncrement());
-        if (!expectation.getPath().equals(exchange.getRequestURI().getPath())) {
+        if (!expectation.getService().getUrlProperty().equals(service.getUrlProperty())) {
           try {
             throw new AssertionError(
-                String.format("Expecting request path to be \"%s\", but received \"%s\"",
-                    expectation.getPath(),
-                    exchange.getRequestURI().getPath()));
+                format("Expecting request \"%s\", but received \"%s\"",
+                    service.getUrlProperty(),
+                    expectation.getService().getUrlProperty()));
           } catch (AssertionError e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
             throw e;
           } finally {
             exchange.sendResponseHeaders(500, -1);
@@ -64,12 +62,17 @@ public class LocalCallbackServer {
     server.start();
   }
 
+  public int getPort() {
+    return server.getAddress().getPort();
+  }
+
   public void addExpectation(Expectation expectation) {
     expectations.add(expectation);
   }
 
-  public void stop() {
-    server.stop(0);
+  public void clear() {
+    currentExpectationIndex.set(0);
+    expectations.clear();
   }
 
   private void handleExchange(
@@ -95,7 +98,7 @@ public class LocalCallbackServer {
     var responseBody = exchange.getResponseBody();
 
     for (var event : expectation.getExchange().getResponse(new RequestEntity(exchange))) {
-      responseBody.write((String.format("data: %s\n\n", event)).getBytes());
+      responseBody.write((format("data: %s\n\n", event)).getBytes());
       sleep(250);
     }
 

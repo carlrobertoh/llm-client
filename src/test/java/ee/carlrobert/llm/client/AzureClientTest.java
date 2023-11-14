@@ -13,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.azure.AzureClient;
 import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.http.ResponseEntity;
+import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
+import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
@@ -28,7 +30,9 @@ class AzureClientTest extends BaseTest {
   void shouldStreamAzureChatCompletion() {
     var prompt = "TEST_PROMPT";
     var resultMessageBuilder = new StringBuilder();
-    expectStreamRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions", request -> {
+    expectAzure((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo(
+          "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0))
           .isEqualTo("Bearer TEST_API_KEY");
@@ -55,7 +59,8 @@ class AzureClientTest extends BaseTest {
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
 
-    new AzureClient.Builder("TEST_API_KEY", new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+    new AzureClient.Builder("TEST_API_KEY",
+        new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .setActiveDirectoryAuthentication(true)
         .build()
         .getChatCompletion(
@@ -85,7 +90,9 @@ class AzureClientTest extends BaseTest {
   @Test
   void shouldGetAzureChatCompletion() {
     var prompt = "TEST_PROMPT";
-    expectRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions", request -> {
+    expectAzure((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo(
+          "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0))
           .isEqualTo("Bearer TEST_API_KEY");
@@ -104,7 +111,6 @@ class AzureClientTest extends BaseTest {
               0.1,
               0.1,
               List.of(Map.of("role", "user", "content", prompt)));
-
       return new ResponseEntity(new ObjectMapper().writeValueAsString
           (Map.of("choices", List.of(
               Map.of("message", Map.of(
@@ -113,7 +119,8 @@ class AzureClientTest extends BaseTest {
     });
 
     var response = new AzureClient.Builder(
-        "TEST_API_KEY", new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+        "TEST_API_KEY",
+        new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .setActiveDirectoryAuthentication(true)
         .build()
         .getChatCompletion(new OpenAIChatCompletionRequest.Builder(
@@ -136,7 +143,8 @@ class AzureClientTest extends BaseTest {
   void shouldStreamAzureChatCompletionWithCustomURL() {
     var prompt = "TEST_PROMPT";
     var resultMessageBuilder = new StringBuilder();
-    expectStreamRequest("/v1/test/segment", request -> {
+    expectAzure((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/test/segment");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0))
           .isEqualTo("Bearer TEST_API_KEY");
@@ -163,11 +171,10 @@ class AzureClientTest extends BaseTest {
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
 
-    ((AzureClient) new AzureClient.Builder("TEST_API_KEY",
+    new AzureClient.Builder("TEST_API_KEY",
         new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .setActiveDirectoryAuthentication(true)
-        .setHost("http://127.0.0.1:8000")
-        .build())
+        .build()
         .getChatCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
@@ -199,10 +206,14 @@ class AzureClientTest extends BaseTest {
     var errorResponse = jsonMapResponse(
         e("statusCode", 401),
         e("message", "Token is invalid"));
-    expectRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions",
-        request -> new ResponseEntity(401, errorResponse));
+    expectAzure((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo(
+          "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions");
+      return new ResponseEntity(401, errorResponse);
+    });
 
-    new AzureClient.Builder("TEST_API_KEY", new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+    new AzureClient.Builder("TEST_API_KEY",
+        new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .build()
         .getChatCompletion(
             new OpenAIChatCompletionRequest.Builder(
@@ -225,10 +236,14 @@ class AzureClientTest extends BaseTest {
     var errorResponse = jsonMapResponse("error", jsonMap(
         e("message", "Resource not found"),
         e("code", "404")));
-    expectRequest("/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions",
-        request -> new ResponseEntity(404, errorResponse));
+    expectAzure((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo(
+          "/openai/deployments/TEST_DEPLOYMENT_ID/chat/completions");
+      return new ResponseEntity(404, errorResponse);
+    });
 
-    new AzureClient.Builder("TEST_API_KEY", new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+    new AzureClient.Builder("TEST_API_KEY",
+        new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .build()
         .getChatCompletion(
             new OpenAIChatCompletionRequest.Builder(

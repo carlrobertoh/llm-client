@@ -5,7 +5,7 @@ import ee.carlrobert.llm.client.http.RequestEntity;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 
 @FunctionalInterface
-public interface BasicHttpExchange {
+public interface BasicHttpExchange extends Exchange {
 
   ResponseEntity getResponse(RequestEntity request) throws JsonProcessingException;
 }

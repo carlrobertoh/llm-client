@@ -6,7 +6,15 @@ import java.util.Properties;
 
 public class PropertiesLoader {
 
-  public static Properties loadProperties() {
+  public static String getValue(String key) {
+    var value = (String) loadProperties().get(key);
+    if (value == null) {
+      return System.getProperty(key);
+    }
+    return value;
+  }
+
+  private static Properties loadProperties() {
     try (InputStream inputStream = PropertiesLoader.class
         .getClassLoader()
         .getResourceAsStream("application.properties")) {
@@ -16,9 +24,5 @@ public class PropertiesLoader {
     } catch (IOException e) {
       throw new RuntimeException("Unable to load application properties", e);
     }
-  }
-
-  public static String getValue(String key) {
-    return (String) loadProperties().get(key);
   }
 }

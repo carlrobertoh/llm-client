@@ -1,13 +1,14 @@
 package ee.carlrobert.llm.client.http.expectation;
 
+import ee.carlrobert.llm.client.http.Service;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 
 public class StreamExpectation extends Expectation {
 
   private final StreamHttpExchange exchange;
 
-  public StreamExpectation(String path, StreamHttpExchange exchange) {
-    super(path);
+  public StreamExpectation(Service service, StreamHttpExchange exchange) {
+    super(service);
     this.exchange = exchange;
   }
 

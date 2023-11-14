@@ -3,9 +3,9 @@ package ee.carlrobert.llm.client;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
@@ -30,7 +30,8 @@ public class YouClientTest extends BaseTest {
     utmParameters.setCampaign("TEST_CAMPAIGN");
     utmParameters.setContent("TEST_CONTENT");
     utmParameters.setTerm("TEST_TERM");
-    expectStreamRequest("/api/streamingSearch", request -> {
+    expectYou((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
       assertThat(request.getMethod()).isEqualTo("GET");
       assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
       assertThat(request.getUri().getQuery()).isEqualTo(
@@ -50,8 +51,8 @@ public class YouClientTest extends BaseTest {
               "utm_content=TEST_CONTENT&" +
               "utm_term=TEST_TERM");
       assertThat(request.getHeaders())
-          .flatExtracting("Host", "Accept", "Connection", "User-agent", "Cookie")
-          .containsExactly("localhost:8000",
+          .flatExtracting("Accept", "Connection", "User-agent", "Cookie")
+          .containsExactly(
               "text/event-stream",
               "Keep-Alive",
               "youide CodeGPT",
@@ -64,7 +65,8 @@ public class YouClientTest extends BaseTest {
                   "stytch_session_jwt=TEST_ACCESS_TOKEN; " +
                   "ydc_stytch_session_jwt=TEST_ACCESS_TOKEN; " +
                   "eg4=true; " +
-                  "safesearch_9015f218b47611b62bbbaf61125cd2dac629e65c3d6f47573a2ec0e9b615c691=Moderate; " +
+                  "safesearch_9015f218b47611b62bbbaf61125cd2dac629e65c3d6f47573a2ec0e9b615c691=Moderate; "
+                  +
                   "__cf_bm=aN2b3pQMH8XADeMB7bg9s1bJ_bfXBcCHophfOGRg6g0-1693601599-0-AWIt5Mr4Y3xQI4mIJ1lSf4+vijWKDobrty8OopDeBxY+NABe0MRFidF3dCUoWjRt8SVMvBZPI3zkOgcRs7Mz3yazd7f7c58HwW5Xg9jdBjNg;");
       return List.of(
           jsonMapResponse("youChatToken", "Hel"),

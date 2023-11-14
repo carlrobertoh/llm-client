@@ -1,14 +1,16 @@
 package ee.carlrobert.llm.client.http.expectation;
 
+import ee.carlrobert.llm.client.http.Service;
+
 public class Expectation {
 
-  private final String path;
+  private final Service service;
 
-  public Expectation(String path) {
-    this.path = path;
+  public Expectation(Service service) {
+    this.service = service;
   }
 
-  public String getPath() {
-    return path;
+  public Service getService() {
+    return service;
   }
 }

@@ -11,6 +11,8 @@ import static org.awaitility.Awaitility.await;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.http.ResponseEntity;
+import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
+import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
@@ -27,7 +29,8 @@ class OpenAIClientTest extends BaseTest {
   void shouldStreamChatCompletion() {
     var prompt = "TEST_PROMPT";
     var resultMessageBuilder = new StringBuilder();
-    expectStreamRequest("/v1/chat/completions", request -> {
+    expectOpenAI((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getHeaders().get("Openai-organization").get(0))
@@ -81,7 +84,8 @@ class OpenAIClientTest extends BaseTest {
   void shouldStreamChatCompletionWithCustomURL() {
     var prompt = "TEST_PROMPT";
     var resultMessageBuilder = new StringBuilder();
-    expectStreamRequest("/v1/test/segment", request -> {
+    expectOpenAI((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/test/segment");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getHeaders().get("Openai-organization").get(0))
@@ -109,10 +113,9 @@ class OpenAIClientTest extends BaseTest {
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
 
-    ((OpenAIClient) new OpenAIClient.Builder("TEST_API_KEY")
+    new OpenAIClient.Builder("TEST_API_KEY")
         .setOrganization("TEST_ORGANIZATION")
-        .setHost("http://127.0.0.1:8000")
-        .build())
+        .build()
         .getChatCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
@@ -136,7 +139,8 @@ class OpenAIClientTest extends BaseTest {
   @Test
   void shouldGetChatCompletion() {
     var prompt = "TEST_PROMPT";
-    expectRequest("/v1/chat/completions", request -> {
+    expectOpenAI((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getHeaders().get("Openai-organization").get(0))
@@ -192,8 +196,10 @@ class OpenAIClientTest extends BaseTest {
         e("message", "Incorrect API key provided"),
         e("type", "invalid_request_error"),
         e("code", "invalid_api_key")));
-    expectRequest("/v1/chat/completions",
-        request -> new ResponseEntity(401, errorResponse));
+    expectOpenAI((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
+      return new ResponseEntity(401, errorResponse);
+    });
 
     new OpenAIClient.Builder("TEST_API_KEY")
         .build()
@@ -219,8 +225,10 @@ class OpenAIClientTest extends BaseTest {
   void shouldHandleUnknownApiError() {
     var errorMessageBuilder = new StringBuilder();
     var errorResponse = jsonMapResponse("error_details", "Server error");
-    expectRequest("/v1/chat/completions",
-        request -> new ResponseEntity(500, errorResponse));
+    expectOpenAI((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
+      return new ResponseEntity(500, errorResponse);
+    });
 
     new OpenAIClient.Builder("TEST_API_KEY")
         .build()
@@ -244,11 +252,13 @@ class OpenAIClientTest extends BaseTest {
 
   @Test
   void shouldGetEmbeddings() {
-    var embeddingResponse = new double[] {-0.00692, -0.0053, -4.5471, -0.0240};
-    expectRequest("/v1/embeddings", request -> {
+    var embeddingResponse = new double[]{-0.00692, -0.0053, -4.5471, -0.0240};
+    expectOpenAI((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/embeddings");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
-      return new ResponseEntity(200, jsonMapResponse("data", jsonArray(jsonMap("embedding", embeddingResponse))));
+      return new ResponseEntity(200,
+          jsonMapResponse("data", jsonArray(jsonMap("embedding", embeddingResponse))));
     });
 
     var result = new OpenAIClient.Builder("TEST_API_KEY").build().getEmbedding("TEST_PROMPT");

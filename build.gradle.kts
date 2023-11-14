@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "0.0.9"
+version = "0.0.10"
 
 repositories {
     mavenCentral()
@@ -102,6 +102,7 @@ tasks {
         from(sourceSets["main"].output)
         from(sourceSets["test"].output) {
             include("**/http/**")
+            include("**/mixin/**")
             include("**/util/**")
         }
     }

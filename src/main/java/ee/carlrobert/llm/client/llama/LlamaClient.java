@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.Client;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionResponse;
@@ -19,7 +20,8 @@ import okhttp3.sse.EventSources;
 
 public class LlamaClient extends Client {
 
-  private final int port;
+  private static final String BASE_URL = PropertiesLoader.getValue("llama.baseUrl");
+  private final Integer port;
 
   protected LlamaClient(Builder builder) {
     super(builder);
@@ -34,8 +36,9 @@ public class LlamaClient extends Client {
 
   private Request buildHttpRequest(LlamaCompletionRequest request) {
     try {
+      var baseHost = port == null ? BASE_URL : format("http://localhost:%d", port);
       return new Request.Builder()
-          .url(getHost() != null ? getHost() : format("http://localhost:%d/completion", port))
+          .url(getHost() != null ? getHost() : baseHost + "/completion")
           .header("Accept", "text/event-stream")
           .header("Cache-Control", "no-cache")
           .post(RequestBody.create(
@@ -70,9 +73,9 @@ public class LlamaClient extends Client {
 
   public static class Builder extends Client.Builder {
 
-    private int port = 8080;
+    private Integer port;
 
-    public Builder setPort(int port) {
+    public Builder setPort(Integer port) {
       this.port = port;
       return this;
     }

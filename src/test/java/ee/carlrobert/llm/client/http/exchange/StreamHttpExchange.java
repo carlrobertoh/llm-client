@@ -5,7 +5,7 @@ import ee.carlrobert.llm.client.http.RequestEntity;
 import java.util.List;
 
 @FunctionalInterface
-public interface StreamHttpExchange {
+public interface StreamHttpExchange extends Exchange {
 
   List<String> getResponse(RequestEntity request) throws JsonProcessingException;
 }
