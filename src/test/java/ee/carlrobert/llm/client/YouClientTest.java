@@ -33,7 +33,6 @@ public class YouClientTest extends BaseTest {
     expectYou((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
       assertThat(request.getMethod()).isEqualTo("GET");
-      assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
       assertThat(request.getUri().getQuery()).isEqualTo(
           "q=TEST_PROMPT&" +
               "page=1&" +

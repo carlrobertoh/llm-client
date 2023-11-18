@@ -12,6 +12,8 @@ import ee.carlrobert.llm.client.llama.completion.LlamaCompletionResponse;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
+import java.io.IOException;
+import java.util.Objects;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -29,9 +31,21 @@ public class LlamaClient extends Client {
   }
 
   public EventSource getChatCompletion(
-      LlamaCompletionRequest request, CompletionEventListener completionEventListener) {
+      LlamaCompletionRequest request,
+      CompletionEventListener completionEventListener) {
     return EventSources.createFactory(getHttpClient())
         .newEventSource(buildHttpRequest(request), getEventSourceListener(completionEventListener));
+  }
+
+  public LlamaCompletionResponse getChatCompletion(LlamaCompletionRequest request) {
+    try (var response = getHttpClient().newCall(buildHttpRequest(request)).execute()) {
+      return new ObjectMapper().readValue(
+          Objects.requireNonNull(response.body()).string(),
+          LlamaCompletionResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException(
+          "Could not get llama completion for the given request:\n" + request, e);
+    }
   }
 
   private Request buildHttpRequest(LlamaCompletionRequest request) {
@@ -39,8 +53,9 @@ public class LlamaClient extends Client {
       var baseHost = port == null ? BASE_URL : format("http://localhost:%d", port);
       return new Request.Builder()
           .url(getHost() != null ? getHost() : baseHost + "/completion")
-          .header("Accept", "text/event-stream")
           .header("Cache-Control", "no-cache")
+          .header("Content-Type", "application/json")
+          .header("Accept", request.isStream() ? "text/event-stream" : "text/json")
           .post(RequestBody.create(
               new ObjectMapper().writeValueAsString(request),
               MediaType.parse("application/json")))

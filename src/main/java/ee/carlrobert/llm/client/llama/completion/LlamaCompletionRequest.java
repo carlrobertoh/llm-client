@@ -6,9 +6,11 @@ public class LlamaCompletionRequest implements CompletionRequest {
 
   private final String prompt;
   private final int n_predict;
+  private final boolean stream;
 
   public LlamaCompletionRequest(Builder builder) {
     this.prompt = builder.prompt;
+    this.stream = builder.stream;
     this.n_predict = builder.n_predict;
   }
 
@@ -16,21 +18,27 @@ public class LlamaCompletionRequest implements CompletionRequest {
     return prompt;
   }
 
-  public int getN_predict() {
-    return n_predict;
+  public boolean isStream() {
+    return stream;
   }
 
-  public boolean getStream() {
-    return true;
+  public int getN_predict() {
+    return n_predict;
   }
 
   public static class Builder {
 
     private final String prompt;
-    private int n_predict;
+    private boolean stream = true;
+    private int n_predict = 256;
 
     public Builder(String prompt) {
       this.prompt = prompt;
+    }
+
+    public Builder setStream(boolean stream) {
+      this.stream = stream;
+      return this;
     }
 
     public Builder setN_predict(int n_predict) {
