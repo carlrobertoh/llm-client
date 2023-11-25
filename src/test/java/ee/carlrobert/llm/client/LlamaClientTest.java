@@ -23,8 +23,8 @@ public class LlamaClientTest extends BaseTest {
       assertThat(request.getUri().getPath()).isEqualTo("/completion");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
-          .extracting("prompt", "stream", "n_predict")
-          .containsExactly("TEST_PROMPT", true, 10);
+          .extracting("prompt", "stream", "n_predict", "temperature")
+          .containsExactly("TEST_PROMPT", true, 10, 0.1);
       assertThat(request.getHeaders())
           .flatExtracting("Accept", "Connection")
           .containsExactly("text/event-stream", "Keep-Alive");
@@ -56,8 +56,8 @@ public class LlamaClientTest extends BaseTest {
       assertThat(request.getUri().getPath()).isEqualTo("/completion");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
-          .extracting("prompt", "stream", "n_predict")
-          .containsExactly("TEST_PROMPT", false, 10);
+          .extracting("prompt", "stream", "n_predict", "temperature")
+          .containsExactly("TEST_PROMPT", false, 10, 0.5);
       return new ResponseEntity(jsonMapResponse("content", "Hello!"));
     });
 
@@ -66,6 +66,7 @@ public class LlamaClientTest extends BaseTest {
         .getChatCompletion(new LlamaCompletionRequest.Builder("TEST_PROMPT")
             .setStream(false)
             .setN_predict(10)
+            .setTemperature(0.5)
             .build());
 
     assertThat(response.getContent()).isEqualTo("Hello!");
