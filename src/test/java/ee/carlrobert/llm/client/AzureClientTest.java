@@ -38,7 +38,6 @@ class AzureClientTest extends BaseTest {
           .isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getBody())
           .extracting(
-              "model",
               "temperature",
               "stream",
               "max_tokens",
@@ -46,7 +45,6 @@ class AzureClientTest extends BaseTest {
               "presence_penalty",
               "messages")
           .containsExactly(
-              "gpt-3.5-turbo",
               0.5,
               true,
               500,
@@ -66,7 +64,6 @@ class AzureClientTest extends BaseTest {
         .getChatCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
-                .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .setMaxTokens(500)
                 .setTemperature(0.5)
                 .setPresencePenalty(0.1)
@@ -98,14 +95,12 @@ class AzureClientTest extends BaseTest {
           .isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getBody())
           .extracting(
-              "model",
               "temperature",
               "max_tokens",
               "frequency_penalty",
               "presence_penalty",
               "messages")
           .containsExactly(
-              "gpt-3.5-turbo",
               0.5,
               500,
               0.1,
@@ -125,7 +120,6 @@ class AzureClientTest extends BaseTest {
         .build()
         .getChatCompletion(new OpenAIChatCompletionRequest.Builder(
             List.of(new OpenAIChatCompletionMessage("user", prompt)))
-            .setModel(OpenAIChatCompletionModel.GPT_3_5)
             .setMaxTokens(500)
             .setTemperature(0.5)
             .setPresencePenalty(0.1)
@@ -150,7 +144,6 @@ class AzureClientTest extends BaseTest {
           .isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getBody())
           .extracting(
-              "model",
               "temperature",
               "stream",
               "max_tokens",
@@ -158,7 +151,6 @@ class AzureClientTest extends BaseTest {
               "presence_penalty",
               "messages")
           .containsExactly(
-              "gpt-3.5-turbo",
               0.5,
               true,
               500,
@@ -178,7 +170,6 @@ class AzureClientTest extends BaseTest {
         .getChatCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
-                .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .setMaxTokens(500)
                 .setTemperature(0.5)
                 .setPresencePenalty(0.1)
@@ -218,7 +209,6 @@ class AzureClientTest extends BaseTest {
         .getChatCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
-                .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
             new CompletionEventListener() {
               @Override
@@ -248,7 +238,6 @@ class AzureClientTest extends BaseTest {
         .getChatCompletion(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
-                .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
             new CompletionEventListener() {
               @Override

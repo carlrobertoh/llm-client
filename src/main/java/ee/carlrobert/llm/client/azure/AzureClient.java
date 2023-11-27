@@ -1,5 +1,6 @@
 package ee.carlrobert.llm.client.azure;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
@@ -61,7 +62,9 @@ public class AzureClient extends Client {
           .url(url + getChatCompletionPath(completionRequest))
           .headers(Headers.of(headers))
           .post(RequestBody.create(
-              new ObjectMapper().writeValueAsString(completionRequest),
+              new ObjectMapper()
+                  .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                  .writeValueAsString(completionRequest),
               MediaType.parse("application/json")))
           .build();
     } catch (JsonProcessingException e) {

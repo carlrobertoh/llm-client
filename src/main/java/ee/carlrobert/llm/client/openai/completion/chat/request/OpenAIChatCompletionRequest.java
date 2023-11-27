@@ -30,7 +30,7 @@ public class OpenAIChatCompletionRequest extends OpenAICompletionRequest {
   public static class Builder extends OpenAICompletionRequest.Builder {
 
     private final List<OpenAIChatCompletionMessage> messages;
-    private String model = OpenAIChatCompletionModel.GPT_3_5.getCode();
+    private String model;
 
     public Builder(List<OpenAIChatCompletionMessage> messages) {
       this.messages = messages;
