@@ -76,9 +76,14 @@ public class AzureClient {
   }
 
   private Map<String, String> getRequiredHeaders() {
-    return activeDirectoryAuthentication
-        ? Map.of("Authorization", "Bearer " + apiKey)
-        : Map.of("api-key", apiKey);
+    var headers = new HashMap<String, String>();
+    headers.put("X-Application-Name", "CODEGPT");
+    if (activeDirectoryAuthentication) {
+      headers.put("Authorization", "Bearer " + apiKey);
+    } else {
+      headers.put("api-key", apiKey);
+    }
+    return headers;
   }
 
   private String getChatCompletionPath(OpenAICompletionRequest request) {
