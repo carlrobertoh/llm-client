@@ -19,10 +19,6 @@ public class YouClientTest extends BaseTest {
 
   @Test
   void shouldStreamYouChatCompletion() {
-    var resultMessageBuilder = new StringBuilder();
-    var chatId = UUID.randomUUID();
-    var queryTraceId = UUID.randomUUID();
-    var userId = UUID.randomUUID();
     var utmParameters = new UTMParameters();
     utmParameters.setId("TEST_ID");
     utmParameters.setSource("TEST_SOURCE");
@@ -30,48 +26,52 @@ public class YouClientTest extends BaseTest {
     utmParameters.setCampaign("TEST_CAMPAIGN");
     utmParameters.setContent("TEST_CONTENT");
     utmParameters.setTerm("TEST_TERM");
+    var userId = UUID.randomUUID();
+    var chatId = UUID.randomUUID();
+    var queryTraceId = UUID.randomUUID();
     expectYou((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/streamingSearch");
       assertThat(request.getMethod()).isEqualTo("GET");
       assertThat(request.getUri().getQuery()).isEqualTo(
-          "q=TEST_PROMPT&" +
-              "page=1&" +
-              "cfr=CodeGPT&" +
-              "count=10&" +
-              "safeSearch=WebPages,Translations,TimeZone,Computation,RelatedSearches&" +
-              "domain=youchat&" +
-              "chat=[{\"question\":\"Ping\",\"answer\":\"Pong\"}]&" +
-              "chatId=" + chatId + "&" +
-              "queryTraceId=" + queryTraceId + "&" +
-              "utm_id=TEST_ID&" +
-              "utm_source=TEST_SOURCE&" +
-              "utm_medium=TEST_MEDIUM&" +
-              "utm_campaign=TEST_CAMPAIGN&" +
-              "utm_content=TEST_CONTENT&" +
-              "utm_term=TEST_TERM");
+          "q=TEST_PROMPT&"
+              + "page=1&"
+              + "cfr=CodeGPT&"
+              + "count=10&"
+              + "safeSearch=WebPages,Translations,TimeZone,Computation,RelatedSearches&"
+              + "domain=youchat&"
+              + "chat=[{\"question\":\"Ping\",\"answer\":\"Pong\"}]&"
+              + "chatId=" + chatId + "&"
+              + "queryTraceId=" + queryTraceId + "&"
+              + "utm_id=TEST_ID&"
+              + "utm_source=TEST_SOURCE&"
+              + "utm_medium=TEST_MEDIUM&"
+              + "utm_campaign=TEST_CAMPAIGN&"
+              + "utm_content=TEST_CONTENT&"
+              + "utm_term=TEST_TERM");
       assertThat(request.getHeaders())
           .flatExtracting("Accept", "Connection", "User-agent", "Cookie")
           .containsExactly(
               "text/event-stream",
               "Keep-Alive",
               "youide CodeGPT",
-              "uuid_guest=" + userId + "; " +
-                  "safesearch_guest=Moderate; " +
-                  "youpro_subscription=true; " +
-                  "you_subscription=free; " +
-                  "stytch_session=TEST_SESSION_ID; " +
-                  "ydc_stytch_session=TEST_SESSION_ID; " +
-                  "stytch_session_jwt=TEST_ACCESS_TOKEN; " +
-                  "ydc_stytch_session_jwt=TEST_ACCESS_TOKEN; " +
-                  "eg4=true; " +
-                  "safesearch_9015f218b47611b62bbbaf61125cd2dac629e65c3d6f47573a2ec0e9b615c691=Moderate; "
-                  +
-                  "__cf_bm=aN2b3pQMH8XADeMB7bg9s1bJ_bfXBcCHophfOGRg6g0-1693601599-0-AWIt5Mr4Y3xQI4mIJ1lSf4+vijWKDobrty8OopDeBxY+NABe0MRFidF3dCUoWjRt8SVMvBZPI3zkOgcRs7Mz3yazd7f7c58HwW5Xg9jdBjNg;");
+              "uuid_guest=" + userId + "; "
+                  + "safesearch_guest=Moderate; "
+                  + "youpro_subscription=true; "
+                  + "you_subscription=free; "
+                  + "stytch_session=TEST_SESSION_ID; "
+                  + "ydc_stytch_session=TEST_SESSION_ID; "
+                  + "stytch_session_jwt=TEST_ACCESS_TOKEN; "
+                  + "ydc_stytch_session_jwt=TEST_ACCESS_TOKEN; "
+                  + "eg4=true; "
+                  + "__cf_bm=aN2b3pQMH8XADeMB7bg9s1bJ_bfXBcCHophfOGRg6g0-1693601599-0-AWIt5Mr4Y3xQI"
+                  + "4mIJ1lSf4+vijWKDobrty8OopDeBxY+NABe0MRFidF3dCUoWjRt8SVMvBZPI3zkOgcRs7Mz3yazd7f"
+                  + "7c58HwW5Xg9jdBjNg;");
       return List.of(
           jsonMapResponse("youChatToken", "Hel"),
           jsonMapResponse("youChatToken", "lo"),
           jsonMapResponse("youChatToken", "!"));
     });
+    var resultMessageBuilder = new StringBuilder();
 
     new YouClient.Builder("TEST_SESSION_ID", "TEST_ACCESS_TOKEN")
         .setUTMParameters(utmParameters)

@@ -76,9 +76,9 @@ public class AzureClient {
   }
 
   private Map<String, String> getRequiredHeaders() {
-    return activeDirectoryAuthentication ?
-        Map.of("Authorization", "Bearer " + apiKey) :
-        Map.of("api-key", apiKey);
+    return activeDirectoryAuthentication
+        ? Map.of("Authorization", "Bearer " + apiKey)
+        : Map.of("api-key", apiKey);
   }
 
   private String getChatCompletionPath(OpenAICompletionRequest request) {

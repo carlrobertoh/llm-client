@@ -2,6 +2,7 @@ plugins {
     `java-library`
     `maven-publish`
     signing
+    checkstyle
     id("io.github.gradle-nexus.publish-plugin") version ("1.1.0")
 }
 
@@ -17,6 +18,10 @@ java {
     withSourcesJar()
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+}
+
+checkstyle {
+    toolVersion = "10.12.5"
 }
 
 dependencies {

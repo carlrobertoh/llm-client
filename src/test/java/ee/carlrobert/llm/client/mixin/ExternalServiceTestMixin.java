@@ -59,8 +59,8 @@ public interface ExternalServiceTestMixin {
 
   private void addExpectation(ExternalService externalService, Exchange exchange) {
     externalServiceServerMap.get(externalService)
-        .addExpectation(exchange instanceof BasicHttpExchange ?
-            new BasicExpectation(externalService, (BasicHttpExchange) exchange) :
-            new StreamExpectation(externalService, (StreamHttpExchange) exchange));
+        .addExpectation(exchange instanceof BasicHttpExchange
+            ? new BasicExpectation(externalService, (BasicHttpExchange) exchange)
+            : new StreamExpectation(externalService, (StreamHttpExchange) exchange));
   }
 }

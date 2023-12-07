@@ -163,11 +163,10 @@ class OpenAIClientTest extends BaseTest {
               0.1,
               List.of(Map.of("role", "user", "content", prompt)));
 
-      return new ResponseEntity(new ObjectMapper().writeValueAsString
-          (Map.of("choices", List.of(
-              Map.of("message", Map.of(
-                  "role", "assistant",
-                  "content", "This is a test"))))));
+      return new ResponseEntity(new ObjectMapper().writeValueAsString(Map.of("choices", List.of(
+          Map.of("message", Map.of(
+              "role", "assistant",
+              "content", "This is a test"))))));
     });
 
     var response = new OpenAIClient.Builder("TEST_API_KEY")

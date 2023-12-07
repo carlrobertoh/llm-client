@@ -74,8 +74,9 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
       @NotNull EventSource eventSource,
       Throwable throwable,
       Response response) {
-    if (throwable instanceof StreamResetException ||
-        (throwable instanceof SocketException && "Socket closed".equals(throwable.getMessage()))) {
+    if (throwable instanceof StreamResetException
+        || (throwable instanceof SocketException
+        && "Socket closed".equals(throwable.getMessage()))) {
       LOG.info("Stream was cancelled");
       listeners.onComplete(messageBuilder);
       return;
@@ -105,8 +106,9 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
         var jsonBody = body.string();
         try {
           var errorDetails = getErrorDetails(jsonBody);
-          if (errorDetails == null ||
-              errorDetails.getMessage() == null || errorDetails.getMessage().isEmpty()) {
+          if (errorDetails == null
+              || errorDetails.getMessage() == null
+              || errorDetails.getMessage().isEmpty()) {
             listeners.onError(toUnknownErrorResponse(response, jsonBody), new RuntimeException());
           } else {
             listeners.onError(errorDetails, new RuntimeException());
