@@ -15,9 +15,9 @@ import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
-import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionMessage;
-import ee.carlrobert.llm.client.openai.completion.chat.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Map;
@@ -261,7 +261,9 @@ class OpenAIClientTest extends BaseTest {
           jsonMapResponse("data", jsonArray(jsonMap("embedding", embeddingResponse))));
     });
 
-    var result = new OpenAIClient.Builder("TEST_API_KEY").build().getEmbedding("TEST_PROMPT");
+    var result = new OpenAIClient.Builder("TEST_API_KEY")
+        .build()
+        .getEmbedding("TEST_PROMPT");
 
     assertThat(result).isEqualTo(embeddingResponse);
   }

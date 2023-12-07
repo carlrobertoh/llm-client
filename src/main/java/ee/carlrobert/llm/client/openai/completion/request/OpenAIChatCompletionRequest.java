@@ -1,7 +1,7 @@
-package ee.carlrobert.llm.client.openai.completion.chat.request;
+package ee.carlrobert.llm.client.openai.completion.request;
 
 import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionModel;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import java.util.List;
 
 public class OpenAIChatCompletionRequest extends OpenAICompletionRequest {

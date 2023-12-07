@@ -1,4 +1,4 @@
-package ee.carlrobert.llm.client.openai.completion.chat;
+package ee.carlrobert.llm.client.openai.completion;
 
 import ee.carlrobert.llm.completion.CompletionModel;
 import java.util.Arrays;

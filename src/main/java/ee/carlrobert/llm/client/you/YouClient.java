@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
-import ee.carlrobert.llm.client.Client;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
@@ -14,20 +13,22 @@ import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
 
-public class YouClient extends Client {
+public class YouClient {
 
-  private static final String BASE_URL = PropertiesLoader.getValue("you.baseUrl");
+  private static final String BASE_HOST = PropertiesLoader.getValue("you.baseUrl");
 
   private final String sessionId;
   private final String accessToken;
   private final UTMParameters utmParameters;
+  private final OkHttpClient httpClient;
 
   private YouClient(YouClient.Builder builder) {
-    super(builder);
+    this.httpClient = new OkHttpClient.Builder().build();
     this.sessionId = builder.sessionId;
     this.accessToken = builder.accessToken;
     this.utmParameters = builder.utmParameters;
@@ -36,7 +37,7 @@ public class YouClient extends Client {
   public EventSource getChatCompletion(
       YouCompletionRequest request,
       CompletionEventListener completionEventListener) {
-    return EventSources.createFactory(getHttpClient())
+    return EventSources.createFactory(httpClient)
         .newEventSource(buildHttpRequest(request), getEventSourceListener(completionEventListener));
   }
 
@@ -67,7 +68,7 @@ public class YouClient extends Client {
 
   private HttpUrl buildHttpUrl(YouCompletionRequest request) {
     try {
-      var url = new URL(getHost() != null ? getHost() : BASE_URL);
+      var url = new URL(BASE_HOST);
       var httpUrlBuilder = new HttpUrl.Builder()
           .scheme(url.getProtocol())
           .host(url.getHost())
@@ -151,7 +152,7 @@ public class YouClient extends Client {
     };
   }
 
-  public static class Builder extends Client.Builder {
+  public static class Builder {
 
     private final String sessionId;
     private final String accessToken;

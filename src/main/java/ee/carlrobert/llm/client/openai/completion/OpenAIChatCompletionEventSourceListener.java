@@ -1,12 +1,10 @@
-package ee.carlrobert.llm.client.openai.completion.chat;
+package ee.carlrobert.llm.client.openai.completion;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.carlrobert.llm.client.openai.completion.ApiResponseError;
-import ee.carlrobert.llm.client.openai.completion.chat.response.OpenAIChatCompletionResponse;
+import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
-import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 
 public class OpenAIChatCompletionEventSourceListener extends CompletionEventSourceListener {
 

@@ -1,4 +1,4 @@
-package ee.carlrobert.llm.client.openai.completion.chat.request;
+package ee.carlrobert.llm.client.openai.completion.request;
 
 public class OpenAIChatCompletionMessage {
 

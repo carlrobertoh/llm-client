@@ -4,49 +4,52 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
-import ee.carlrobert.llm.client.Client;
+import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.chat.OpenAIChatCompletionEventSourceListener;
-import ee.carlrobert.llm.client.openai.completion.chat.response.OpenAIChatCompletionResponse;
+import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import okhttp3.Headers;
 import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
 
-public class AzureClient extends Client {
+public class AzureClient {
 
-  private static final String BASE_URL = PropertiesLoader.getValue("azure.openai.baseUrl");
+  private static final String BASE_HOST = PropertiesLoader.getValue("azure.openai.baseUrl");
 
+  private final OkHttpClient httpClient;
+  private final String apiKey;
   private final AzureCompletionRequestParams requestParams;
   private final boolean activeDirectoryAuthentication;
   private final String url;
 
-  private AzureClient(Builder builder) {
-    super(builder);
+  private AzureClient(Builder builder, OkHttpClient.Builder httpClientBuilder) {
+    this.httpClient = httpClientBuilder.build();
+    this.apiKey = builder.apiKey;
     this.requestParams = builder.requestParams;
     this.activeDirectoryAuthentication = builder.activeDirectoryAuthentication;
-    this.url = String.format(getHost() == null ? BASE_URL : getHost(), builder.requestParams.getResourceName());
+    this.url = String.format(BASE_HOST, builder.requestParams.getResourceName());
   }
 
-  public EventSource getChatCompletion(OpenAICompletionRequest request, CompletionEventListener completionEventListener) {
-    return EventSources.createFactory(getHttpClient()).newEventSource(
+  public EventSource getChatCompletion(
+      OpenAICompletionRequest request,
+      CompletionEventListener completionEventListener) {
+    return EventSources.createFactory(httpClient).newEventSource(
         buildHttpRequest(request),
         getEventSourceListener(completionEventListener));
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAICompletionRequest request) {
-    try (var response = getHttpClient()
-        .newCall(buildHttpRequest(request))
-        .execute()) {
-      return new ObjectMapper().readValue(Objects.requireNonNull(response.body()).string(), OpenAIChatCompletionResponse.class);
+    try (var response = httpClient.newCall(buildHttpRequest(request)).execute()) {
+      return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -74,19 +77,21 @@ public class AzureClient extends Client {
 
   private Map<String, String> getRequiredHeaders() {
     return activeDirectoryAuthentication ?
-        Map.of("Authorization", "Bearer " + getApiKey()) :
-        Map.of("api-key", getApiKey());
+        Map.of("Authorization", "Bearer " + apiKey) :
+        Map.of("api-key", apiKey);
   }
 
   private String getChatCompletionPath(OpenAICompletionRequest request) {
     var overriddenPath = request.getOverriddenPath();
     if (overriddenPath == null) {
-      return String.format("/openai/deployments/%s/chat/completions?api-version=%s", requestParams.getDeploymentId(), requestParams.getApiVersion());
+      return String.format("/openai/deployments/%s/chat/completions?api-version=%s",
+          requestParams.getDeploymentId(), requestParams.getApiVersion());
     }
     return overriddenPath;
   }
 
-  private OpenAIChatCompletionEventSourceListener getEventSourceListener(CompletionEventListener listeners) {
+  private OpenAIChatCompletionEventSourceListener getEventSourceListener(
+      CompletionEventListener listeners) {
     return new OpenAIChatCompletionEventSourceListener(listeners) {
       @Override
       protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
@@ -95,13 +100,14 @@ public class AzureClient extends Client {
     };
   }
 
-  public static class Builder extends Client.Builder {
+  public static class Builder {
 
+    private final String apiKey;
     private final AzureCompletionRequestParams requestParams;
     private boolean activeDirectoryAuthentication;
 
     public Builder(String apiKey, AzureCompletionRequestParams requestParams) {
-      super(apiKey);
+      this.apiKey = apiKey;
       this.requestParams = requestParams;
     }
 
@@ -110,9 +116,12 @@ public class AzureClient extends Client {
       return this;
     }
 
-    @Override
+    public AzureClient build(OkHttpClient.Builder builder) {
+      return new AzureClient(this, builder);
+    }
+
     public AzureClient build() {
-      return new AzureClient(this);
+      return build(new OkHttpClient.Builder());
     }
   }
 }
