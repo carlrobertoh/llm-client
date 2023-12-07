@@ -138,7 +138,9 @@ class AzureClientTest extends BaseTest {
     var prompt = "TEST_PROMPT";
     var resultMessageBuilder = new StringBuilder();
     expectAzure((StreamHttpExchange) request -> {
-      assertThat(request.getUri().getPath()).isEqualTo("/v1/test/segment");
+      assertThat(request.getUri().getPath()).isEqualTo(
+          "/v1/deployments/TEST_DEPLOYMENT_ID/completions");
+      assertThat(request.getUri().getQuery()).isEqualTo("api_version=TEST_API_VERSION");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0))
           .isEqualTo("Bearer TEST_API_KEY");
@@ -174,7 +176,7 @@ class AzureClientTest extends BaseTest {
                 .setTemperature(0.5)
                 .setPresencePenalty(0.1)
                 .setFrequencyPenalty(0.1)
-                .setOverriddenPath("/v1/test/segment")
+                .setOverriddenPath("/v1/deployments/%s/completions?api_version=%s")
                 .build(),
             new CompletionEventListener() {
               @Override

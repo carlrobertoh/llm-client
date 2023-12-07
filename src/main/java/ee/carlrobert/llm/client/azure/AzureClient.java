@@ -23,8 +23,6 @@ import okhttp3.sse.EventSources;
 
 public class AzureClient {
 
-  private static final String BASE_HOST = PropertiesLoader.getValue("azure.openai.baseUrl");
-
   private final OkHttpClient httpClient;
   private final String apiKey;
   private final AzureCompletionRequestParams requestParams;
@@ -36,7 +34,7 @@ public class AzureClient {
     this.apiKey = builder.apiKey;
     this.requestParams = builder.requestParams;
     this.activeDirectoryAuthentication = builder.activeDirectoryAuthentication;
-    this.url = String.format(BASE_HOST, builder.requestParams.getResourceName());
+    this.url = builder.url;
   }
 
   public EventSource getChatCompletion(
@@ -87,12 +85,12 @@ public class AzureClient {
   }
 
   private String getChatCompletionPath(OpenAICompletionRequest request) {
-    var overriddenPath = request.getOverriddenPath();
-    if (overriddenPath == null) {
-      return String.format("/openai/deployments/%s/chat/completions?api-version=%s",
-          requestParams.getDeploymentId(), requestParams.getApiVersion());
-    }
-    return overriddenPath;
+    return String.format(
+        request.getOverriddenPath() == null
+            ? "/openai/deployments/%s/chat/completions?api-version=%s"
+            : request.getOverriddenPath(),
+        requestParams.getDeploymentId(),
+        requestParams.getApiVersion());
   }
 
   private OpenAIChatCompletionEventSourceListener getEventSourceListener(
@@ -109,11 +107,17 @@ public class AzureClient {
 
     private final String apiKey;
     private final AzureCompletionRequestParams requestParams;
+    private String url = PropertiesLoader.getValue("azure.openai.baseUrl");
     private boolean activeDirectoryAuthentication;
 
     public Builder(String apiKey, AzureCompletionRequestParams requestParams) {
       this.apiKey = apiKey;
       this.requestParams = requestParams;
+    }
+
+    public Builder setUrl(String url) {
+      this.url = url;
+      return this;
     }
 
     public Builder setActiveDirectoryAuthentication(boolean activeDirectoryAuthentication) {
