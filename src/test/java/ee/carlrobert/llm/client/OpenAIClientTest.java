@@ -14,6 +14,9 @@ import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
+import ee.carlrobert.llm.client.openai.completion.request.Tool;
+import ee.carlrobert.llm.client.openai.completion.request.ToolFunction;
+import ee.carlrobert.llm.client.openai.completion.request.ToolFunctionParameters;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
@@ -186,6 +189,107 @@ class OpenAIClientTest extends BaseTest {
         .extracting("message")
         .extracting("role", "content")
         .containsExactly(tuple("assistant", "This is a test"));
+  }
+
+  @Test
+  void shouldUseFunctionCalling() {
+    var prompt = "TEST_PROMPT";
+    expectOpenAI((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Openai-organization").get(0))
+          .isEqualTo("TEST_ORGANIZATION");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "temperature",
+              "stream",
+              "max_tokens",
+              "frequency_penalty",
+              "presence_penalty",
+              "messages",
+              "tools",
+              "tool_choice")
+          .containsExactly(
+              "gpt-3.5-turbo",
+              0.5,
+              false,
+              500,
+              0.1,
+              0.1,
+              List.of(Map.of("role", "user", "content", prompt)),
+              List.of(Map.of("type", "function", "function",
+                  Map.of(
+                      "name", "get_current_weather",
+                      "description", "Get the current weather in a given location",
+                      "parameters", Map.of(
+                          "type", "object",
+                          "required", List.of("location"),
+                          "properties", Map.of("location", Map.of(
+                                  "type", "string",
+                                  "description", "The city and state, e.g. San Francisco, CA"),
+                              "unit", Map.of(
+                                  "type", "string",
+                                  "enum", List.of("celsius", "fahrenheit"))))))),
+              "auto");
+
+      return new ResponseEntity(
+          new ObjectMapper().writeValueAsString(
+              Map.of("choices", List.of(Map.of(
+                  "finish_reason", "tool_calls",
+                  "message", Map.of(
+                      "role", "assistant",
+                      "tool_calls", List.of(Map.of(
+                          "id", "call_abc123",
+                          "type", "function",
+                          "function", Map.of(
+                              "name", "get_current_weather",
+                              "arguments", "{\n\"location\": \"Boston, MA\"\n}")))))))));
+    });
+    var parameters = new ToolFunctionParameters();
+    parameters.setType("object");
+    parameters.setProperties(Map.of(
+        "location", Map.of(
+            "type", "string",
+            "description", "The city and state, e.g. San Francisco, CA"),
+        "unit", Map.of(
+            "type", "string",
+            "enum", List.of("celsius", "fahrenheit"))
+    ));
+    parameters.setRequired(List.of("location"));
+    var function = new ToolFunction();
+    function.setName("get_current_weather");
+    function.setDescription("Get the current weather in a given location");
+    function.setParameters(parameters);
+    var tool = new Tool();
+    tool.setType("function");
+    tool.setFunction(function);
+
+    var response = new OpenAIClient.Builder("TEST_API_KEY")
+        .setOrganization("TEST_ORGANIZATION")
+        .build()
+        .getChatCompletion(new OpenAIChatCompletionRequest.Builder(
+            List.of(new OpenAIChatCompletionMessage("user", prompt)))
+            .setModel(OpenAIChatCompletionModel.GPT_3_5)
+            .setMaxTokens(500)
+            .setTemperature(0.5)
+            .setPresencePenalty(0.1)
+            .setFrequencyPenalty(0.1)
+            .setTools(List.of(tool))
+            .setToolChoice("auto")
+            .setStream(false)
+            .build());
+
+    assertThat(response.getChoices().size()).isOne();
+    var message = response.getChoices().get(0).getMessage();
+    assertThat(message.getRole()).isEqualTo("assistant");
+    assertThat(message.getToolCalls().size()).isOne();
+    assertThat(message.getToolCalls().get(0).getId()).isEqualTo("call_abc123");
+    assertThat(message.getToolCalls().get(0).getType()).isEqualTo("function");
+    assertThat(message.getToolCalls().get(0).getFunction())
+        .extracting("name", "arguments")
+        .containsExactly("get_current_weather", "{\n\"location\": \"Boston, MA\"\n}");
   }
 
   @Test
