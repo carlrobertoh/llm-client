@@ -75,7 +75,7 @@ public class AzureClient {
 
   private Map<String, String> getRequiredHeaders() {
     var headers = new HashMap<String, String>();
-    headers.put("X-Application-Name", "CODEGPT");
+    headers.put("X-LLM-Application-Tag", "codegpt");
     if (activeDirectoryAuthentication) {
       headers.put("Authorization", "Bearer " + apiKey);
     } else {

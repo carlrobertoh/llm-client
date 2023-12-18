@@ -35,6 +35,8 @@ class AzureClientTest extends BaseTest {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0))
           .isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
       assertThat(request.getBody())
           .extracting(
               "temperature",
@@ -92,8 +94,8 @@ class AzureClientTest extends BaseTest {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0))
           .isEqualTo("Bearer TEST_API_KEY");
-      assertThat(request.getHeaders().get("X-application-name").get(0))
-          .isEqualTo("CODEGPT");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
       assertThat(request.getBody())
           .extracting(
               "temperature",
@@ -144,6 +146,8 @@ class AzureClientTest extends BaseTest {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0))
           .isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
       assertThat(request.getBody())
           .extracting(
               "temperature",

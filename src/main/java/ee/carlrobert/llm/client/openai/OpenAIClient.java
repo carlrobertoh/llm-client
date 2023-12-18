@@ -91,6 +91,7 @@ public class OpenAIClient {
 
   protected Request buildCompletionHttpRequest(OpenAICompletionRequest completionRequest) {
     var headers = new HashMap<>(getRequiredHeaders());
+    headers.put("X-LLM-Application-Tag", "codegpt");
     if (completionRequest.isStream()) {
       headers.put("Accept", "text/event-stream");
     }

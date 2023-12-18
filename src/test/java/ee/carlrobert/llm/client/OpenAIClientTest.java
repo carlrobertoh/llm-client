@@ -38,6 +38,8 @@ class OpenAIClientTest extends BaseTest {
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getHeaders().get("Openai-organization").get(0))
           .isEqualTo("TEST_ORGANIZATION");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
       assertThat(request.getBody())
           .extracting(
               "model",
@@ -93,6 +95,8 @@ class OpenAIClientTest extends BaseTest {
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getHeaders().get("Openai-organization").get(0))
           .isEqualTo("TEST_ORGANIZATION");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
       assertThat(request.getBody())
           .extracting(
               "model",
@@ -148,6 +152,8 @@ class OpenAIClientTest extends BaseTest {
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getHeaders().get("Openai-organization").get(0))
           .isEqualTo("TEST_ORGANIZATION");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
       assertThat(request.getBody())
           .extracting(
               "model",
@@ -200,6 +206,8 @@ class OpenAIClientTest extends BaseTest {
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
       assertThat(request.getHeaders().get("Openai-organization").get(0))
           .isEqualTo("TEST_ORGANIZATION");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
       assertThat(request.getBody())
           .extracting(
               "model",
