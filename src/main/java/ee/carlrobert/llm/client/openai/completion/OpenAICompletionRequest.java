@@ -2,7 +2,9 @@ package ee.carlrobert.llm.client.openai.completion;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ee.carlrobert.llm.client.openai.completion.request.Tool;
 import ee.carlrobert.llm.completion.CompletionRequest;
+import java.util.List;
 
 public abstract class OpenAICompletionRequest implements CompletionRequest {
 
@@ -16,6 +18,9 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
   private final boolean stream;
   @JsonIgnore
   private final String overriddenPath;
+  private final List<Tool> tools;
+  @JsonProperty("tool_choice")
+  private final String toolChoice;
 
   protected OpenAICompletionRequest(Builder builder) {
     this.maxTokens = builder.maxTokens;
@@ -24,6 +29,8 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
     this.presencePenalty = builder.presencePenalty;
     this.stream = builder.stream;
     this.overriddenPath = builder.overriddenPath;
+    this.tools = builder.tools;
+    this.toolChoice = builder.toolChoice;
   }
 
   public int getMaxTokens() {
@@ -50,6 +57,14 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
     return overriddenPath;
   }
 
+  public List<Tool> getTools() {
+    return tools;
+  }
+
+  public String getToolChoice() {
+    return toolChoice;
+  }
+
   public abstract static class Builder {
 
     private int maxTokens = 1000;
@@ -58,6 +73,8 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
     private double presencePenalty = 0.6;
     private boolean stream = true;
     private String overriddenPath;
+    private List<Tool> tools;
+    private String toolChoice;
 
     public Builder setMaxTokens(int maxTokens) {
       this.maxTokens = maxTokens;
@@ -86,6 +103,16 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
 
     public Builder setOverriddenPath(String overriddenPath) {
       this.overriddenPath = overriddenPath;
+      return this;
+    }
+
+    public Builder setTools(List<Tool> tools) {
+      this.tools = tools;
+      return this;
+    }
+
+    public Builder setToolChoice(String toolChoice) {
+      this.toolChoice = toolChoice;
       return this;
     }
 
