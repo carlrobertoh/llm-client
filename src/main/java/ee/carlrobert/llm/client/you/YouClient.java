@@ -22,10 +22,10 @@ public class YouClient {
 
   private static final String BASE_HOST = PropertiesLoader.getValue("you.baseUrl");
 
+  private final OkHttpClient httpClient;
   private final String sessionId;
   private final String accessToken;
   private final UTMParameters utmParameters;
-  private final OkHttpClient httpClient;
 
   private YouClient(YouClient.Builder builder) {
     this.httpClient = new OkHttpClient.Builder().build();
@@ -34,7 +34,7 @@ public class YouClient {
     this.utmParameters = builder.utmParameters;
   }
 
-  public EventSource getChatCompletion(
+  public EventSource getChatCompletionAsync(
       YouCompletionRequest request,
       CompletionEventListener completionEventListener) {
     return EventSources.createFactory(httpClient)

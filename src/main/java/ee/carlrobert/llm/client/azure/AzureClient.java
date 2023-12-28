@@ -37,12 +37,11 @@ public class AzureClient {
     this.url = builder.url;
   }
 
-  public EventSource getChatCompletion(
+  public EventSource getChatCompletionAsync(
       OpenAICompletionRequest request,
       CompletionEventListener completionEventListener) {
-    return EventSources.createFactory(httpClient).newEventSource(
-        buildHttpRequest(request),
-        getEventSourceListener(completionEventListener));
+    return EventSources.createFactory(httpClient)
+        .newEventSource(buildHttpRequest(request), getEventSourceListener(completionEventListener));
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAICompletionRequest request) {

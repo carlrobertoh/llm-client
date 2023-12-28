@@ -66,7 +66,7 @@ class OpenAIClientTest extends BaseTest {
     new OpenAIClient.Builder("TEST_API_KEY")
         .setOrganization("TEST_ORGANIZATION")
         .build()
-        .getChatCompletion(
+        .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
@@ -123,7 +123,7 @@ class OpenAIClientTest extends BaseTest {
     new OpenAIClient.Builder("TEST_API_KEY")
         .setOrganization("TEST_ORGANIZATION")
         .build()
-        .getChatCompletion(
+        .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
@@ -314,7 +314,7 @@ class OpenAIClientTest extends BaseTest {
 
     new OpenAIClient.Builder("TEST_API_KEY")
         .build()
-        .getChatCompletion(
+        .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
@@ -343,7 +343,7 @@ class OpenAIClientTest extends BaseTest {
 
     new OpenAIClient.Builder("TEST_API_KEY")
         .build()
-        .getChatCompletion(
+        .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)

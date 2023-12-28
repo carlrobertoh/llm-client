@@ -40,17 +40,16 @@ public class OpenAIClient {
     this.host = builder.host;
   }
 
-  public EventSource getChatCompletion(
+  public EventSource getChatCompletionAsync(
       OpenAICompletionRequest request,
-      CompletionEventListener completionEventListener) {
-    return EventSources.createFactory(httpClient)
-        .newEventSource(
-            buildCompletionHttpRequest(request),
-            new OpenAIChatCompletionEventSourceListener(completionEventListener));
+      CompletionEventListener eventListener) {
+    return EventSources.createFactory(httpClient).newEventSource(
+        buildCompletionRequest(request),
+        new OpenAIChatCompletionEventSourceListener(eventListener));
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAICompletionRequest request) {
-    try (var response = httpClient.newCall(buildCompletionHttpRequest(request)).execute()) {
+    try (var response = httpClient.newCall(buildCompletionRequest(request)).execute()) {
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -63,7 +62,7 @@ public class OpenAIClient {
 
   public List<double[]> getEmbeddings(List<String> texts) {
     try (var response = httpClient
-        .newCall(buildRequest(host + "/v1/embeddings", texts))
+        .newCall(buildEmbeddingsRequest(host + "/v1/embeddings", texts))
         .execute()) {
 
       return Optional.ofNullable(DeserializationUtil.mapResponse(response, EmbeddingResponse.class))
@@ -77,10 +76,11 @@ public class OpenAIClient {
     }
   }
 
-  private Request buildRequest(String url, List<String> texts) throws JsonProcessingException {
+  private Request buildEmbeddingsRequest(String url, List<String> texts)
+      throws JsonProcessingException {
     return new Request.Builder()
         .url(url)
-        .headers(Headers.of(Map.of("Authorization", "Bearer " + apiKey)))
+        .headers(Headers.of(getRequiredHeaders()))
         .post(RequestBody.create(
             new ObjectMapper().writeValueAsString(Map.of(
                 "input", texts,
@@ -89,9 +89,8 @@ public class OpenAIClient {
         .build();
   }
 
-  protected Request buildCompletionHttpRequest(OpenAICompletionRequest completionRequest) {
+  protected Request buildCompletionRequest(OpenAICompletionRequest completionRequest) {
     var headers = new HashMap<>(getRequiredHeaders());
-    headers.put("X-LLM-Application-Tag", "codegpt");
     if (completionRequest.isStream()) {
       headers.put("Accept", "text/event-stream");
     }
@@ -110,7 +109,9 @@ public class OpenAIClient {
   }
 
   private Map<String, String> getRequiredHeaders() {
-    var headers = new HashMap<>(Map.of("Authorization", "Bearer " + apiKey));
+    var headers = new HashMap<>(Map.of(
+        "Authorization", "Bearer " + apiKey,
+        "X-LLM-Application-Tag", "codegpt"));
     if (organization != null && !organization.isEmpty()) {
       headers.put("OpenAI-Organization", organization);
     }

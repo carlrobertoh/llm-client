@@ -62,7 +62,7 @@ class AzureClientTest extends BaseTest {
         new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .setActiveDirectoryAuthentication(true)
         .build()
-        .getChatCompletion(
+        .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
                 .setMaxTokens(500)
@@ -173,7 +173,7 @@ class AzureClientTest extends BaseTest {
         new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .setActiveDirectoryAuthentication(true)
         .build()
-        .getChatCompletion(
+        .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
                 .setMaxTokens(500)
@@ -212,7 +212,7 @@ class AzureClientTest extends BaseTest {
     new AzureClient.Builder("TEST_API_KEY",
         new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .build()
-        .getChatCompletion(
+        .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .build(),
@@ -241,7 +241,7 @@ class AzureClientTest extends BaseTest {
     new AzureClient.Builder("TEST_API_KEY",
         new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
         .build()
-        .getChatCompletion(
+        .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .build(),

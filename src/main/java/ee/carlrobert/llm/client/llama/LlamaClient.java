@@ -34,11 +34,11 @@ public class LlamaClient {
     this.port = builder.port;
   }
 
-  public EventSource getChatCompletion(
+  public EventSource getChatCompletionAsync(
       LlamaCompletionRequest request,
-      CompletionEventListener completionEventListener) {
+      CompletionEventListener eventListener) {
     return EventSources.createFactory(httpClient)
-        .newEventSource(buildHttpRequest(request), getEventSourceListener(completionEventListener));
+        .newEventSource(buildHttpRequest(request), getEventSourceListener(eventListener));
   }
 
   public LlamaCompletionResponse getChatCompletion(LlamaCompletionRequest request) {

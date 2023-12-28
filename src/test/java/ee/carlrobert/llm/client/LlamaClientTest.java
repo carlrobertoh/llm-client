@@ -37,7 +37,7 @@ public class LlamaClientTest extends BaseTest {
 
     new LlamaClient.Builder()
         .build()
-        .getChatCompletion(
+        .getChatCompletionAsync(
             new LlamaCompletionRequest.Builder("TEST_PROMPT")
                 .setN_predict(10)
                 .build(),
