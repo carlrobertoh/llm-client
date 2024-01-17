@@ -10,6 +10,8 @@ import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.llama.LlamaClient;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
+import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest.Builder;
+import ee.carlrobert.llm.client.llama.completion.LlamaInfillRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -74,6 +76,36 @@ public class LlamaClientTest extends BaseTest {
             .setMin_p(0.05)
             .setRepeat_penalty(1.1)
             .build());
+
+    assertThat(response.getContent()).isEqualTo("Hello!");
+  }
+
+  @Test
+  void shouldGetLlamaInfill() {
+    expectLlama((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/infill");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getBody())
+          .extracting("input_prefix", "input_suffix", "stream", "n_predict", "temperature", "top_k",
+              "top_p", "min_p",
+              "repeat_penalty", "stop")
+          .containsExactly("PREFIX", "SUFFIX", false, 10, 0.5, 40, 0.9, 0.05, 1.1,
+              List.of("  <EOT>", "<EOT>"));
+      return new ResponseEntity(jsonMapResponse("content", "Hello!"));
+    });
+
+    var response = new LlamaClient.Builder()
+        .build()
+        .getInfill(new LlamaInfillRequest(new Builder("")
+            .setStream(false)
+            .setN_predict(10)
+            .setTemperature(0.5)
+            .setTop_k(40)
+            .setTop_p(0.9)
+            .setMin_p(0.05)
+            .setRepeat_penalty(1.1)
+            .setStop(List.of("  <EOT>", "<EOT>")), "PREFIX", "SUFFIX")
+        );
 
     assertThat(response.getContent()).isEqualTo("Hello!");
   }
