@@ -12,13 +12,13 @@ To use the package, you need to use following Maven dependency:
 <dependency>
     <groupId>ee.carlrobert</groupId>
     <artifactId>llm-client</artifactId>
-    <version>0.1.4</version>
+    <version>0.2.1</version>
 </dependency>
 ```
 Gradle dependency:
 ```kts
 dependencies {
-  implementation("ee.carlrobert:llm-client:0.1.4")
+  implementation("ee.carlrobert:llm-client:0.2.1")
 }
 ```
 
