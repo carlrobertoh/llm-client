@@ -9,6 +9,7 @@ import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionResponse;
+import ee.carlrobert.llm.client.llama.completion.LlamaInfillRequest;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
@@ -38,11 +39,11 @@ public class LlamaClient {
       LlamaCompletionRequest request,
       CompletionEventListener eventListener) {
     return EventSources.createFactory(httpClient)
-        .newEventSource(buildHttpRequest(request), getEventSourceListener(eventListener));
+        .newEventSource(buildCompletionHttpRequest(request), getEventSourceListener(eventListener));
   }
 
   public LlamaCompletionResponse getChatCompletion(LlamaCompletionRequest request) {
-    try (var response = httpClient.newCall(buildHttpRequest(request)).execute()) {
+    try (var response = httpClient.newCall(buildCompletionHttpRequest(request)).execute()) {
       return DeserializationUtil.mapResponse(response, LlamaCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(
@@ -50,11 +51,25 @@ public class LlamaClient {
     }
   }
 
-  private Request buildHttpRequest(LlamaCompletionRequest request) {
+  public LlamaCompletionResponse getInfill(LlamaInfillRequest request) {
+    try (var response = httpClient.newCall(buildHttpRequest(request, "/infill")).execute()) {
+      return DeserializationUtil.mapResponse(response, LlamaCompletionResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException(
+          "Could not get llama completion for the given request:\n" + request, e);
+    }
+  }
+
+  private Request buildCompletionHttpRequest(LlamaCompletionRequest request) {
+    return buildHttpRequest(request, "/completion");
+  }
+
+
+  private Request buildHttpRequest(LlamaCompletionRequest request, String path) {
     try {
       var baseHost = port == null ? BASE_URL : format("http://localhost:%d", port);
       return new Request.Builder()
-          .url(host == null ? baseHost + "/completion" : host)
+          .url(host == null ? baseHost + path : host)
           .header("Cache-Control", "no-cache")
           .header("Content-Type", "application/json")
           .header("Accept", request.isStream() ? "text/event-stream" : "text/json")

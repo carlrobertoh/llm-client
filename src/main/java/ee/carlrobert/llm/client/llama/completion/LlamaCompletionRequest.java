@@ -1,6 +1,8 @@
 package ee.carlrobert.llm.client.llama.completion;
 
 import ee.carlrobert.llm.completion.CompletionRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LlamaCompletionRequest implements CompletionRequest {
 
@@ -12,6 +14,7 @@ public class LlamaCompletionRequest implements CompletionRequest {
   private final double top_p;
   private final double min_p;
   private final double repeat_penalty;
+  private final List<String> stop;
 
   public LlamaCompletionRequest(Builder builder) {
     this.prompt = builder.prompt;
@@ -22,6 +25,7 @@ public class LlamaCompletionRequest implements CompletionRequest {
     this.top_p = builder.top_p;
     this.min_p = builder.min_p;
     this.repeat_penalty = builder.repeat_penalty;
+    this.stop = builder.stop;
   }
 
   public String getPrompt() {
@@ -56,6 +60,10 @@ public class LlamaCompletionRequest implements CompletionRequest {
     return repeat_penalty;
   }
 
+  public List<String> getStop() {
+    return stop;
+  }
+
   public static class Builder {
 
     private final String prompt;
@@ -66,6 +74,7 @@ public class LlamaCompletionRequest implements CompletionRequest {
     private double top_p = 0.9;
     private double min_p = 0.05;
     private double repeat_penalty = 1.1;
+    private List<String> stop = new ArrayList<>();
 
     public Builder(String prompt) {
       this.prompt = prompt;
@@ -106,6 +115,10 @@ public class LlamaCompletionRequest implements CompletionRequest {
       return this;
     }
 
+    public Builder setStop(List<String> stop) {
+      this.stop = stop;
+      return this;
+    }
     public LlamaCompletionRequest build() {
       return new LlamaCompletionRequest(this);
     }
