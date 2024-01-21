@@ -109,4 +109,41 @@ public class LlamaClientTest extends BaseTest {
 
     assertThat(response.getContent()).isEqualTo("Hello!");
   }
+
+  @Test
+  void shouldStreamLlamaInfill() {
+    var resultMessageBuilder = new StringBuilder();
+    expectLlama((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/infill");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getBody())
+          .extracting("input_prefix", "input_suffix", "stream", "n_predict", "stop")
+          .containsExactly("TEST_PREFIX", "TEST_SUFFIX", true, 10, List.of("  <EOT>", "<EOT>"));
+      assertThat(request.getHeaders())
+          .flatExtracting("Accept", "Connection")
+          .containsExactly("text/event-stream", "Keep-Alive");
+      return List.of(
+          jsonMapResponse("content", "Hel"),
+          jsonMapResponse("content", "lo"),
+          jsonMapResponse("content", "!"));
+    });
+
+    new LlamaClient.Builder()
+        .build()
+        .getInfillAsync(
+            new LlamaInfillRequest(new Builder("")
+                .setStream(true)
+                .setN_predict(10)
+                .setStop(List.of("  <EOT>", "<EOT>")),
+                "TEST_PREFIX",
+                "TEST_SUFFIX"),
+            new CompletionEventListener() {
+              @Override
+              public void onMessage(String message) {
+                resultMessageBuilder.append(message);
+              }
+            });
+
+    await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
+  }
 }

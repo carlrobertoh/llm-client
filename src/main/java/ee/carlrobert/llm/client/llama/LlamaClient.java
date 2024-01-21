@@ -60,10 +60,17 @@ public class LlamaClient {
     }
   }
 
+  public EventSource getInfillAsync(
+      LlamaInfillRequest request,
+      CompletionEventListener eventListener) {
+    return EventSources.createFactory(httpClient).newEventSource(
+        buildHttpRequest(request, "/infill"),
+        getEventSourceListener(eventListener));
+  }
+
   private Request buildCompletionHttpRequest(LlamaCompletionRequest request) {
     return buildHttpRequest(request, "/completion");
   }
-
 
   private Request buildHttpRequest(LlamaCompletionRequest request, String path) {
     try {
