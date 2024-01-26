@@ -18,6 +18,7 @@ import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.Tool;
 import ee.carlrobert.llm.client.openai.completion.request.ToolFunction;
 import ee.carlrobert.llm.client.openai.completion.request.ToolFunctionParameters;
@@ -70,6 +71,62 @@ class OpenAIClientTest extends BaseTest {
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", prompt)))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
+                .setMaxTokens(500)
+                .setTemperature(0.5)
+                .setPresencePenalty(0.1)
+                .setFrequencyPenalty(0.1)
+                .build(),
+            new CompletionEventListener() {
+              @Override
+              public void onMessage(String message) {
+                resultMessageBuilder.append(message);
+              }
+            });
+
+    await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
+  }
+
+  @Test
+  void shouldStreamCompletion() {
+    var resultMessageBuilder = new StringBuilder();
+    expectOpenAI((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/completions");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Openai-organization").get(0))
+          .isEqualTo("TEST_ORGANIZATION");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "prompt",
+              "suffix",
+              "temperature",
+              "stream",
+              "max_tokens",
+              "frequency_penalty",
+              "presence_penalty")
+          .containsExactly(
+              "gpt-3.5-turbo-instruct",
+              "TEST_PROMPT",
+              "TEST_SUFFIX",
+              0.5,
+              true,
+              500,
+              0.1,
+              0.1);
+      return List.of(
+          jsonMapResponse("choices", jsonArray(jsonMap("text", "Hello"))),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", "!"))));
+    });
+
+    new OpenAIClient.Builder("TEST_API_KEY")
+        .setOrganization("TEST_ORGANIZATION")
+        .build()
+        .getCompletionAsync(new OpenAITextCompletionRequest.Builder("TEST_PROMPT")
+                .setSuffix("TEST_SUFFIX")
+                .setStream(true)
                 .setMaxTokens(500)
                 .setTemperature(0.5)
                 .setPresencePenalty(0.1)

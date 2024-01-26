@@ -78,7 +78,7 @@ public abstract class CompletionEventSourceListener extends EventSourceListener 
         || (throwable instanceof SocketException
         && "Socket closed".equals(throwable.getMessage()))) {
       LOG.info("Stream was cancelled");
-      listeners.onComplete(messageBuilder);
+      listeners.onCancelled(messageBuilder);
       return;
     }
 

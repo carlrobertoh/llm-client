@@ -10,6 +10,9 @@ public interface CompletionEventListener {
   default void onComplete(StringBuilder messageBuilder) {
   }
 
+  default void onCancelled(StringBuilder messageBuilder) {
+  }
+
   default void onError(ErrorDetails error, Throwable ex) {
   }
 }

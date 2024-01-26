@@ -1,13 +1,13 @@
-package ee.carlrobert.llm.client.openai.completion;
+package ee.carlrobert.llm.client.openai.completion.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ee.carlrobert.llm.client.openai.completion.request.Tool;
 import ee.carlrobert.llm.completion.CompletionRequest;
-import java.util.List;
 
-public abstract class OpenAICompletionRequest implements CompletionRequest {
+public class OpenAITextCompletionRequest implements CompletionRequest {
 
+  private final String model;
+  private final String prompt;
+  private final String suffix;
   @JsonProperty("max_tokens")
   private final int maxTokens;
   private final double temperature;
@@ -16,25 +16,32 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
   @JsonProperty("presence_penalty")
   private final double presencePenalty;
   private final boolean stream;
-  @JsonIgnore
-  private final String overriddenPath;
-  private final List<Tool> tools;
-  @JsonProperty("tool_choice")
-  private final String toolChoice;
 
-  protected OpenAICompletionRequest(Builder builder) {
+  protected OpenAITextCompletionRequest(Builder builder) {
+    this.model = builder.model;
+    this.prompt = builder.prompt;
+    this.suffix = builder.suffix;
     this.maxTokens = builder.maxTokens;
     this.temperature = builder.temperature;
     this.frequencyPenalty = builder.frequencyPenalty;
     this.presencePenalty = builder.presencePenalty;
     this.stream = builder.stream;
-    this.overriddenPath = builder.overriddenPath;
-    this.tools = builder.tools;
-    this.toolChoice = builder.toolChoice;
   }
 
   public int getMaxTokens() {
     return maxTokens;
+  }
+
+  public String getModel() {
+    return model;
+  }
+
+  public String getPrompt() {
+    return prompt;
+  }
+
+  public String getSuffix() {
+    return suffix;
   }
 
   public double getTemperature() {
@@ -53,28 +60,31 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
     return stream;
   }
 
-  public String getOverriddenPath() {
-    return overriddenPath;
-  }
+  public static class Builder {
 
-  public List<Tool> getTools() {
-    return tools;
-  }
+    private final String prompt;
 
-  public String getToolChoice() {
-    return toolChoice;
-  }
-
-  public abstract static class Builder {
-
+    private String model = "gpt-3.5-turbo-instruct";
+    private String suffix;
     private int maxTokens = 1000;
     private double temperature = 0.9;
     private double frequencyPenalty = 0;
     private double presencePenalty = 0.6;
     private boolean stream = true;
-    private String overriddenPath;
-    private List<Tool> tools;
-    private String toolChoice;
+
+    public Builder(String prompt) {
+      this.prompt = prompt;
+    }
+
+    public Builder setModel(String model) {
+      this.model = model;
+      return this;
+    }
+
+    public Builder setSuffix(String suffix) {
+      this.suffix = suffix;
+      return this;
+    }
 
     public Builder setMaxTokens(int maxTokens) {
       this.maxTokens = maxTokens;
@@ -101,21 +111,8 @@ public abstract class OpenAICompletionRequest implements CompletionRequest {
       return this;
     }
 
-    public Builder setOverriddenPath(String overriddenPath) {
-      this.overriddenPath = overriddenPath;
-      return this;
+    public OpenAITextCompletionRequest build() {
+      return new OpenAITextCompletionRequest(this);
     }
-
-    public Builder setTools(List<Tool> tools) {
-      this.tools = tools;
-      return this;
-    }
-
-    public Builder setToolChoice(String toolChoice) {
-      this.toolChoice = toolChoice;
-      return this;
-    }
-
-    public abstract OpenAICompletionRequest build();
   }
 }

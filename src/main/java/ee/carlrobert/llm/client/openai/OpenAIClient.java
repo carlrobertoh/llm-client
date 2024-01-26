@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
-import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingData;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingResponse;
@@ -40,16 +42,24 @@ public class OpenAIClient {
     this.host = builder.host;
   }
 
-  public EventSource getChatCompletionAsync(
-      OpenAICompletionRequest request,
+  public EventSource getCompletionAsync(
+      OpenAITextCompletionRequest request,
       CompletionEventListener eventListener) {
     return EventSources.createFactory(httpClient).newEventSource(
-        buildCompletionRequest(request),
+        buildTextCompletionRequest(request),
+        new OpenAITextCompletionEventSourceListener(eventListener));
+  }
+
+  public EventSource getChatCompletionAsync(
+      OpenAIChatCompletionRequest request,
+      CompletionEventListener eventListener) {
+    return EventSources.createFactory(httpClient).newEventSource(
+        buildChatCompletionRequest(request),
         new OpenAIChatCompletionEventSourceListener(eventListener));
   }
 
-  public OpenAIChatCompletionResponse getChatCompletion(OpenAICompletionRequest request) {
-    try (var response = httpClient.newCall(buildCompletionRequest(request)).execute()) {
+  public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
+    try (var response = httpClient.newCall(buildChatCompletionRequest(request)).execute()) {
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -89,18 +99,36 @@ public class OpenAIClient {
         .build();
   }
 
-  protected Request buildCompletionRequest(OpenAICompletionRequest completionRequest) {
+  protected Request buildChatCompletionRequest(OpenAIChatCompletionRequest request) {
     var headers = new HashMap<>(getRequiredHeaders());
-    if (completionRequest.isStream()) {
+    if (request.isStream()) {
       headers.put("Accept", "text/event-stream");
     }
     try {
-      var overriddenPath = completionRequest.getOverriddenPath();
+      var overriddenPath = request.getOverriddenPath();
       return new Request.Builder()
           .url(host + (overriddenPath == null ? "/v1/chat/completions" : overriddenPath))
           .headers(Headers.of(headers))
           .post(RequestBody.create(
-              new ObjectMapper().writeValueAsString(completionRequest),
+              new ObjectMapper().writeValueAsString(request),
+              MediaType.parse("application/json")))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to process request", e);
+    }
+  }
+
+  private Request buildTextCompletionRequest(OpenAITextCompletionRequest request) {
+    var headers = new HashMap<>(getRequiredHeaders());
+    if (request.isStream()) {
+      headers.put("Accept", "text/event-stream");
+    }
+    try {
+      return new Request.Builder()
+          .url(host + "/v1/completions")
+          .headers(Headers.of(headers))
+          .post(RequestBody.create(
+              new ObjectMapper().writeValueAsString(request),
               MediaType.parse("application/json")))
           .build();
     } catch (JsonProcessingException e) {

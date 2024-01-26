@@ -7,7 +7,7 @@ import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
-import ee.carlrobert.llm.client.openai.completion.OpenAICompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
@@ -38,13 +38,13 @@ public class AzureClient {
   }
 
   public EventSource getChatCompletionAsync(
-      OpenAICompletionRequest request,
+      OpenAIChatCompletionRequest request,
       CompletionEventListener completionEventListener) {
     return EventSources.createFactory(httpClient)
         .newEventSource(buildHttpRequest(request), getEventSourceListener(completionEventListener));
   }
 
-  public OpenAIChatCompletionResponse getChatCompletion(OpenAICompletionRequest request) {
+  public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
     try (var response = httpClient.newCall(buildHttpRequest(request)).execute()) {
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
@@ -52,7 +52,7 @@ public class AzureClient {
     }
   }
 
-  public Request buildHttpRequest(OpenAICompletionRequest completionRequest) {
+  public Request buildHttpRequest(OpenAIChatCompletionRequest completionRequest) {
     var headers = new HashMap<>(getRequiredHeaders());
     if (completionRequest.isStream()) {
       headers.put("Accept", "text/event-stream");
@@ -83,7 +83,7 @@ public class AzureClient {
     return headers;
   }
 
-  private String getChatCompletionPath(OpenAICompletionRequest request) {
+  private String getChatCompletionPath(OpenAIChatCompletionRequest request) {
     return String.format(
         request.getOverriddenPath() == null
             ? "/openai/deployments/%s/chat/completions?api-version=%s"
