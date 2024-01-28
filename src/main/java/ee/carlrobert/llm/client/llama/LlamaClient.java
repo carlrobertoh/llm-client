@@ -28,11 +28,13 @@ public class LlamaClient {
   private final OkHttpClient httpClient;
   private final String host;
   private final Integer port;
+  private final String apiKey;
 
   protected LlamaClient(Builder builder, OkHttpClient.Builder httpClientBuilder) {
     this.httpClient = httpClientBuilder.build();
     this.host = builder.host;
     this.port = builder.port;
+    this.apiKey = builder.apiKey;
   }
 
   public EventSource getChatCompletionAsync(
@@ -75,15 +77,18 @@ public class LlamaClient {
   private Request buildHttpRequest(LlamaCompletionRequest request, String path) {
     try {
       var baseHost = port == null ? BASE_URL : format("http://localhost:%d", port);
-      return new Request.Builder()
-          .url(host == null ? baseHost + path : host)
+      Request.Builder builder = new Request.Builder()
+          .url((host == null ? baseHost : host) + path)
           .header("Cache-Control", "no-cache")
           .header("Content-Type", "application/json")
           .header("Accept", request.isStream() ? "text/event-stream" : "text/json")
           .post(RequestBody.create(
               new ObjectMapper().writeValueAsString(request),
-              MediaType.parse("application/json")))
-          .build();
+              MediaType.parse("application/json")));
+      if (apiKey != null) {
+        builder.header("Authorization", "Bearer " + apiKey);
+      }
+      return builder.build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
@@ -114,6 +119,7 @@ public class LlamaClient {
 
     private String host;
     private Integer port;
+    private String apiKey;
 
     public Builder setHost(String host) {
       this.host = host;
@@ -122,6 +128,11 @@ public class LlamaClient {
 
     public Builder setPort(Integer port) {
       this.port = port;
+      return this;
+    }
+
+    public Builder setApiKey(String apiKey) {
+      this.apiKey = apiKey;
       return this;
     }
 
