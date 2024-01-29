@@ -84,7 +84,7 @@ public class YouClientTest extends BaseTest {
                 .setUseGPT4Model(true)
                 .setQueryTraceId(queryTraceId)
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onMessage(String message) {
                 resultMessageBuilder.append(message);

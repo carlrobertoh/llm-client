@@ -35,7 +35,7 @@ EventSource call = client.getChatCompletion(
         .setModel(OpenAIChatCompletionModel.GPT_4)
         .setTemperature(0.1)
         .build(),
-    new CompletionEventListener() {
+    new CompletionEventListener<String>(){
       @Override
       public void onMessage(String message) {
         System.out.println(message);

@@ -76,7 +76,7 @@ class OpenAIClientTest extends BaseTest {
                 .setPresencePenalty(0.1)
                 .setFrequencyPenalty(0.1)
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onMessage(String message) {
                 resultMessageBuilder.append(message);
@@ -132,7 +132,7 @@ class OpenAIClientTest extends BaseTest {
                 .setPresencePenalty(0.1)
                 .setFrequencyPenalty(0.1)
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onMessage(String message) {
                 resultMessageBuilder.append(message);
@@ -190,7 +190,7 @@ class OpenAIClientTest extends BaseTest {
                 .setFrequencyPenalty(0.1)
                 .setOverriddenPath("/v1/test/segment")
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onMessage(String message) {
                 resultMessageBuilder.append(message);
@@ -376,7 +376,7 @@ class OpenAIClientTest extends BaseTest {
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
                 assertThat(error.getCode()).isEqualTo("invalid_api_key");
@@ -405,7 +405,7 @@ class OpenAIClientTest extends BaseTest {
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
                 errorMessageBuilder.append(error.getMessage());

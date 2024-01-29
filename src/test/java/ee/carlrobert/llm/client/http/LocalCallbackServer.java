@@ -80,12 +80,15 @@ public class LocalCallbackServer {
     exchange.getResponseHeaders().add("Content-Type", "application/json");
 
     var response = expectation.getExchange().getResponse(new RequestEntity(exchange));
-    exchange.sendResponseHeaders(response.getStatusCode(), response.getResponse().length());
-
     var responseBody = exchange.getResponseBody();
-    responseBody.write(response.getResponse().getBytes());
-    responseBody.flush();
-    responseBody.close();
+    String responseString = response.getResponse();
+    exchange.sendResponseHeaders(response.getStatusCode(),
+        responseString == null ? 0 : responseString.length());
+    if (responseString != null) {
+      responseBody.write(responseString.getBytes());
+      responseBody.flush();
+      responseBody.close();
+    }
   }
 
   private void handleStreamExchange(

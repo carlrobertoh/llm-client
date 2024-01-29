@@ -2,9 +2,9 @@ package ee.carlrobert.llm.completion;
 
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 
-public interface CompletionEventListener {
+public interface CompletionEventListener<T> {
 
-  default void onMessage(String message) {
+  default void onMessage(T message) {
   }
 
   default void onComplete(StringBuilder messageBuilder) {

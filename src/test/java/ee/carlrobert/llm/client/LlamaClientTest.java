@@ -43,7 +43,7 @@ public class LlamaClientTest extends BaseTest {
             new LlamaCompletionRequest.Builder("TEST_PROMPT")
                 .setN_predict(10)
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onMessage(String message) {
                 resultMessageBuilder.append(message);
@@ -137,7 +137,7 @@ public class LlamaClientTest extends BaseTest {
                 .setStop(List.of("  <EOT>", "<EOT>")),
                 "TEST_PREFIX",
                 "TEST_SUFFIX"),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onMessage(String message) {
                 resultMessageBuilder.append(message);

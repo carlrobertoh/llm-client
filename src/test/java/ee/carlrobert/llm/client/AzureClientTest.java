@@ -70,7 +70,7 @@ class AzureClientTest extends BaseTest {
                 .setPresencePenalty(0.1)
                 .setFrequencyPenalty(0.1)
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onMessage(String message) {
                 resultMessageBuilder.append(message);
@@ -182,7 +182,7 @@ class AzureClientTest extends BaseTest {
                 .setFrequencyPenalty(0.1)
                 .setOverriddenPath("/v1/deployments/%s/completions?api_version=%s")
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onMessage(String message) {
                 resultMessageBuilder.append(message);
@@ -216,7 +216,7 @@ class AzureClientTest extends BaseTest {
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
                 errorMessageBuilder.append(error.getMessage());
@@ -245,7 +245,7 @@ class AzureClientTest extends BaseTest {
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
                 .build(),
-            new CompletionEventListener() {
+            new CompletionEventListener<String>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
                 errorMessageBuilder.append(error.getMessage());
