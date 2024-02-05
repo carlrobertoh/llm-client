@@ -66,15 +66,23 @@ public class OllamaClient {
   @NotNull
   private static Response convertNDJsonToTextEventStreamResponse(Response response)
       throws IOException {
-    String ndJsonString = response.body().string();
-    String textEventString = ndJsonString
-        .replace("{\"model\"", "data: {\"model\"")
-        .replace("}\n", "}\n\n");
     return response
         .newBuilder()
         .header("Content-Type", "text/event-stream")
-        .body(ResponseBody.create(textEventString, MediaType.get("text/event-stream")))
+        .body(ResponseBody.create(convertNdJsonToEventStream(response.body().string()),
+            MediaType.get("text/event-stream")))
         .build();
+  }
+
+  private static String convertNdJsonToEventStream(String ndjsonString) {
+    StringBuilder eventStreamBuilder = new StringBuilder();
+    String[] lines = ndjsonString.split("\n");
+    for (String line : lines) {
+      if (!line.isEmpty()) {
+        eventStreamBuilder.append("data: " + line + "\n\n");
+      }
+    }
+    return eventStreamBuilder.toString();
   }
 
   public EventSource getChatCompletionAsync(
