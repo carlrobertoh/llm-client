@@ -11,8 +11,11 @@ import static ee.carlrobert.llm.client.mixin.ExternalServiceTestMixin.Private.ex
 import ee.carlrobert.llm.client.http.LocalCallbackServer;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.Exchange;
+import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.http.expectation.BasicExpectation;
+import ee.carlrobert.llm.client.http.expectation.Expectation;
+import ee.carlrobert.llm.client.http.expectation.NdJsonStreamExpectation;
 import ee.carlrobert.llm.client.http.expectation.StreamExpectation;
 import java.util.Arrays;
 import java.util.Map;
@@ -63,9 +66,16 @@ public interface ExternalServiceTestMixin {
   }
 
   private void addExpectation(ExternalService externalService, Exchange exchange) {
+    Expectation expectation;
+    if (exchange instanceof StreamHttpExchange) {
+      expectation = new StreamExpectation(externalService, (StreamHttpExchange) exchange);
+    } else if (exchange instanceof NdJsonStreamHttpExchange) {
+      expectation = new NdJsonStreamExpectation(externalService,
+          (NdJsonStreamHttpExchange) exchange);
+    } else {
+      expectation = new BasicExpectation(externalService, (BasicHttpExchange) exchange);
+    }
     externalServiceServerMap.get(externalService)
-        .addExpectation(exchange instanceof BasicHttpExchange
-            ? new BasicExpectation(externalService, (BasicHttpExchange) exchange)
-            : new StreamExpectation(externalService, (StreamHttpExchange) exchange));
+        .addExpectation(expectation);
   }
 }

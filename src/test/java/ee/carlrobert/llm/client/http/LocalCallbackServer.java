@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import ee.carlrobert.llm.client.http.expectation.BasicExpectation;
 import ee.carlrobert.llm.client.http.expectation.Expectation;
+import ee.carlrobert.llm.client.http.expectation.NdJsonStreamExpectation;
 import ee.carlrobert.llm.client.http.expectation.StreamExpectation;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -49,6 +50,8 @@ public class LocalCallbackServer {
         }
         if (expectation instanceof StreamExpectation) {
           handleStreamExchange((StreamExpectation) expectation, exchange);
+        } else if (expectation instanceof NdJsonStreamExpectation) {
+          handleNdjsonStreamExchange((NdJsonStreamExpectation) expectation, exchange);
         } else {
           handleExchange((BasicExpectation) expectation, exchange);
         }
@@ -106,6 +109,24 @@ public class LocalCallbackServer {
     }
 
     responseBody.write(("data: [DONE]\n\n").getBytes());
+    responseBody.flush();
+    responseBody.close();
+  }
+
+  private void handleNdjsonStreamExchange(
+      NdJsonStreamExpectation expectation, HttpExchange exchange) throws IOException {
+    exchange.getResponseHeaders().add("Content-Type", "application/x-ndjson");
+    exchange.getResponseHeaders().add("Cache-Control", "no-cache");
+    exchange.getResponseHeaders().add("Connection", "keep-alive");
+    exchange.sendResponseHeaders(200, 0);
+
+    var responseBody = exchange.getResponseBody();
+
+    for (var event : expectation.getExchange().getResponse(new RequestEntity(exchange))) {
+      responseBody.write((format("%s\n", event)).getBytes());
+      sleep(250);
+    }
+
     responseBody.flush();
     responseBody.close();
   }

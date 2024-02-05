@@ -10,7 +10,7 @@ import static org.awaitility.Awaitility.await;
 
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
-import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
+import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange;
 import ee.carlrobert.llm.client.ollama.OllamaClient;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest.Builder;
@@ -34,7 +34,7 @@ public class OllamaClientTest extends BaseTest {
     OllamaParameters options = new OllamaParameters(new OllamaParameters.Builder()
         .temperature(0.8));
 
-    expectOllama((StreamHttpExchange) request -> {
+    expectOllama((NdJsonStreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/generate");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
@@ -143,7 +143,7 @@ public class OllamaClientTest extends BaseTest {
   void shouldStreamPullOllamaModel() {
     var results = new ArrayList<OllamaPullResponse>();
 
-    expectOllama((StreamHttpExchange) request -> {
+    expectOllama((NdJsonStreamHttpExchange)  request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/pull");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
