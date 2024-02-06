@@ -14,7 +14,6 @@ public class OllamaCompletionResponse {
   private boolean done;
   private int promptEvalCount;
   private int evalCount;
-  private String context;
 
   public String getModel() {
     return model;
@@ -62,13 +61,5 @@ public class OllamaCompletionResponse {
 
   public void setEvalCount(int evalCount) {
     this.evalCount = evalCount;
-  }
-
-  public String getContext() {
-    return context;
-  }
-
-  public void setContext(String context) {
-    this.context = context;
   }
 }
