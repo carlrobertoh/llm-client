@@ -2,7 +2,6 @@ package ee.carlrobert.llm.client.ollama.completion.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import ee.carlrobert.llm.client.StreamableRequest;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaResponseFormat;
 import ee.carlrobert.llm.completion.CompletionRequest;
 
@@ -10,7 +9,7 @@ import ee.carlrobert.llm.completion.CompletionRequest;
  * See <a href="https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-completion">ollama/api</a>
  */
 @JsonInclude(Include.NON_NULL)
-public class OllamaCompletionRequest implements CompletionRequest, StreamableRequest {
+public class OllamaCompletionRequest implements CompletionRequest {
 
   private final String model;
   private final String prompt;
@@ -22,7 +21,6 @@ public class OllamaCompletionRequest implements CompletionRequest, StreamableReq
   private final String context;
   private final Boolean stream;
   private final Boolean raw;
-
 
   public OllamaCompletionRequest(Builder builder) {
     this.prompt = builder.prompt;
@@ -128,6 +126,5 @@ public class OllamaCompletionRequest implements CompletionRequest, StreamableReq
     public OllamaCompletionRequest build() {
       return new OllamaCompletionRequest(this);
     }
-
   }
 }

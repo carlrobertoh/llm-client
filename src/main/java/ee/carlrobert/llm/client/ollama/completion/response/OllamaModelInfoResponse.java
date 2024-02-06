@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaModel.OllamaModelDetails;
 
-
 /**
  * see <a
  * href="https://github.com/ollama/ollama/blob/main/docs/api.md#show-model-information">ollama/api</a>.
@@ -47,8 +46,7 @@ public class OllamaModelInfoResponse {
     return details;
   }
 
-  public void setDetails(
-      OllamaModelDetails details) {
+  public void setDetails(OllamaModelDetails details) {
     this.details = details;
   }
 }

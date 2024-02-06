@@ -27,13 +27,10 @@ import org.junit.jupiter.api.Test;
 
 public class OllamaClientTest extends BaseTest {
 
+  private static final OllamaClient client = new OllamaClient.Builder().build();
+
   @Test
   void shouldStreamOllamaCompletion() {
-    var resultMessageBuilder = new StringBuilder();
-
-    OllamaParameters options = new OllamaParameters(new OllamaParameters.Builder()
-        .temperature(0.8));
-
     expectOllama((NdJsonStreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/generate");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -50,21 +47,20 @@ public class OllamaClientTest extends BaseTest {
           jsonMapResponse(e("response", "!"), e("done", true)));
     });
 
-    new OllamaClient.Builder()
-        .build()
-        .getChatCompletionAsync(
-            new OllamaCompletionRequest.Builder("codellama:7b",
-                "TEST_PROMPT")
-                .setSystem("SYSTEM_PROMPT")
-                .setStream(true)
-                .setOptions(options)
-                .build(),
-            new CompletionEventListener<String>() {
-              @Override
-              public void onMessage(String message) {
-                resultMessageBuilder.append(message);
-              }
-            });
+    var resultMessageBuilder = new StringBuilder();
+    client.getChatCompletionAsync(
+        new OllamaCompletionRequest.Builder("codellama:7b",
+            "TEST_PROMPT")
+            .setSystem("SYSTEM_PROMPT")
+            .setStream(true)
+            .setOptions(new OllamaParameters.Builder().temperature(0.8).build())
+            .build(),
+        new CompletionEventListener<>() {
+          @Override
+          public void onMessage(String message) {
+            resultMessageBuilder.append(message);
+          }
+        });
 
     await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
   }
@@ -80,11 +76,9 @@ public class OllamaClientTest extends BaseTest {
       return new ResponseEntity(jsonMapResponse("response", "Hello!"));
     });
 
-    var response = new OllamaClient.Builder()
-        .build()
-        .getChatCompletion(new Builder("codellama:7b", "TEST_PROMPT")
-            .setStream(false)
-            .build());
+    var response = client.getChatCompletion(new Builder("codellama:7b", "TEST_PROMPT")
+        .setStream(false)
+        .build());
 
     assertThat(response.getResponse()).isEqualTo("Hello!");
   }
@@ -94,21 +88,17 @@ public class OllamaClientTest extends BaseTest {
     expectOllama((BasicHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/tags");
       assertThat(request.getMethod()).isEqualTo("GET");
-      return new ResponseEntity(jsonMapResponse("models",
-          jsonArray(Map.of("name", "codellama:7b",
-                  "size", 70000,
-                  "details", jsonMap(e("format", "gguf"), e("parameter_size", "7B"))
-              ),
-              Map.of("name", "codellama:13b",
-                  "size", 130000,
-                  "details", jsonMap(e("format", "gguf"), e("parameter_size", "13B"))
-              )
-          )));
+      return new ResponseEntity(jsonMapResponse("models", jsonArray(
+          Map.of("name", "codellama:7b",
+              "size", 70000,
+              "details", jsonMap(e("format", "gguf"), e("parameter_size", "7B"))),
+          Map.of("name", "codellama:13b",
+              "size", 130000,
+              "details", jsonMap(e("format", "gguf"), e("parameter_size", "13B")))
+      )));
     });
 
-    var response = new OllamaClient.Builder()
-        .build()
-        .getModelTags();
+    var response = client.getModelTags();
 
     assertThat(response.getModels()).hasSize(2);
     OllamaModel firstModel = response.getModels().get(0);
@@ -132,41 +122,39 @@ public class OllamaClientTest extends BaseTest {
       return new ResponseEntity(jsonMapResponse("status", "success"));
     });
 
-    var response = new OllamaClient.Builder()
-        .build()
-        .pullModel(new OllamaPullRequest("codellama:7b", false));
+    var response = client.pullModel(new OllamaPullRequest("codellama:7b", false));
 
     assertThat(response.getStatus()).isEqualTo("success");
   }
 
   @Test
   void shouldStreamPullOllamaModel() {
-    var results = new ArrayList<OllamaPullResponse>();
-
-    expectOllama((NdJsonStreamHttpExchange)  request -> {
+    expectOllama((NdJsonStreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/pull");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
           .extracting("name", "stream")
           .containsExactly("codellama:7b", true);
       return List.of(
-          jsonMapResponse(e("status", "downloading digestname"), e("digest", "digestname"),
-              e("total", "1234"), e("completed", "10")),
+          jsonMapResponse(
+              e("status", "downloading digestname"),
+              e("digest", "digestname"),
+              e("total", "1234"),
+              e("completed", "10")),
           jsonMapResponse(e("status", "verifying sha256 digestname")),
           jsonMapResponse(e("status", "writing manifest")),
           jsonMapResponse(e("status", "removing any unused layers")),
           jsonMapResponse(e("status", "success")));
     });
 
-    new OllamaClient.Builder()
-        .build()
-        .pullModelAsync(new OllamaPullRequest("codellama:7b", true),
-            new CompletionEventListener<>() {
-              @Override
-              public void onMessage(OllamaPullResponse response) {
-                results.add(response);
-              }
-            });
+    var results = new ArrayList<OllamaPullResponse>();
+    client.pullModelAsync(new OllamaPullRequest("codellama:7b", true),
+        new CompletionEventListener<>() {
+          @Override
+          public void onMessage(OllamaPullResponse response) {
+            results.add(response);
+          }
+        });
 
     await().atMost(5, SECONDS).until(() -> results.size() == 5);
     OllamaPullResponse firstResponse = results.get(0);
@@ -190,15 +178,13 @@ public class OllamaClientTest extends BaseTest {
       return new ResponseEntity(null);
     });
 
-    var response = new OllamaClient.Builder()
-        .build()
-        .deleteModel("codellama:7b");
+    var response = client.deleteModel("codellama:7b");
 
     assertThat(response).isTrue();
   }
 
   @Test
-  void shouldGetOllamaModelinfo() {
+  void shouldGetOllamaModelInfo() {
     expectOllama((BasicHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/show");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -208,13 +194,10 @@ public class OllamaClientTest extends BaseTest {
           e("modelfile", "# Modelfile generated by \"ollama show\"\n"),
           e("template", "{{ .System }}\nUSER: {{ .Prompt }}\nASSSISTANT: "),
           e("parameters", "num_ctx                        4096"),
-          e("details", jsonMap(e("format", "gguf"), e("parameter_size", "7B"))
-          )));
+          e("details", jsonMap(e("format", "gguf"), e("parameter_size", "7B")))));
     });
 
-    var response = new OllamaClient.Builder()
-        .build()
-        .getModelInfo("codellama:7b");
+    var response = client.getModelInfo("codellama:7b");
 
     assertThat(response.getModelfile()).isEqualTo("# Modelfile generated by \"ollama show\"\n");
     assertThat(response.getTemplate()).isEqualTo(
@@ -222,13 +205,11 @@ public class OllamaClientTest extends BaseTest {
     assertThat(response.getParameters()).isEqualTo("num_ctx                        4096");
     assertThat(response.getDetails().getFormat()).isEqualTo("gguf");
     assertThat(response.getDetails().getParameterSize()).isEqualTo("7B");
-
   }
 
   @Test
   void shouldGetOllamaEmbedding() {
     double[] embedding = {0.1, 0.2, 0.3};
-
     expectOllama((BasicHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/embeddings");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -238,12 +219,9 @@ public class OllamaClientTest extends BaseTest {
       return new ResponseEntity(jsonMapResponse(e("embedding", embedding)));
     });
 
-    var response = new OllamaClient.Builder()
-        .build()
-        .getEmbedding(
-            new OllamaEmbeddingRequest.Builder("codellama:7b", "This is a prompt").build());
+    var response = client.getEmbedding(
+        new OllamaEmbeddingRequest.Builder("codellama:7b", "This is a prompt").build());
 
     assertThat(response.getEmbedding()).isEqualTo(embedding);
   }
-
 }

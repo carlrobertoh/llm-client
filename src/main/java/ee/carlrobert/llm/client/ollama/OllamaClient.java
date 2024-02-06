@@ -1,5 +1,6 @@
 package ee.carlrobert.llm.client.ollama;
 
+import static ee.carlrobert.llm.client.InterceptorUtil.REWRITE_X_NDJSON_CONTENT_INTERCEPTOR;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.core.JacksonException;
@@ -7,7 +8,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
-import ee.carlrobert.llm.client.StreamableRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaEmbeddingRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaPullRequest;
@@ -21,16 +21,12 @@ import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 import java.io.IOException;
 import java.util.Map;
-import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
-import org.jetbrains.annotations.NotNull;
 
 public class OllamaClient {
 
@@ -41,60 +37,24 @@ public class OllamaClient {
   private final Integer port;
 
   protected OllamaClient(Builder builder, OkHttpClient.Builder httpClientBuilder) {
-    httpClientBuilder
-        .addInterceptor(new Interceptor() {
-          @NotNull
-          @Override
-          public Response intercept(@NotNull Chain chain) throws IOException {
-            Request request = chain.request();
-            Response response = chain.proceed(request);
-            // Workaround since OkHttp does not recognize "application/x-ndjson" as a valid stream
-            // Content-Type
-            // see: RealEventSource.kt ResponseBody.isEventStream()
-            if (response.header("Content-Type", "")
-                .equals("application/x-ndjson")) {
-              return convertNDJsonToTextEventStreamResponse(response);
-            }
-            return response;
-          }
-        });
-    this.httpClient = httpClientBuilder.build();
+    this.httpClient = httpClientBuilder
+        .addInterceptor(REWRITE_X_NDJSON_CONTENT_INTERCEPTOR)
+        .build();
     this.host = builder.host;
     this.port = builder.port;
-  }
-
-  @NotNull
-  private static Response convertNDJsonToTextEventStreamResponse(Response response)
-      throws IOException {
-    return response
-        .newBuilder()
-        .header("Content-Type", "text/event-stream")
-        .body(ResponseBody.create(convertNdJsonToEventStream(response.body().string()),
-            MediaType.get("text/event-stream")))
-        .build();
-  }
-
-  private static String convertNdJsonToEventStream(String ndjsonString) {
-    StringBuilder eventStreamBuilder = new StringBuilder();
-    String[] lines = ndjsonString.split("\n");
-    for (String line : lines) {
-      if (!line.isEmpty()) {
-        eventStreamBuilder.append("data: " + line + "\n\n");
-      }
-    }
-    return eventStreamBuilder.toString();
   }
 
   public EventSource getChatCompletionAsync(
       OllamaCompletionRequest request,
       CompletionEventListener<String> eventListener) {
     return EventSources.createFactory(httpClient)
-        .newEventSource(buildCompletionHttpRequest(request),
+        .newEventSource(
+            buildPostRequest(request, "/api/generate", true),
             getCompletionEventSourceListener(eventListener));
   }
 
   public OllamaCompletionResponse getChatCompletion(OllamaCompletionRequest request) {
-    try (var response = httpClient.newCall(buildCompletionHttpRequest(request)).execute()) {
+    try (var response = httpClient.newCall(buildPostRequest(request, "/api/generate")).execute()) {
       return DeserializationUtil.mapResponse(response, OllamaCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(
@@ -103,8 +63,8 @@ public class OllamaClient {
   }
 
   public OllamaEmbeddingResponse getEmbedding(OllamaEmbeddingRequest request) {
-    try (var response = httpClient.newCall(
-            buildPostRequest(request, "/api/embeddings", false))
+    try (var response = httpClient
+        .newCall(buildPostRequest(request, "/api/embeddings"))
         .execute()) {
       return DeserializationUtil.mapResponse(response, OllamaEmbeddingResponse.class);
     } catch (IOException e) {
@@ -126,14 +86,17 @@ public class OllamaClient {
       OllamaPullRequest request,
       CompletionEventListener<OllamaPullResponse> eventListener) {
     return EventSources.createFactory(httpClient)
-        .newEventSource(buildPostRequest(request, "/api/pull"),
+        .newEventSource(
+            buildPostRequest(request, "/api/pull", true),
             getPullModelEventSourceListener(eventListener));
   }
 
-
   public boolean deleteModel(String model) {
-    try (var response = httpClient.newCall(defaultRequest("/api/delete", false)
-        .delete(createRequestBody(Map.of("name", model))).build()).execute()) {
+    try (var response = httpClient
+        .newCall(defaultRequest("/api/delete")
+            .delete(createRequestBody(Map.of("name", model)))
+            .build())
+        .execute()) {
       return response.isSuccessful();
     } catch (IOException e) {
       throw new RuntimeException(
@@ -142,7 +105,8 @@ public class OllamaClient {
   }
 
   public OllamaTagsResponse getModelTags() {
-    try (var response = httpClient.newCall(defaultRequest("/api/tags", false).get().build())
+    try (var response = httpClient
+        .newCall(defaultRequest("/api/tags").get().build())
         .execute()) {
       return DeserializationUtil.mapResponse(response, OllamaTagsResponse.class);
     } catch (IOException e) {
@@ -152,8 +116,8 @@ public class OllamaClient {
   }
 
   public OllamaModelInfoResponse getModelInfo(String model) {
-    try (var response = httpClient.newCall(
-            buildPostRequest(Map.of("name", model), "/api/show", false))
+    try (var response = httpClient
+        .newCall(buildPostRequest(Map.of("name", model), "/api/show"))
         .execute()) {
       return DeserializationUtil.mapResponse(response, OllamaModelInfoResponse.class);
     } catch (IOException e) {
@@ -162,17 +126,13 @@ public class OllamaClient {
     }
   }
 
-  private Request buildCompletionHttpRequest(OllamaCompletionRequest request) {
-    return buildPostRequest(request, "/api/generate");
+  private Request buildPostRequest(Object request, String path) {
+    return buildPostRequest(request, path, false);
   }
 
-  private Request buildPostRequest(StreamableRequest request, String path) {
-    return buildPostRequest(request, path, request.isStream());
-  }
-
-  private Request buildPostRequest(Object request, String path, boolean isStream) {
+  private Request buildPostRequest(Object request, String path, boolean stream) {
     try {
-      return defaultRequest(path, isStream)
+      return defaultRequest(path, stream)
           .post(createRequestBody(request))
           .build();
     } catch (JsonProcessingException e) {
@@ -180,11 +140,14 @@ public class OllamaClient {
     }
   }
 
-  @NotNull
   private static RequestBody createRequestBody(Object request) throws JsonProcessingException {
     return RequestBody.create(
         new ObjectMapper().writeValueAsString(request),
         MediaType.parse("application/json"));
+  }
+
+  private Request.Builder defaultRequest(String path) {
+    return defaultRequest(path, false);
   }
 
   private Request.Builder defaultRequest(String path, boolean stream) {
@@ -196,18 +159,16 @@ public class OllamaClient {
         .header("Accept", stream ? "text/event-stream" : "text/json");
   }
 
-  private CompletionEventSourceListener getCompletionEventSourceListener(
-      CompletionEventListener eventListener) {
-    return new CompletionEventSourceListener(eventListener) {
+  private CompletionEventSourceListener<String> getCompletionEventSourceListener(
+      CompletionEventListener<String> eventListener) {
+    return new CompletionEventSourceListener<>(eventListener) {
       @Override
       protected String getMessage(String data) {
         try {
-          var response = new ObjectMapper().readValue(data, OllamaCompletionResponse.class);
-          return response.getResponse();
+          return new ObjectMapper().readValue(data, OllamaCompletionResponse.class).getResponse();
         } catch (JacksonException e) {
-          // ignore
+          return "";
         }
-        return "";
       }
 
       @Override
@@ -225,9 +186,8 @@ public class OllamaClient {
         try {
           return new ObjectMapper().readValue(data, OllamaPullResponse.class);
         } catch (JacksonException e) {
-          // ignore
+          return null;
         }
-        return null;
       }
 
       @Override

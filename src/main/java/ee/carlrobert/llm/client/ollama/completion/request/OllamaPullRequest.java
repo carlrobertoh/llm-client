@@ -2,19 +2,17 @@ package ee.carlrobert.llm.client.ollama.completion.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import ee.carlrobert.llm.client.StreamableRequest;
 
 /*
  * See <a href="https://github.com/ollama/ollama/blob/main/docs/api.md#pull-a-model">ollama/api</a>
  */
 @JsonInclude(Include.NON_NULL)
-public class OllamaPullRequest implements StreamableRequest {
+public class OllamaPullRequest {
 
   private final String name;
-  private final Boolean stream;
+  private final boolean stream;
 
-
-  public OllamaPullRequest(String name, Boolean stream) {
+  public OllamaPullRequest(String name, boolean stream) {
     this.name = name;
     this.stream = stream;
   }
@@ -23,12 +21,7 @@ public class OllamaPullRequest implements StreamableRequest {
     return name;
   }
 
-  public Boolean getStream() {
-    return stream;
-  }
-
-  @Override
-  public Boolean isStream() {
+  public boolean isStream() {
     return stream;
   }
 }

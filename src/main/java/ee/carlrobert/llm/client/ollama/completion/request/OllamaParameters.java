@@ -48,7 +48,6 @@ public class OllamaParameters {
     this.topP = builder.topP;
   }
 
-
   public Integer getMirostat() {
     return mirostat;
   }
@@ -214,6 +213,10 @@ public class OllamaParameters {
     public Builder topP(Double topP) {
       this.topP = topP;
       return this;
+    }
+
+    public OllamaParameters build() {
+      return new OllamaParameters(this);
     }
   }
 }
