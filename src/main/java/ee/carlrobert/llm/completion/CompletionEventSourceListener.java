@@ -16,27 +16,27 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class CompletionEventSourceListener extends EventSourceListener {
+public abstract class CompletionEventSourceListener<T> extends EventSourceListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(CompletionEventSourceListener.class);
 
-  private final CompletionEventListener listeners;
+  private final CompletionEventListener<T> listeners;
   private final StringBuilder messageBuilder = new StringBuilder();
   private final boolean retryOnReadTimeout;
   private final Consumer<String> onRetry;
 
-  public CompletionEventSourceListener(CompletionEventListener listeners) {
+  public CompletionEventSourceListener(CompletionEventListener<T> listeners) {
     this(listeners, false, null);
   }
 
-  public CompletionEventSourceListener(CompletionEventListener listeners,
+  public CompletionEventSourceListener(CompletionEventListener<T> listeners,
       boolean retryOnReadTimeout, Consumer<String> onRetry) {
     this.listeners = listeners;
     this.retryOnReadTimeout = retryOnReadTimeout;
     this.onRetry = onRetry;
   }
 
-  protected abstract String getMessage(String data) throws JsonProcessingException;
+  protected abstract T getMessage(String data) throws JsonProcessingException;
 
   protected abstract ErrorDetails getErrorDetails(String data) throws JsonProcessingException;
 

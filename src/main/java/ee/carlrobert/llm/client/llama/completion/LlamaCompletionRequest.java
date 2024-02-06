@@ -32,7 +32,7 @@ public class LlamaCompletionRequest implements CompletionRequest {
     return prompt;
   }
 
-  public boolean isStream() {
+  public Boolean isStream() {
     return stream;
   }
 
