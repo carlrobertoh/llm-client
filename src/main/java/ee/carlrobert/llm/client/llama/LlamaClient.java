@@ -39,7 +39,7 @@ public class LlamaClient {
 
   public EventSource getChatCompletionAsync(
       LlamaCompletionRequest request,
-      CompletionEventListener eventListener) {
+      CompletionEventListener<String> eventListener) {
     return EventSources.createFactory(httpClient)
         .newEventSource(buildCompletionHttpRequest(request), getEventSourceListener(eventListener));
   }

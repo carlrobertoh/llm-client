@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.List;
 
 /*
  * See <a href="https://github.com/ollama/ollama/blob/main/docs/modelfile.md#parameter">ollama/api</a>
@@ -23,7 +24,7 @@ public class OllamaParameters {
   private final Double repeatPenalty;
   private final Double temperature;
   private final Integer seed;
-  private final String stop;
+  private final List<String> stop;
   private final Double tfsZ;
   private final Integer numPredict;
   private final Integer topK;
@@ -92,7 +93,7 @@ public class OllamaParameters {
     return seed;
   }
 
-  public String getStop() {
+  public List<String> getStop() {
     return stop;
   }
 
@@ -125,7 +126,7 @@ public class OllamaParameters {
     private Double repeatPenalty;
     private Double temperature;
     private Integer seed;
-    private String stop;
+    private List<String> stop;
     private Double tfsZ;
     private Integer numPredict;
     private Integer topK;
@@ -190,7 +191,7 @@ public class OllamaParameters {
       return this;
     }
 
-    public Builder stop(String stop) {
+    public Builder stop(List<String> stop) {
       this.stop = stop;
       return this;
     }
