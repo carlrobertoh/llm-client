@@ -21,6 +21,7 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRe
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Map;
+import okhttp3.sse.EventSource;
 import org.junit.jupiter.api.Test;
 
 class AzureClientTest extends BaseTest {
@@ -72,7 +73,7 @@ class AzureClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener<String>() {
               @Override
-              public void onMessage(String message) {
+              public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
 
@@ -184,7 +185,7 @@ class AzureClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener<String>() {
               @Override
-              public void onMessage(String message) {
+              public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
 

@@ -14,6 +14,7 @@ import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest.Builder;
 import ee.carlrobert.llm.client.llama.completion.LlamaInfillRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
+import okhttp3.sse.EventSource;
 import org.junit.jupiter.api.Test;
 
 public class LlamaClientTest extends BaseTest {
@@ -45,7 +46,7 @@ public class LlamaClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener<String>() {
               @Override
-              public void onMessage(String message) {
+              public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
             });
@@ -139,7 +140,7 @@ public class LlamaClientTest extends BaseTest {
                 "TEST_SUFFIX"),
             new CompletionEventListener<String>() {
               @Override
-              public void onMessage(String message) {
+              public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
             });

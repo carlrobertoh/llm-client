@@ -25,6 +25,7 @@ import ee.carlrobert.llm.client.openai.completion.request.ToolFunctionParameters
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Map;
+import okhttp3.sse.EventSource;
 import org.junit.jupiter.api.Test;
 
 class OpenAIClientTest extends BaseTest {
@@ -78,7 +79,7 @@ class OpenAIClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener<String>() {
               @Override
-              public void onMessage(String message) {
+              public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
             });
@@ -134,7 +135,7 @@ class OpenAIClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener<String>() {
               @Override
-              public void onMessage(String message) {
+              public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
             });
@@ -192,7 +193,7 @@ class OpenAIClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener<String>() {
               @Override
-              public void onMessage(String message) {
+              public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
             });

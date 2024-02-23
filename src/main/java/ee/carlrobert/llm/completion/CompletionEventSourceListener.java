@@ -63,7 +63,7 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
       var message = getMessage(data);
       if (message != null) {
         messageBuilder.append(message);
-        listeners.onMessage(message);
+        listeners.onMessage(message, eventSource);
       }
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to deserialize payload.", e);

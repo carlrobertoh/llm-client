@@ -23,6 +23,7 @@ import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import okhttp3.sse.EventSource;
 import org.junit.jupiter.api.Test;
 
 public class OllamaClientTest extends BaseTest {
@@ -57,7 +58,7 @@ public class OllamaClientTest extends BaseTest {
             .build(),
         new CompletionEventListener<>() {
           @Override
-          public void onMessage(String message) {
+          public void onMessage(String message, EventSource eventSource) {
             resultMessageBuilder.append(message);
           }
         });
@@ -151,7 +152,7 @@ public class OllamaClientTest extends BaseTest {
     client.pullModelAsync(new OllamaPullRequest("codellama:7b", true),
         new CompletionEventListener<>() {
           @Override
-          public void onMessage(OllamaPullResponse response) {
+          public void onMessage(OllamaPullResponse response, EventSource eventSource) {
             results.add(response);
           }
         });

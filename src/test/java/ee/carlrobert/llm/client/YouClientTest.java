@@ -13,6 +13,7 @@ import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.UUID;
+import okhttp3.sse.EventSource;
 import org.junit.jupiter.api.Test;
 
 public class YouClientTest extends BaseTest {
@@ -86,7 +87,7 @@ public class YouClientTest extends BaseTest {
                 .build(),
             new CompletionEventListener<String>() {
               @Override
-              public void onMessage(String message) {
+              public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
             });
