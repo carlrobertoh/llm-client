@@ -6,9 +6,9 @@ import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionR
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 
-public class OpenAIChatCompletionEventSourceListener extends CompletionEventSourceListener {
+public class OpenAIChatCompletionEventSourceListener extends CompletionEventSourceListener<String> {
 
-  public OpenAIChatCompletionEventSourceListener(CompletionEventListener listeners) {
+  public OpenAIChatCompletionEventSourceListener(CompletionEventListener<String> listeners) {
     super(listeners);
   }
 

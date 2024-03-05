@@ -1,6 +1,7 @@
 package ee.carlrobert.llm.client.mixin;
 
 
+import static ee.carlrobert.llm.client.mixin.ExternalService.ANTHROPIC;
 import static ee.carlrobert.llm.client.mixin.ExternalService.AZURE;
 import static ee.carlrobert.llm.client.mixin.ExternalService.LLAMA;
 import static ee.carlrobert.llm.client.mixin.ExternalService.OLLAMA;
@@ -47,6 +48,10 @@ public interface ExternalServiceTestMixin {
 
   default void expectOpenAI(Exchange exchange) {
     addExpectation(OPENAI, exchange);
+  }
+
+  default void expectAnthropic(Exchange exchange) {
+    addExpectation(ANTHROPIC, exchange);
   }
 
   default void expectAzure(Exchange exchange) {

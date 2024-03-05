@@ -4,6 +4,7 @@ import ee.carlrobert.llm.client.http.Service;
 
 public enum ExternalService implements Service {
   OPENAI("openai.baseUrl"),
+  ANTHROPIC("anthropic.baseUrl"),
   AZURE("azure.openai.baseUrl"),
   YOU("you.baseUrl"),
   LLAMA("llama.baseUrl"),
