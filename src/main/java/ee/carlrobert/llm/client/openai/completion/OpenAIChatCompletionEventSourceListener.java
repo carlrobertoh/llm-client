@@ -13,16 +13,19 @@ public class OpenAIChatCompletionEventSourceListener extends CompletionEventSour
   }
 
   protected String getMessage(String data) throws JsonProcessingException {
-    var choice = new ObjectMapper()
+    var choices = new ObjectMapper()
         .readValue(data, OpenAIChatCompletionResponse.class)
-        .getChoices()
-        .get(0);
-    if (choice != null) {
-      var delta = choice.getDelta();
-      if (delta != null) {
-        return delta.getContent();
+        .getChoices();
+    if (choices != null && !choices.isEmpty()) {
+      var choice = choices.get(0);
+      if (choice != null) {
+        var delta = choice.getDelta();
+        if (delta != null) {
+          return delta.getContent();
+        }
       }
     }
+
     return "";
   }
 
