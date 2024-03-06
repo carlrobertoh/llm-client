@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionErrorDetails;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionResponse;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStreamResponse;
@@ -78,19 +79,26 @@ public class ClaudeClient {
     return new CompletionEventSourceListener<>(eventListener) {
       @Override
       protected String getMessage(String data) {
+        var mapper = new ObjectMapper();
         try {
-          return new ObjectMapper().readValue(data, ClaudeCompletionStreamResponse.class)
+          return mapper.readValue(data, ClaudeCompletionStreamResponse.class)
               .getDelta()
               .getText();
-        } catch (Throwable t) {
-          return "";
+        } catch (Exception e) {
+          try {
+            return mapper.readValue(data, ClaudeCompletionErrorDetails.class)
+                .getError()
+                .getMessage();
+          } catch (Exception ex) {
+            return "";
+          }
         }
       }
 
       @Override
       protected ErrorDetails getErrorDetails(String error) {
         try {
-          return new ObjectMapper().readValue(error, ErrorDetails.class);
+          return new ObjectMapper().readValue(error, ClaudeCompletionErrorDetails.class).getError();
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
