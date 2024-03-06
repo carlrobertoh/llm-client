@@ -56,8 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.6.0]: https://github.com/carlrobertoh/llm-client/compare/3831d02c7ac0bd932dfad844605f3bd41d709d2b...HEAD
-[0.5.0]: https://github.com/carlrobertoh/llm-client/compare/50f636ef1796286ca259ad9d3fc0000ae180687e...HEAD
+[0.6.1]: https://github.com/carlrobertoh/llm-client/compare/f7791cbf92af7fe8b8b6a0226cdc3d3f8bf56f14...HEAD
+[0.6.0]: https://github.com/carlrobertoh/llm-client/compare/3831d02c7ac0bd932dfad844605f3bd41d709d2b...f7791cbf92af7fe8b8b6a0226cdc3d3f8bf56f14
+[0.5.0]: https://github.com/carlrobertoh/llm-client/compare/50f636ef1796286ca259ad9d3fc0000ae180687e...3831d02c7ac0bd932dfad844605f3bd41d709d2b
 [0.4.3]: https://github.com/carlrobertoh/llm-client/compare/ae03125494754cf220eb9e3908d3be61bb2f9fe9..50f636ef1796286ca259ad9d3fc0000ae180687e
 [0.4.2]: https://github.com/carlrobertoh/llm-client/compare/eedae7c6e0eca726620e3f1abb4610eda53cc502..ae03125494754cf220eb9e3908d3be61bb2f9fe9
 [0.4.1]: https://github.com/carlrobertoh/llm-client/compare/0c6e33c925ddd01a65ca4692111d12eb0047dfbb..eedae7c6e0eca726620e3f1abb4610eda53cc502
