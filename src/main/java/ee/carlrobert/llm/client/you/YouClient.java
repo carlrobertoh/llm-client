@@ -82,7 +82,12 @@ public class YouClient {
               "safeSearch",
               "WebPages,Translations,TimeZone,Computation,RelatedSearches")
           .addQueryParameter("domain", "youchat")
+          .addQueryParameter("selectedChatMode", request.getChatMode().toString())
           .addQueryParameter("chat", new ObjectMapper().writeValueAsString(request.getMessages()));
+
+      if (request.getChatMode().isSupportCustomModel()) {
+        httpUrlBuilder.addQueryParameter("selectedAIModel", request.getCustomModel().toString());
+      }
 
       if (url.getPort() != -1) {
         httpUrlBuilder.port(url.getPort());

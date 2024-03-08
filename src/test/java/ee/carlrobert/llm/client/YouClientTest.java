@@ -8,6 +8,8 @@ import static org.awaitility.Awaitility.await;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.you.UTMParameters;
 import ee.carlrobert.llm.client.you.YouClient;
+import ee.carlrobert.llm.client.you.completion.YouCompletionCustomModel;
+import ee.carlrobert.llm.client.you.completion.YouCompletionMode;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequest;
 import ee.carlrobert.llm.client.you.completion.YouCompletionRequestMessage;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -40,7 +42,9 @@ public class YouClientTest extends BaseTest {
               + "count=10&"
               + "safeSearch=WebPages,Translations,TimeZone,Computation,RelatedSearches&"
               + "domain=youchat&"
+              + "selectedChatMode=custom&"
               + "chat=[{\"question\":\"Ping\",\"answer\":\"Pong\"}]&"
+              + "selectedAIModel=gemini_pro&"
               + "chatId=" + chatId + "&"
               + "queryTraceId=" + queryTraceId + "&"
               + "utm_id=TEST_ID&"
@@ -84,6 +88,8 @@ public class YouClientTest extends BaseTest {
                 .setUserId(userId)
                 .setUseGPT4Model(true)
                 .setQueryTraceId(queryTraceId)
+                .setChatMode(YouCompletionMode.CUSTOM)
+                .setCustomModel(YouCompletionCustomModel.GEMINI_PRO)
                 .build(),
             new CompletionEventListener<String>() {
               @Override

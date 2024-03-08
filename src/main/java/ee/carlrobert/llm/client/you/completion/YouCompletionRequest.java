@@ -13,6 +13,9 @@ public class YouCompletionRequest implements CompletionRequest {
   private final UUID queryTraceId;
   private final boolean useGPT4Model;
 
+  private final YouCompletionMode chatMode;
+  private final YouCompletionCustomModel customModel;
+
   public YouCompletionRequest(Builder builder) {
     this.prompt = builder.prompt;
     this.messages = builder.messages;
@@ -20,6 +23,8 @@ public class YouCompletionRequest implements CompletionRequest {
     this.userId = builder.userId;
     this.queryTraceId = builder.queryTraceId;
     this.useGPT4Model = builder.useGPT4Model;
+    this.chatMode = builder.chatMode;
+    this.customModel = builder.customModel;
   }
 
   public String getPrompt() {
@@ -46,6 +51,14 @@ public class YouCompletionRequest implements CompletionRequest {
     return useGPT4Model;
   }
 
+  public YouCompletionMode getChatMode() {
+    return chatMode == null ? YouCompletionMode.DEFAULT : chatMode;
+  }
+
+  public YouCompletionCustomModel getCustomModel() {
+    return customModel == null ? YouCompletionCustomModel.GPT_4_TURBO : customModel;
+  }
+
   public static class Builder {
 
     private final String prompt;
@@ -54,6 +67,8 @@ public class YouCompletionRequest implements CompletionRequest {
     private UUID userId;
     private UUID queryTraceId;
     private boolean useGPT4Model;
+    private YouCompletionMode chatMode = YouCompletionMode.DEFAULT;
+    private YouCompletionCustomModel customModel = YouCompletionCustomModel.GPT_4_TURBO;
 
     public Builder(String prompt) {
       this.prompt = prompt;
@@ -81,6 +96,16 @@ public class YouCompletionRequest implements CompletionRequest {
 
     public Builder setUseGPT4Model(boolean useGPT4Model) {
       this.useGPT4Model = useGPT4Model;
+      return this;
+    }
+
+    public Builder setChatMode(YouCompletionMode chatMode) {
+      this.chatMode = chatMode;
+      return this;
+    }
+
+    public Builder setCustomModel(YouCompletionCustomModel customModel) {
+      this.customModel = customModel;
       return this;
     }
 
