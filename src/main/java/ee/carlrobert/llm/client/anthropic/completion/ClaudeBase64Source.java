@@ -42,6 +42,8 @@ public class ClaudeBase64Source extends ClaudeSource {
 
     /**
      * Gets the data as base64 encoded string.
+     *
+     * @return the data
      */
     @JsonGetter("data")
     public String getBase64EncodedData() {
@@ -50,6 +52,8 @@ public class ClaudeBase64Source extends ClaudeSource {
 
     /**
      * Sets the data. Only base64 encoded strings should be used.
+     *
+     * @param base64Data base64 encoded data
      */
     @JsonSetter("data")
     public void setBase64EncodedData(String base64Data) {
