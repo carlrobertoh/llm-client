@@ -11,6 +11,7 @@ import static org.awaitility.Awaitility.await;
 import ee.carlrobert.llm.client.anthropic.ClaudeClient;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageTextContent;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
@@ -29,7 +30,8 @@ public class ClaudeClientTest extends BaseTest {
     request.setModel("claude-3");
     request.setStream(true);
     request.setMaxTokens(500);
-    request.setMessages(List.of(new ClaudeCompletionRequestMessage("user", "USER_PROMPT")));
+    request.setMessages(List.of(
+            new ClaudeCompletionRequestMessage("user", new ClaudeMessageTextContent("USER_PROMPT"))));
     expectAnthropic((StreamHttpExchange) exchange -> {
       assertThat(exchange.getUri().getPath()).isEqualTo("/v1/messages");
       assertThat(exchange.getMethod()).isEqualTo("POST");
@@ -78,7 +80,8 @@ public class ClaudeClientTest extends BaseTest {
     request.setModel("claude-3");
     request.setStream(false);
     request.setMaxTokens(500);
-    request.setMessages(List.of(new ClaudeCompletionRequestMessage("user", "USER_PROMPT")));
+    request.setMessages(List.of(
+            new ClaudeCompletionRequestMessage("user", new ClaudeMessageTextContent("USER_PROMPT"))));
     expectAnthropic((BasicHttpExchange) exchange -> {
       assertThat(exchange.getUri().getPath()).isEqualTo("/v1/messages");
       assertThat(exchange.getMethod()).isEqualTo("POST");
