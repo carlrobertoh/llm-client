@@ -5,20 +5,20 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonTypeName("text")
 public class ClaudeMessageTextContent extends ClaudeMessageContent {
 
-    private String text;
+  private String text;
 
-    public ClaudeMessageTextContent() {
-    }
+  public ClaudeMessageTextContent() {
+  }
 
-    public ClaudeMessageTextContent(String text) {
-        this.text = text;
-    }
+  public ClaudeMessageTextContent(String text) {
+    this.text = text;
+  }
 
-    public String getText() {
-        return text;
-    }
+  public String getText() {
+    return text;
+  }
 
-    public void setText(String text) {
-        this.text = text;
-    }
+  public void setText(String text) {
+    this.text = text;
+  }
 }
