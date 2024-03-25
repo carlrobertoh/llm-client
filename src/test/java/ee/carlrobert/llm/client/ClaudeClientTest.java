@@ -11,10 +11,12 @@ import static org.awaitility.Awaitility.await;
 import ee.carlrobert.llm.client.anthropic.ClaudeClient;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequestMessage;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeMessageTextContent;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.completion.CompletionEventListener;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import okhttp3.OkHttpClient;
@@ -29,7 +31,8 @@ public class ClaudeClientTest extends BaseTest {
     request.setModel("claude-3");
     request.setStream(true);
     request.setMaxTokens(500);
-    request.setMessages(List.of(new ClaudeCompletionRequestMessage("user", "USER_PROMPT")));
+    request.setMessages(List.of(
+        new ClaudeCompletionRequestMessage("user", new ClaudeMessageTextContent("USER_PROMPT"))));
     expectAnthropic((StreamHttpExchange) exchange -> {
       assertThat(exchange.getUri().getPath()).isEqualTo("/v1/messages");
       assertThat(exchange.getMethod()).isEqualTo("POST");
@@ -47,7 +50,9 @@ public class ClaudeClientTest extends BaseTest {
               "claude-3",
               true,
               500,
-              List.of(Map.of("role", "user", "content", "USER_PROMPT")));
+              List.of(Map.of("role", "user",
+                  "content", Collections.singletonList(
+                      Map.of("type", "text", "text", "USER_PROMPT")))));
       return List.of(
           jsonMapResponse("delta", jsonMap("text", "He")),
           jsonMapResponse("delta", jsonMap("text", "llo")),
@@ -78,7 +83,8 @@ public class ClaudeClientTest extends BaseTest {
     request.setModel("claude-3");
     request.setStream(false);
     request.setMaxTokens(500);
-    request.setMessages(List.of(new ClaudeCompletionRequestMessage("user", "USER_PROMPT")));
+    request.setMessages(List.of(
+        new ClaudeCompletionRequestMessage("user", new ClaudeMessageTextContent("USER_PROMPT"))));
     expectAnthropic((BasicHttpExchange) exchange -> {
       assertThat(exchange.getUri().getPath()).isEqualTo("/v1/messages");
       assertThat(exchange.getMethod()).isEqualTo("POST");
@@ -103,7 +109,9 @@ public class ClaudeClientTest extends BaseTest {
               0.1,
               1,
               2,
-              List.of(Map.of("role", "user", "content", "USER_PROMPT")));
+              List.of(Map.of("role", "user",
+                  "content", Collections.singletonList(
+                      Map.of("type", "text", "text", "USER_PROMPT")))));
       return new ResponseEntity(
           jsonMapResponse(
               e("content", jsonArray(jsonMap("text", "TEST_ASSISTANT_RESPONSE"))),
