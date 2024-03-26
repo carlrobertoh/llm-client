@@ -1,11 +1,19 @@
 package ee.carlrobert.llm.client.openai.completion.request;
 
+import java.util.Collections;
+import java.util.List;
+
 public class OpenAIChatCompletionMessage {
 
   private final String role;
-  private String content;
+  private List<OpenAIMessageContent> content;
 
-  public OpenAIChatCompletionMessage(String role, String content) {
+  public OpenAIChatCompletionMessage(String role, OpenAIMessageContent content) {
+    this.role = role;
+    this.content = Collections.singletonList(content);
+  }
+
+  public OpenAIChatCompletionMessage(String role, List<OpenAIMessageContent> content) {
     this.role = role;
     this.content = content;
   }
@@ -14,11 +22,11 @@ public class OpenAIChatCompletionMessage {
     return role;
   }
 
-  public String getContent() {
+  public List<OpenAIMessageContent> getContent() {
     return content;
   }
 
-  public void setContent(String content) {
+  public void setContent(List<OpenAIMessageContent> content) {
     this.content = content;
   }
 }

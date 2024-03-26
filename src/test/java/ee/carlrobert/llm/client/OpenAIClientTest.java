@@ -16,13 +16,10 @@ import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.request.Tool;
-import ee.carlrobert.llm.client.openai.completion.request.ToolFunction;
-import ee.carlrobert.llm.client.openai.completion.request.ToolFunctionParameters;
+import ee.carlrobert.llm.client.openai.completion.request.*;
 import ee.carlrobert.llm.completion.CompletionEventListener;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import okhttp3.sse.EventSource;
@@ -58,7 +55,7 @@ class OpenAIClientTest extends BaseTest {
               500,
               0.1,
               0.1,
-              List.of(Map.of("role", "user", "content", prompt)));
+              List.of(Map.of("role", "user", "content", Collections.singletonList(Map.of("type", "text", "text", prompt)))));
       return List.of(
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hello")))),
@@ -70,7 +67,7 @@ class OpenAIClientTest extends BaseTest {
         .build()
         .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
-                List.of(new OpenAIChatCompletionMessage("user", prompt)))
+                List.of(new OpenAIChatCompletionMessage("user", new OpenAIMessageTextContent(prompt))))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .setMaxTokens(500)
                 .setTemperature(0.5)
@@ -171,7 +168,7 @@ class OpenAIClientTest extends BaseTest {
               500,
               0.1,
               0.1,
-              List.of(Map.of("role", "user", "content", prompt)));
+              List.of(Map.of("role", "user", "content", Collections.singletonList(Map.of("type", "text", "text", prompt)))));
       return List.of(
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hello")))),
@@ -183,7 +180,7 @@ class OpenAIClientTest extends BaseTest {
         .build()
         .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
-                List.of(new OpenAIChatCompletionMessage("user", prompt)))
+                List.of(new OpenAIChatCompletionMessage("user", new OpenAIMessageTextContent(prompt))))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .setMaxTokens(500)
                 .setTemperature(0.5)
@@ -228,7 +225,7 @@ class OpenAIClientTest extends BaseTest {
               500,
               0.1,
               0.1,
-              List.of(Map.of("role", "user", "content", prompt)));
+              List.of(Map.of("role", "user", "content", Collections.singletonList(Map.of("type", "text", "text", prompt)))));
 
       return new ResponseEntity(new ObjectMapper().writeValueAsString(Map.of("choices", List.of(
           Map.of("message", Map.of(
@@ -240,7 +237,7 @@ class OpenAIClientTest extends BaseTest {
         .setOrganization("TEST_ORGANIZATION")
         .build()
         .getChatCompletion(new OpenAIChatCompletionRequest.Builder(
-            List.of(new OpenAIChatCompletionMessage("user", prompt)))
+            List.of(new OpenAIChatCompletionMessage("user", new OpenAIMessageTextContent(prompt))))
             .setModel(OpenAIChatCompletionModel.GPT_3_5)
             .setMaxTokens(500)
             .setTemperature(0.5)
@@ -284,7 +281,7 @@ class OpenAIClientTest extends BaseTest {
               500,
               0.1,
               0.1,
-              List.of(Map.of("role", "user", "content", prompt)),
+              List.of(Map.of("role", "user", "content", Collections.singletonList(Map.of("type", "text", "text", prompt)))),
               List.of(Map.of("type", "function", "function",
                   Map.of(
                       "name", "get_current_weather",
@@ -336,7 +333,7 @@ class OpenAIClientTest extends BaseTest {
         .setOrganization("TEST_ORGANIZATION")
         .build()
         .getChatCompletion(new OpenAIChatCompletionRequest.Builder(
-            List.of(new OpenAIChatCompletionMessage("user", prompt)))
+            List.of(new OpenAIChatCompletionMessage("user", new OpenAIMessageTextContent(prompt))))
             .setModel(OpenAIChatCompletionModel.GPT_3_5)
             .setMaxTokens(500)
             .setTemperature(0.5)
@@ -374,7 +371,7 @@ class OpenAIClientTest extends BaseTest {
         .build()
         .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
-                List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
+                List.of(new OpenAIChatCompletionMessage("user", new OpenAIMessageTextContent("TEST_PROMPT"))))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
             new CompletionEventListener<String>() {
@@ -403,7 +400,7 @@ class OpenAIClientTest extends BaseTest {
         .build()
         .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
-                List.of(new OpenAIChatCompletionMessage("user", "TEST_PROMPT")))
+                List.of(new OpenAIChatCompletionMessage("user", new OpenAIMessageTextContent("TEST_PROMPT"))))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
             new CompletionEventListener<String>() {
