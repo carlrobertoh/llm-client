@@ -8,7 +8,7 @@ public class ClaudeCompletionRequest implements CompletionRequest {
 
   private String model;
   private String system;
-  private List<ClaudeCompletionRequestMessage> messages;
+  private List<ClaudeCompletionMessage> messages;
   @JsonProperty("max_tokens")
   private int maxTokens;
   private boolean stream;
@@ -34,11 +34,11 @@ public class ClaudeCompletionRequest implements CompletionRequest {
     this.system = system;
   }
 
-  public List<ClaudeCompletionRequestMessage> getMessages() {
+  public List<ClaudeCompletionMessage> getMessages() {
     return messages;
   }
 
-  public void setMessages(List<ClaudeCompletionRequestMessage> messages) {
+  public void setMessages(List<ClaudeCompletionMessage> messages) {
     this.messages = messages;
   }
 

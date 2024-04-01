@@ -3,20 +3,17 @@ package ee.carlrobert.llm.client.anthropic.completion;
 import java.util.Collections;
 import java.util.List;
 
-public class ClaudeCompletionRequestMessage {
+public class ClaudeCompletionDetailedMessage implements ClaudeCompletionMessage {
 
   private String role;
   private List<ClaudeMessageContent> content;
 
-  public ClaudeCompletionRequestMessage() {
-  }
-
-  public ClaudeCompletionRequestMessage(String role, ClaudeMessageContent content) {
+  public ClaudeCompletionDetailedMessage(String role, ClaudeMessageContent content) {
     this.role = role;
     this.content = Collections.singletonList(content);
   }
 
-  public ClaudeCompletionRequestMessage(String role, List<ClaudeMessageContent> content) {
+  public ClaudeCompletionDetailedMessage(String role, List<ClaudeMessageContent> content) {
     this.role = role;
     this.content = content;
   }
