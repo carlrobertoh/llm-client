@@ -1,0 +1,22 @@
+[versions]
+assertj = "3.25.3"
+awaitility = "4.2.1"
+checkstyle = "10.15.0"
+commons-io = "2.16.0"
+jackson = "2.17.0"
+junit = "5.10.2"
+okhttp = "5.0.0-alpha.12"
+publish-plugin = "2.0.0"
+slf4j = "2.0.12"
+
+[libraries]
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
+commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
+jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+okhttp-bom = { module = "com.squareup.okhttp3:okhttp-bom", version.ref = "okhttp" }
+slf4j-bom = { module = "org.slf4j:slf4j-bom", version.ref = "slf4j" }
+
+[plugins]
+publish-plugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "publish-plugin" }
