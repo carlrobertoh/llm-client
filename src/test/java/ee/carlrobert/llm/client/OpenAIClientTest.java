@@ -23,7 +23,6 @@ import ee.carlrobert.llm.client.openai.completion.request.Tool;
 import ee.carlrobert.llm.client.openai.completion.request.ToolFunction;
 import ee.carlrobert.llm.client.openai.completion.request.ToolFunctionParameters;
 import ee.carlrobert.llm.completion.CompletionEventListener;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import okhttp3.sse.EventSource;
@@ -119,6 +118,12 @@ class OpenAIClientTest extends BaseTest {
               0.1,
               0.1);
       return List.of(
+          "{\"choices\": null}",
+          "{\"choices\": [null]}",
+          jsonMapResponse("choices", jsonArray()),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", null))),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", ""))),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", " "))),
           jsonMapResponse("choices", jsonArray(jsonMap("text", "Hello"))),
           jsonMapResponse("choices", jsonArray(jsonMap("text", "!"))));
     });
@@ -175,6 +180,13 @@ class OpenAIClientTest extends BaseTest {
               List.of(Map.of("role", "user", "content", prompt)));
       return List.of(
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
+          "{\"choices\": null}",
+          "{\"choices\": [null]}",
+          jsonMapResponse("choices", jsonArray()),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", null))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", null)))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", " ")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hello")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
@@ -348,10 +360,10 @@ class OpenAIClientTest extends BaseTest {
             .setStream(false)
             .build());
 
-    assertThat(response.getChoices().size()).isOne();
+    assertThat(response.getChoices()).hasSize(1);
     var message = response.getChoices().get(0).getMessage();
     assertThat(message.getRole()).isEqualTo("assistant");
-    assertThat(message.getToolCalls().size()).isOne();
+    assertThat(message.getToolCalls()).hasSize(1);
     assertThat(message.getToolCalls().get(0).getId()).isEqualTo("call_abc123");
     assertThat(message.getToolCalls().get(0).getType()).isEqualTo("function");
     assertThat(message.getToolCalls().get(0).getFunction())
