@@ -3,7 +3,7 @@ plugins {
     `maven-publish`
     signing
     checkstyle
-    id("io.github.gradle-nexus.publish-plugin") version ("1.1.0")
+    alias(libs.plugins.publish.plugin)
 }
 
 group = "ee.carlrobert"
@@ -21,24 +21,27 @@ java {
 }
 
 checkstyle {
-    toolVersion = "10.12.5"
+    toolVersion = libs.versions.checkstyle.get()
 }
 
 dependencies {
-    api("com.squareup.okhttp3:okhttp:4.10.0")
-    api("com.squareup.okhttp3:okhttp-sse:4.10.0")
-    api("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    api(enforcedPlatform(libs.okhttp.bom))
+    api("com.squareup.okhttp3:okhttp")
+    api("com.squareup.okhttp3:okhttp-sse")
+    api("com.squareup.okhttp3:logging-interceptor")
 
-    implementation("org.slf4j:slf4j-api:2.0.7")
-    implementation("org.slf4j:slf4j-simple:2.0.7")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.14.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2")
+    implementation(enforcedPlatform(libs.slf4j.bom))
+    implementation("org.slf4j:slf4j-api")
+    implementation("org.slf4j:slf4j-simple")
+    implementation(enforcedPlatform(libs.jackson.bom))
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
-    testImplementation(platform("org.junit:junit-bom:5.9.3"))
+    testImplementation(enforcedPlatform(libs.junit.bom))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("commons-io:commons-io:2.11.0")
-    testImplementation("org.assertj:assertj-core:3.24.2")
-    testImplementation("org.awaitility:awaitility:4.2.0")
+    testImplementation(libs.commons.io)
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.awaitility)
 }
 
 nexusPublishing {
