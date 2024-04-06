@@ -1,11 +1,11 @@
 package ee.carlrobert.llm.client.ollama;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 import static ee.carlrobert.llm.client.InterceptorUtil.REWRITE_X_NDJSON_CONTENT_INTERCEPTOR;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
@@ -31,7 +31,6 @@ import okhttp3.sse.EventSources;
 public class OllamaClient {
 
   private static final String BASE_URL = PropertiesLoader.getValue("ollama.baseUrl");
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
 
   private final OkHttpClient httpClient;

@@ -1,9 +1,9 @@
 package ee.carlrobert.llm.client.openai;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
@@ -30,7 +30,6 @@ import okhttp3.sse.EventSources;
 
 public class OpenAIClient {
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
   private final OkHttpClient httpClient;
   private final String apiKey;

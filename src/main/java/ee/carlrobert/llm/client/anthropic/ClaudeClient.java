@@ -1,7 +1,8 @@
 package ee.carlrobert.llm.client.anthropic;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionErrorDetails;
@@ -25,7 +26,6 @@ import okhttp3.sse.EventSources;
 public class ClaudeClient {
 
   private static final String BASE_URL = PropertiesLoader.getValue("anthropic.baseUrl");
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
 
   private final OkHttpClient httpClient;

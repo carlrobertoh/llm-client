@@ -6,7 +6,10 @@ import okhttp3.Response;
 
 public class DeserializationUtil {
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private DeserializationUtil() {
+  }
+
+  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public static <T> T mapResponse(Response response, Class<T> clazz) {
     var body = response.body();

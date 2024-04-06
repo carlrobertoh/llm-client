@@ -1,7 +1,8 @@
 package ee.carlrobert.llm.client.http;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
@@ -13,7 +14,6 @@ import org.apache.commons.io.IOUtils;
 
 public class RequestEntity {
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final URI uri;
   private final Map<String, Object> body;
   private final Headers headers;

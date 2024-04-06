@@ -1,8 +1,9 @@
 package ee.carlrobert.llm.client.azure;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
@@ -23,7 +24,6 @@ import okhttp3.sse.EventSources;
 
 public class AzureClient {
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
   private final OkHttpClient httpClient;
   private final String apiKey;

@@ -1,14 +1,13 @@
 package ee.carlrobert.llm.client.openai.completion;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAITextCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 
 public class OpenAITextCompletionEventSourceListener extends CompletionEventSourceListener {
-
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public OpenAITextCompletionEventSourceListener(CompletionEventListener listeners) {
     super(listeners);

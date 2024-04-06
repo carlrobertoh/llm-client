@@ -2,13 +2,12 @@ package ee.carlrobert.llm.client.util;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 
-public class JSONUtil {
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+public class JSONUtil {
 
   @SafeVarargs
   public static String jsonMapResponse(Map.Entry<String, ?>... entries) {

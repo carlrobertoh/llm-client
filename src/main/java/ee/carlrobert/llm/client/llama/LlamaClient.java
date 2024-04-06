@@ -1,10 +1,10 @@
 package ee.carlrobert.llm.client.llama;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
@@ -24,7 +24,6 @@ import okhttp3.sse.EventSources;
 public class LlamaClient {
 
   private static final String BASE_URL = PropertiesLoader.getValue("llama.baseUrl");
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
 
   private final OkHttpClient httpClient;
