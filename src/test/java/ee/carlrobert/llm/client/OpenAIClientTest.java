@@ -361,7 +361,9 @@ class OpenAIClientTest extends BaseTest {
             .build());
 
     assertThat(response.getChoices()).hasSize(1);
+    assertThat(response.getChoices().get(0)).isNotNull();
     var message = response.getChoices().get(0).getMessage();
+    assertThat(message).isNotNull();
     assertThat(message.getRole()).isEqualTo("assistant");
     assertThat(message.getToolCalls()).hasSize(1);
     assertThat(message.getToolCalls().get(0).getId()).isEqualTo("call_abc123");
