@@ -8,12 +8,14 @@ import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 
 public class OpenAIChatCompletionEventSourceListener extends CompletionEventSourceListener<String> {
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   public OpenAIChatCompletionEventSourceListener(CompletionEventListener<String> listeners) {
     super(listeners);
   }
 
   protected String getMessage(String data) throws JsonProcessingException {
-    var choices = new ObjectMapper()
+    var choices = OBJECT_MAPPER
         .readValue(data, OpenAIChatCompletionResponse.class)
         .getChoices();
     if (choices != null && !choices.isEmpty()) {
@@ -31,6 +33,6 @@ public class OpenAIChatCompletionEventSourceListener extends CompletionEventSour
 
   @Override
   protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
-    return new ObjectMapper().readValue(data, ApiResponseError.class).getError();
+    return OBJECT_MAPPER.readValue(data, ApiResponseError.class).getError();
   }
 }

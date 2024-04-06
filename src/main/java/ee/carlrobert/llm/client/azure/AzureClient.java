@@ -23,6 +23,8 @@ import okhttp3.sse.EventSources;
 
 public class AzureClient {
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
   private final OkHttpClient httpClient;
   private final String apiKey;
   private final AzureCompletionRequestParams requestParams;
@@ -62,10 +64,10 @@ public class AzureClient {
           .url(url + getChatCompletionPath(completionRequest))
           .headers(Headers.of(headers))
           .post(RequestBody.create(
-              new ObjectMapper()
+              OBJECT_MAPPER
                   .setSerializationInclusion(JsonInclude.Include.NON_NULL)
                   .writeValueAsString(completionRequest),
-              MediaType.parse("application/json")))
+              APPLICATION_JSON))
           .build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to process request", e);
@@ -97,7 +99,7 @@ public class AzureClient {
     return new OpenAIChatCompletionEventSourceListener(listeners) {
       @Override
       protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
-        return new ObjectMapper().readValue(data, AzureApiResponseError.class).getError();
+        return OBJECT_MAPPER.readValue(data, AzureApiResponseError.class).getError();
       }
     };
   }

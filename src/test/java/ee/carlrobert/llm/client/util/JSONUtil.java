@@ -8,10 +8,12 @@ import java.util.Map;
 
 public class JSONUtil {
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   @SafeVarargs
   public static String jsonMapResponse(Map.Entry<String, ?>... entries) {
     try {
-      return new ObjectMapper().writeValueAsString(Map.ofEntries(entries));
+      return OBJECT_MAPPER.writeValueAsString(Map.ofEntries(entries));
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to map to json string", e);
     }
@@ -39,4 +41,3 @@ public class JSONUtil {
     return Map.entry(key, value);
   }
 }
-

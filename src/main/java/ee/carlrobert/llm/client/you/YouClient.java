@@ -21,6 +21,7 @@ import okhttp3.sse.EventSources;
 public class YouClient {
 
   private static final String BASE_HOST = PropertiesLoader.getValue("you.baseUrl");
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final OkHttpClient httpClient;
   private final String sessionId;
@@ -83,7 +84,7 @@ public class YouClient {
               "WebPages,Translations,TimeZone,Computation,RelatedSearches")
           .addQueryParameter("domain", "youchat")
           .addQueryParameter("selectedChatMode", request.getChatMode().toString())
-          .addQueryParameter("chat", new ObjectMapper().writeValueAsString(request.getMessages()));
+          .addQueryParameter("chat", OBJECT_MAPPER.writeValueAsString(request.getMessages()));
 
       if (request.getChatMode().isSupportCustomModel()) {
         httpUrlBuilder.addQueryParameter("selectedAIModel", request.getCustomModel().toString());
@@ -136,7 +137,7 @@ public class YouClient {
       @Override
       protected String getMessage(String data) {
         try {
-          var response = new ObjectMapper().readValue(data, YouCompletionResponse.class);
+          var response = OBJECT_MAPPER.readValue(data, YouCompletionResponse.class);
           if (eventListener instanceof YouCompletionEventListener) {
             var serpResults = response.getSerpResults();
             if (serpResults != null) {

@@ -6,14 +6,12 @@ import okhttp3.Response;
 
 public class DeserializationUtil {
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   public static <T> T mapResponse(Response response, Class<T> clazz) {
     var body = response.body();
-    if (body == null) {
-      return null;
-    }
-
     try {
-      return new ObjectMapper().readValue(body.string(), clazz);
+      return OBJECT_MAPPER.readValue(body.string(), clazz);
     } catch (IOException ex) {
       throw new RuntimeException("Could not deserialize response", ex);
     }

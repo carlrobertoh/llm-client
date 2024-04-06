@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 
 public class RequestEntity {
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final URI uri;
   private final Map<String, Object> body;
   private final Headers headers;
@@ -38,7 +39,7 @@ public class RequestEntity {
       return Collections.emptyMap();
     }
 
-    return new ObjectMapper().readValue(json, new TypeReference<>() {});
+    return OBJECT_MAPPER.readValue(json, new TypeReference<>() {});
   }
 
   public Headers getHeaders() {
