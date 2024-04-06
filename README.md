@@ -30,14 +30,14 @@ OpenAIClient client = new OpenAIClient.Builder(System.getenv("OPENAI_API_KEY"))
     .setOrganization("MY_ORGANIZATION")
     .build();
 
-EventSource call = client.getChatCompletion(
-    new OpenAIChatCompletionRequest.Builder(List.of(new OpenAIChatCompletionMessage("user", prompt)))
+EventSource call = client.getChatCompletionAsync(
+    new OpenAIChatCompletionRequest.Builder(List.of(new OpenAIChatCompletionStandardMessage("user", prompt)))
         .setModel(OpenAIChatCompletionModel.GPT_4)
         .setTemperature(0.1)
         .build(),
     new CompletionEventListener<String>(){
       @Override
-      public void onMessage(String message) {
+      public void onMessage(String message, EventSource eventSource) {
         System.out.println(message);
       }
     });
