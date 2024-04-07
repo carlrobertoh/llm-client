@@ -2,16 +2,17 @@ package ee.carlrobert.llm.client.util;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
+
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 
 public class JSONUtil {
 
   @SafeVarargs
   public static String jsonMapResponse(Map.Entry<String, ?>... entries) {
     try {
-      return new ObjectMapper().writeValueAsString(Map.ofEntries(entries));
+      return OBJECT_MAPPER.writeValueAsString(Map.ofEntries(entries));
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to map to json string", e);
     }
@@ -39,4 +40,3 @@ public class JSONUtil {
     return Map.entry(key, value);
   }
 }
-

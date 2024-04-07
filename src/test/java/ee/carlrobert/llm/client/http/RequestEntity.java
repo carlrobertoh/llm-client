@@ -1,7 +1,8 @@
 package ee.carlrobert.llm.client.http;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class RequestEntity {
       return Collections.emptyMap();
     }
 
-    return new ObjectMapper().readValue(json, new TypeReference<>() {});
+    return OBJECT_MAPPER.readValue(json, new TypeReference<>() {});
   }
 
   public Headers getHeaders() {

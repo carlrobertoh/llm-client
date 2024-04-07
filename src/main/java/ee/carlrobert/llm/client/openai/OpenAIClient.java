@@ -1,9 +1,9 @@
 package ee.carlrobert.llm.client.openai;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
@@ -30,6 +30,7 @@ import okhttp3.sse.EventSources;
 
 public class OpenAIClient {
 
+  private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
   private final OkHttpClient httpClient;
   private final String apiKey;
   private final String organization;
@@ -92,10 +93,10 @@ public class OpenAIClient {
         .url(url)
         .headers(Headers.of(getRequiredHeaders()))
         .post(RequestBody.create(
-            new ObjectMapper().writeValueAsString(Map.of(
+            OBJECT_MAPPER.writeValueAsString(Map.of(
                 "input", texts,
                 "model", "text-embedding-ada-002")),
-            MediaType.parse("application/json")))
+            APPLICATION_JSON))
         .build();
   }
 
@@ -109,9 +110,7 @@ public class OpenAIClient {
       return new Request.Builder()
           .url(host + (overriddenPath == null ? "/v1/chat/completions" : overriddenPath))
           .headers(Headers.of(headers))
-          .post(RequestBody.create(
-              new ObjectMapper().writeValueAsString(request),
-              MediaType.parse("application/json")))
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
           .build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to process request", e);
@@ -127,9 +126,7 @@ public class OpenAIClient {
       return new Request.Builder()
           .url(host + "/v1/completions")
           .headers(Headers.of(headers))
-          .post(RequestBody.create(
-              new ObjectMapper().writeValueAsString(request),
-              MediaType.parse("application/json")))
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
           .build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to process request", e);

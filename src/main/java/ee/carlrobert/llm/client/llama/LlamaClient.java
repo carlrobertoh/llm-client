@@ -1,10 +1,10 @@
 package ee.carlrobert.llm.client.llama;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
@@ -24,6 +24,7 @@ import okhttp3.sse.EventSources;
 public class LlamaClient {
 
   private static final String BASE_URL = PropertiesLoader.getValue("llama.baseUrl");
+  private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
 
   private final OkHttpClient httpClient;
   private final String host;
@@ -82,9 +83,7 @@ public class LlamaClient {
           .header("Cache-Control", "no-cache")
           .header("Content-Type", "application/json")
           .header("Accept", request.isStream() ? "text/event-stream" : "text/json")
-          .post(RequestBody.create(
-              new ObjectMapper().writeValueAsString(request),
-              MediaType.parse("application/json")));
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON));
       if (apiKey != null) {
         builder.header("Authorization", "Bearer " + apiKey);
       }
@@ -100,7 +99,7 @@ public class LlamaClient {
       @Override
       protected String getMessage(String data) {
         try {
-          var response = new ObjectMapper().readValue(data, LlamaCompletionResponse.class);
+          var response = OBJECT_MAPPER.readValue(data, LlamaCompletionResponse.class);
           return response.getContent();
         } catch (JacksonException e) {
           // ignore

@@ -1,7 +1,8 @@
 package ee.carlrobert.llm.client.openai.completion;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponseChoice;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponseChoiceDelta;
@@ -17,7 +18,7 @@ public class OpenAIChatCompletionEventSourceListener extends CompletionEventSour
   }
 
   protected String getMessage(String data) throws JsonProcessingException {
-    var choices = new ObjectMapper()
+    var choices = OBJECT_MAPPER
         .readValue(data, OpenAIChatCompletionResponse.class)
         .getChoices();
     return (choices == null ? Stream.<OpenAIChatCompletionResponseChoice>empty() : choices.stream())
@@ -32,6 +33,6 @@ public class OpenAIChatCompletionEventSourceListener extends CompletionEventSour
 
   @Override
   protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
-    return new ObjectMapper().readValue(data, ApiResponseError.class).getError();
+    return OBJECT_MAPPER.readValue(data, ApiResponseError.class).getError();
   }
 }

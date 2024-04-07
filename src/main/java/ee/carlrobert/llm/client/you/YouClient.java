@@ -1,8 +1,9 @@
 package ee.carlrobert.llm.client.you;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.you.completion.YouCompletionEventListener;
@@ -83,7 +84,7 @@ public class YouClient {
               "WebPages,Translations,TimeZone,Computation,RelatedSearches")
           .addQueryParameter("domain", "youchat")
           .addQueryParameter("selectedChatMode", request.getChatMode().toString())
-          .addQueryParameter("chat", new ObjectMapper().writeValueAsString(request.getMessages()));
+          .addQueryParameter("chat", OBJECT_MAPPER.writeValueAsString(request.getMessages()));
 
       if (request.getChatMode().isSupportCustomModel()) {
         httpUrlBuilder.addQueryParameter("selectedAIModel", request.getCustomModel().toString());
@@ -136,7 +137,7 @@ public class YouClient {
       @Override
       protected String getMessage(String data) {
         try {
-          var response = new ObjectMapper().readValue(data, YouCompletionResponse.class);
+          var response = OBJECT_MAPPER.readValue(data, YouCompletionResponse.class);
           if (eventListener instanceof YouCompletionEventListener) {
             var serpResults = response.getSerpResults();
             if (serpResults != null) {

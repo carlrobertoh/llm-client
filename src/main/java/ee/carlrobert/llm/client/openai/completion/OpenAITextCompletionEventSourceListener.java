@@ -1,7 +1,8 @@
 package ee.carlrobert.llm.client.openai.completion;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAITextCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
@@ -13,7 +14,7 @@ public class OpenAITextCompletionEventSourceListener extends CompletionEventSour
   }
 
   protected String getMessage(String data) throws JsonProcessingException {
-    var choice = new ObjectMapper()
+    var choice = OBJECT_MAPPER
         .readValue(data, OpenAITextCompletionResponse.class)
         .getChoices()
         .get(0);
@@ -25,6 +26,6 @@ public class OpenAITextCompletionEventSourceListener extends CompletionEventSour
 
   @Override
   protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
-    return new ObjectMapper().readValue(data, ApiResponseError.class).getError();
+    return OBJECT_MAPPER.readValue(data, ApiResponseError.class).getError();
   }
 }

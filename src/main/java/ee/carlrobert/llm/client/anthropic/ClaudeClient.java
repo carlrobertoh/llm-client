@@ -1,7 +1,8 @@
 package ee.carlrobert.llm.client.anthropic;
 
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionErrorDetails;
@@ -25,6 +26,7 @@ import okhttp3.sse.EventSources;
 public class ClaudeClient {
 
   private static final String BASE_URL = PropertiesLoader.getValue("anthropic.baseUrl");
+  private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
 
   private final OkHttpClient httpClient;
   private final String apiKey;
@@ -61,9 +63,7 @@ public class ClaudeClient {
       return new Request.Builder()
           .url(BASE_URL + "/v1/messages")
           .headers(Headers.of(headers))
-          .post(RequestBody.create(
-              new ObjectMapper().writeValueAsString(request),
-              MediaType.parse("application/json")))
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
           .build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to process request", e);
@@ -79,14 +79,13 @@ public class ClaudeClient {
     return new CompletionEventSourceListener<>(eventListener) {
       @Override
       protected String getMessage(String data) {
-        var mapper = new ObjectMapper();
-        try {
-          return mapper.readValue(data, ClaudeCompletionStreamResponse.class)
+          try {
+          return OBJECT_MAPPER.readValue(data, ClaudeCompletionStreamResponse.class)
               .getDelta()
               .getText();
         } catch (Exception e) {
           try {
-            return mapper.readValue(data, ClaudeCompletionErrorDetails.class)
+            return OBJECT_MAPPER.readValue(data, ClaudeCompletionErrorDetails.class)
                 .getError()
                 .getMessage();
           } catch (Exception ex) {
@@ -98,7 +97,7 @@ public class ClaudeClient {
       @Override
       protected ErrorDetails getErrorDetails(String error) {
         try {
-          return new ObjectMapper().readValue(error, ClaudeCompletionErrorDetails.class).getError();
+          return OBJECT_MAPPER.readValue(error, ClaudeCompletionErrorDetails.class).getError();
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
