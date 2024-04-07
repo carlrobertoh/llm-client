@@ -19,7 +19,8 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon
+        # Build and dry-run maven-publish
+        run: ./gradlew build publishMavenJavaPublicationToMavenLocal --no-daemon
 
   publish:
     name: Publish Artifacts
