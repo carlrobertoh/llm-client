@@ -118,7 +118,8 @@ public class ClaudeClientTest extends BaseTest {
         new OkHttpClient.Builder())
         .getCompletion(request);
 
-    assertThat(response.getContent().size()).isOne();
+    assertThat(response.getContent()).hasSize(1);
+    assertThat(response.getContent().get(0)).isNotNull();
     assertThat(response.getContent().get(0).getText()).isEqualTo("TEST_ASSISTANT_RESPONSE");
     assertThat(response.getUsage())
         .extracting("inputTokens", "outputTokens")

@@ -25,19 +25,19 @@ checkstyle {
 }
 
 dependencies {
-    api(enforcedPlatform(libs.okhttp.bom))
+    api(platform(libs.okhttp.bom))
     api("com.squareup.okhttp3:okhttp")
     api("com.squareup.okhttp3:okhttp-sse")
     api("com.squareup.okhttp3:logging-interceptor")
 
-    implementation(enforcedPlatform(libs.slf4j.bom))
+    implementation(platform(libs.slf4j.bom))
     implementation("org.slf4j:slf4j-api")
     implementation("org.slf4j:slf4j-simple")
-    implementation(enforcedPlatform(libs.jackson.bom))
+    implementation(platform(libs.jackson.bom))
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
-    testImplementation(enforcedPlatform(libs.junit.bom))
+    testImplementation(platform(libs.junit.bom))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation(libs.commons.io)
     testImplementation(libs.assertj.core)

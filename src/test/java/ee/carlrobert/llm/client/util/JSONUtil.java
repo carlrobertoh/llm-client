@@ -2,6 +2,8 @@ package ee.carlrobert.llm.client.util;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,9 @@ public class JSONUtil {
   }
 
   public static String jsonMapResponse(String key, Object value) {
+    if (value == null) {
+      return String.format("{\"%s\": null}", key);
+    }
     return jsonMapResponse(e(key, value));
   }
 
@@ -28,12 +33,25 @@ public class JSONUtil {
   }
 
   public static Map<String, ?> jsonMap(String key, Object value) {
+    if (value == null) {
+      Map<String, ?> contentNull = new HashMap<>();
+      contentNull.put(key, null);
+      return contentNull; // {"key": null}
+    }
     return jsonMap(e(key, value));
   }
 
   @SafeVarargs
   public static List<?> jsonArray(Map<String, ?>... objects) {
-    return List.of(objects);
+    List list = new ArrayList<>();
+    if (objects == null) {
+      list.add(null); // [null]
+    } else {
+      for (int i = 0; i < objects.length; i++) {
+        list.add(objects[i]);
+      }
+    }
+    return list;
   }
 
   public static Map.Entry<String, ?> e(String key, Object value) {

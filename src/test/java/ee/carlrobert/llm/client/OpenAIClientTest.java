@@ -23,11 +23,14 @@ import ee.carlrobert.llm.client.openai.completion.request.Tool;
 import ee.carlrobert.llm.client.openai.completion.request.ToolFunction;
 import ee.carlrobert.llm.client.openai.completion.request.ToolFunctionParameters;
 import ee.carlrobert.llm.completion.CompletionEventListener;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import okhttp3.sse.EventSource;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class OpenAIClientTest extends BaseTest {
 
@@ -119,6 +122,14 @@ class OpenAIClientTest extends BaseTest {
               0.1,
               0.1);
       return List.of(
+          "{}",
+          jsonMapResponse("choices", null),
+          jsonMapResponse("choices", jsonArray()),
+          jsonMapResponse("choices", jsonArray((Map<String, ?>) null)),
+          jsonMapResponse("choices", jsonArray(jsonMap())),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", null))),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", ""))),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", " "))),
           jsonMapResponse("choices", jsonArray(jsonMap("text", "Hello"))),
           jsonMapResponse("choices", jsonArray(jsonMap("text", "!"))));
     });
@@ -175,6 +186,15 @@ class OpenAIClientTest extends BaseTest {
               List.of(Map.of("role", "user", "content", prompt)));
       return List.of(
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
+          "{}",
+          jsonMapResponse("choices", null),
+          jsonMapResponse("choices", jsonArray()),
+          jsonMapResponse("choices", jsonArray((Map<String, ?>) null)),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", null))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap()))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", null)))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "")))),
+          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", " ")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hello")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
@@ -348,10 +368,12 @@ class OpenAIClientTest extends BaseTest {
             .setStream(false)
             .build());
 
-    assertThat(response.getChoices().size()).isOne();
+    assertThat(response.getChoices()).hasSize(1);
+    assertThat(response.getChoices().get(0)).isNotNull();
     var message = response.getChoices().get(0).getMessage();
+    assertThat(message).isNotNull();
     assertThat(message.getRole()).isEqualTo("assistant");
-    assertThat(message.getToolCalls().size()).isOne();
+    assertThat(message.getToolCalls()).hasSize(1);
     assertThat(message.getToolCalls().get(0).getId()).isEqualTo("call_abc123");
     assertThat(message.getToolCalls().get(0).getType()).isEqualTo("function");
     assertThat(message.getToolCalls().get(0).getFunction())
@@ -420,21 +442,35 @@ class OpenAIClientTest extends BaseTest {
             + "Body: {\"error_details\":\"Server error\"}").contentEquals(errorMessageBuilder));
   }
 
-  @Test
-  void shouldGetEmbeddings() {
-    var embeddingResponse = new double[]{-0.00692, -0.0053, -4.5471, -0.0240};
+  static Stream<Arguments> testEmbeddings() {
+    double[] one = {1};
+    Map<String, ?> embeddingOne = jsonMap("embedding", one);
+    Map<String, ?> embeddingNull = jsonMap("embedding", null);
+    Map<String, ?> embeddingTwo = jsonMap("embedding", new double[]{2});
+    return Stream.of(
+            Arguments.of("{}", null),
+            Arguments.of(jsonMapResponse("data", null), null),
+            Arguments.of(jsonMapResponse("data", jsonArray()), null),
+            Arguments.of(jsonMapResponse("data", jsonArray(null, embeddingOne)), one),
+            Arguments.of(jsonMapResponse("data", jsonArray(embeddingNull, embeddingOne)), one),
+            Arguments.of(jsonMapResponse("data", jsonArray(embeddingOne, embeddingTwo)), one)
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("testEmbeddings")
+  void shouldGetEmbeddings(String json, double[] expected) {
     expectOpenAI((BasicHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/embeddings");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
-      return new ResponseEntity(200,
-          jsonMapResponse("data", jsonArray(jsonMap("embedding", embeddingResponse))));
+      return new ResponseEntity(200, json);
     });
 
     var result = new OpenAIClient.Builder("TEST_API_KEY")
         .build()
         .getEmbedding("TEST_PROMPT");
 
-    assertThat(result).isEqualTo(embeddingResponse);
+    assertThat(result).isEqualTo(expected);
   }
 }

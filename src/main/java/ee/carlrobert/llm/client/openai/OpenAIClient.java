@@ -15,10 +15,11 @@ import ee.carlrobert.llm.client.openai.embeddings.EmbeddingData;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -67,21 +68,36 @@ public class OpenAIClient {
     }
   }
 
+  /**
+   * First non-null embedding response (or null).
+   *
+   * @param input Request texts
+   * @return First non-null embedding response (if there is one)
+   */
   public double[] getEmbedding(String input) {
-    return getEmbeddings(List.of(input)).get(0);
+    var embeddings = getEmbeddings(List.of(input));
+    return embeddings.isEmpty() ? null : embeddings.get(0);
   }
 
+  /**
+   * Embeddings response (empty list if none could be found).
+   *
+   * @param texts Request texts
+   * @return Non-null response embeddings
+   */
   public List<double[]> getEmbeddings(List<String> texts) {
     try (var response = httpClient
         .newCall(buildEmbeddingsRequest(host + "/v1/embeddings", texts))
         .execute()) {
 
       return Optional.ofNullable(DeserializationUtil.mapResponse(response, EmbeddingResponse.class))
-          .map(EmbeddingResponse::getData)
-          .orElseGet(Collections::emptyList)
-          .stream()
-          .map(EmbeddingData::getEmbedding)
-          .collect(toList());
+              .map(EmbeddingResponse::getData)
+              .stream()
+              .flatMap(Collection::stream)
+              .filter(Objects::nonNull)
+              .map(EmbeddingData::getEmbedding)
+              .filter(Objects::nonNull)
+              .collect(toList());
     } catch (IOException e) {
       throw new RuntimeException("Unable to fetch embedding", e);
     }
