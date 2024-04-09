@@ -21,6 +21,16 @@ jobs:
       - name: Build with Gradle
         # Build and dry-run maven-publish (metadata and pom, but no signing)
         run: ./gradlew build generateMetadataFileForMavenJavaPublication generatePomFileForMavenJavaPublication --no-daemon
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          ignore-unfixed: true
+          scan-ref: 'build/publications/mavenJava'
+          scan-type: 'fs'
+          scanners: 'vuln'
+          severity: 'MEDIUM,HIGH,CRITICAL'
+        env:
+          TRIVY_FILE_PATTERNS: "pom:pom.*.xml"
 
   publish:
     name: Publish Artifacts
