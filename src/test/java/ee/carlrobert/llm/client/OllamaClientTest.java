@@ -36,6 +36,42 @@ public class OllamaClientTest extends BaseTest {
       assertThat(request.getUri().getPath()).isEqualTo("/api/generate");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
+              .extracting("model", "prompt", "options", "system", "stream")
+              .containsExactly("codellama:7b", "TEST_PROMPT", Map.of("temperature", 0.8),
+                      "SYSTEM_PROMPT", true);
+      assertThat(request.getHeaders())
+              .flatExtracting("Accept", "Connection")
+              .containsExactly("text/event-stream", "Keep-Alive");
+      return List.of(
+              jsonMapResponse(e("response", "Hel"), e("done", false)),
+              jsonMapResponse(e("response", "lo"), e("done", false)),
+              jsonMapResponse(e("response", "!"), e("done", true)));
+    });
+
+    var resultMessageBuilder = new StringBuilder();
+    client.getCompletionAsync(
+            new OllamaCompletionRequest.Builder("codellama:7b",
+                    "TEST_PROMPT")
+                    .setSystem("SYSTEM_PROMPT")
+                    .setStream(true)
+                    .setOptions(new OllamaParameters.Builder().temperature(0.8).build())
+                    .build(),
+            new CompletionEventListener<>() {
+              @Override
+              public void onMessage(String message, EventSource eventSource) {
+                resultMessageBuilder.append(message);
+              }
+            });
+
+    await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
+  }
+
+  @Test
+  void shouldStreamOllamaChatCompletion() {
+    expectOllama((NdJsonStreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/api/chat");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getBody())
           .extracting("model", "prompt", "options", "system", "stream")
           .containsExactly("codellama:7b", "TEST_PROMPT", Map.of("temperature", 0.8),
               "SYSTEM_PROMPT", true);
@@ -70,6 +106,24 @@ public class OllamaClientTest extends BaseTest {
   void shouldGetOllamaCompletion() {
     expectOllama((BasicHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/api/generate");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getBody())
+              .extracting("prompt", "stream")
+              .containsExactly("TEST_PROMPT", false);
+      return new ResponseEntity(jsonMapResponse("response", "Hello!"));
+    });
+
+    var response = client.getCompletion(new Builder("codellama:7b", "TEST_PROMPT")
+            .setStream(false)
+            .build());
+
+    assertThat(response.getResponse()).isEqualTo("Hello!");
+  }
+
+  @Test
+  void shouldGetOllamaChatCompletion() {
+    expectOllama((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/api/chat");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
           .extracting("prompt", "stream")
