@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2024-04-12
+
+### Added
+
+- New 'response_format' OpenAI chat completions body param
+
+### Fixed
+
+- Azure base url construction
+- Completion's response choice handling
+
 ## [0.7.0] - 2024-04-01
 
 ### Added
@@ -68,7 +79,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.7.0]: https://github.com/carlrobertoh/llm-client/compare/0179d0c1e1d4281fe6d93bf84a23ca6714931500...HEAD
+[0.7.1]: https://github.com/carlrobertoh/llm-client/compare/27e8046091f1489790a7ec2bde4edadb5cc3d14b...HEAD
+[0.7.0]: https://github.com/carlrobertoh/llm-client/compare/0179d0c1e1d4281fe6d93bf84a23ca6714931500...0179d0c1e1d4281fe6d93bf84a23ca6714931500
 [0.6.2]: https://github.com/carlrobertoh/llm-client/compare/57039edbe25796bca08bd6cce2a92a02160607e9...0179d0c1e1d4281fe6d93bf84a23ca6714931500
 [0.6.1]: https://github.com/carlrobertoh/llm-client/compare/f7791cbf92af7fe8b8b6a0226cdc3d3f8bf56f14...57039edbe25796bca08bd6cce2a92a02160607e9
 [0.6.0]: https://github.com/carlrobertoh/llm-client/compare/3831d02c7ac0bd932dfad844605f3bd41d709d2b...f7791cbf92af7fe8b8b6a0226cdc3d3f8bf56f14
