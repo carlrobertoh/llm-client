@@ -25,6 +25,8 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
   private final List<Tool> tools;
   @JsonProperty("tool_choice")
   private final String toolChoice;
+  @JsonProperty("response_format")
+  private final ResponseFormat responseFormat;
 
   private OpenAIChatCompletionRequest(Builder builder) {
     this.model = builder.model;
@@ -37,6 +39,7 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     this.overriddenPath = builder.overriddenPath;
     this.tools = builder.tools;
     this.toolChoice = builder.toolChoice;
+    this.responseFormat = builder.responseFormat;
   }
 
   public void addMessage(OpenAIChatCompletionMessage message) {
@@ -83,6 +86,10 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     return toolChoice;
   }
 
+  public ResponseFormat getResponseFormat() {
+    return responseFormat;
+  }
+
   public static class Builder {
 
     private final List<OpenAIChatCompletionMessage> messages;
@@ -95,6 +102,7 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     private String overriddenPath;
     private List<Tool> tools;
     private String toolChoice;
+    private ResponseFormat responseFormat;
 
     public Builder(List<OpenAIChatCompletionMessage> messages) {
       this.messages = messages;
@@ -147,6 +155,11 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
 
     public Builder setToolChoice(String toolChoice) {
       this.toolChoice = toolChoice;
+      return this;
+    }
+
+    public Builder setResponseFormat(ResponseFormat responseFormat) {
+      this.responseFormat = responseFormat;
       return this;
     }
 

@@ -19,6 +19,7 @@ import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.request.ResponseFormat;
 import ee.carlrobert.llm.client.openai.completion.request.Tool;
 import ee.carlrobert.llm.client.openai.completion.request.ToolFunction;
 import ee.carlrobert.llm.client.openai.completion.request.ToolFunctionParameters;
@@ -38,6 +39,8 @@ class OpenAIClientTest extends BaseTest {
   void shouldStreamChatCompletion() {
     var prompt = "TEST_PROMPT";
     var resultMessageBuilder = new StringBuilder();
+    var responseFormat = new ResponseFormat();
+    responseFormat.setType("TEST_TYPE");
     expectOpenAI((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -54,6 +57,7 @@ class OpenAIClientTest extends BaseTest {
               "max_tokens",
               "frequency_penalty",
               "presence_penalty",
+              "response_format",
               "messages")
           .containsExactly(
               "gpt-3.5-turbo",
@@ -62,6 +66,7 @@ class OpenAIClientTest extends BaseTest {
               500,
               0.1,
               0.1,
+              Map.of("type", responseFormat.getType()),
               List.of(Map.of("role", "user", "content", prompt)));
       return List.of(
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
@@ -80,6 +85,7 @@ class OpenAIClientTest extends BaseTest {
                 .setTemperature(0.5)
                 .setPresencePenalty(0.1)
                 .setFrequencyPenalty(0.1)
+                .setResponseFormat(responseFormat)
                 .build(),
             new CompletionEventListener<String>() {
               @Override
@@ -448,12 +454,12 @@ class OpenAIClientTest extends BaseTest {
     Map<String, ?> embeddingNull = jsonMap("embedding", null);
     Map<String, ?> embeddingTwo = jsonMap("embedding", new double[]{2});
     return Stream.of(
-            Arguments.of("{}", null),
-            Arguments.of(jsonMapResponse("data", null), null),
-            Arguments.of(jsonMapResponse("data", jsonArray()), null),
-            Arguments.of(jsonMapResponse("data", jsonArray(null, embeddingOne)), one),
-            Arguments.of(jsonMapResponse("data", jsonArray(embeddingNull, embeddingOne)), one),
-            Arguments.of(jsonMapResponse("data", jsonArray(embeddingOne, embeddingTwo)), one)
+        Arguments.of("{}", null),
+        Arguments.of(jsonMapResponse("data", null), null),
+        Arguments.of(jsonMapResponse("data", jsonArray()), null),
+        Arguments.of(jsonMapResponse("data", jsonArray(null, embeddingOne)), one),
+        Arguments.of(jsonMapResponse("data", jsonArray(embeddingNull, embeddingOne)), one),
+        Arguments.of(jsonMapResponse("data", jsonArray(embeddingOne, embeddingTwo)), one)
     );
   }
 
