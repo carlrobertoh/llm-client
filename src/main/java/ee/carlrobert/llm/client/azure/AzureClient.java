@@ -25,6 +25,8 @@ import okhttp3.sse.EventSources;
 public class AzureClient {
 
   private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
+  private static final String BASE_URL = PropertiesLoader.getValue("azure.openai.baseUrl");
+
   private final OkHttpClient httpClient;
   private final String apiKey;
   private final AzureCompletionRequestParams requestParams;
@@ -36,12 +38,12 @@ public class AzureClient {
     this.apiKey = builder.apiKey;
     this.requestParams = builder.requestParams;
     this.activeDirectoryAuthentication = builder.activeDirectoryAuthentication;
-    this.url = builder.url;
+    this.url = String.format(BASE_URL, requestParams.getResourceName());
   }
 
   public EventSource getChatCompletionAsync(
       OpenAIChatCompletionRequest request,
-      CompletionEventListener completionEventListener) {
+      CompletionEventListener<String> completionEventListener) {
     return EventSources.createFactory(httpClient)
         .newEventSource(buildHttpRequest(request), getEventSourceListener(completionEventListener));
   }
@@ -95,7 +97,7 @@ public class AzureClient {
   }
 
   private OpenAIChatCompletionEventSourceListener getEventSourceListener(
-      CompletionEventListener listeners) {
+      CompletionEventListener<String> listeners) {
     return new OpenAIChatCompletionEventSourceListener(listeners) {
       @Override
       protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
@@ -108,17 +110,11 @@ public class AzureClient {
 
     private final String apiKey;
     private final AzureCompletionRequestParams requestParams;
-    private String url = PropertiesLoader.getValue("azure.openai.baseUrl");
     private boolean activeDirectoryAuthentication;
 
     public Builder(String apiKey, AzureCompletionRequestParams requestParams) {
       this.apiKey = apiKey;
       this.requestParams = requestParams;
-    }
-
-    public Builder setUrl(String url) {
-      this.url = url;
-      return this;
     }
 
     public Builder setActiveDirectoryAuthentication(boolean activeDirectoryAuthentication) {
