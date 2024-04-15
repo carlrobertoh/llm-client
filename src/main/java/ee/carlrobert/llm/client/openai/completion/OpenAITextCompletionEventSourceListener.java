@@ -33,7 +33,7 @@ public class OpenAITextCompletionEventSourceListener extends CompletionEventSour
     return (choices == null ? Stream.<OpenAITextCompletionResponseChoice>empty() : choices.stream())
             .filter(Objects::nonNull)
             .map(OpenAITextCompletionResponseChoice::getText)
-            .filter(c -> c != null && !c.isBlank())
+            .filter(Objects::nonNull)
             .findFirst()
             .orElse("");
   }

@@ -37,7 +37,7 @@ public class OpenAIChatCompletionEventSourceListener extends CompletionEventSour
             .map(OpenAIChatCompletionResponseChoice::getDelta)
             .filter(Objects::nonNull)
             .map(OpenAIChatCompletionResponseChoiceDelta::getContent)
-            .filter(c -> c != null && !c.isBlank())
+            .filter(Objects::nonNull)
             .findFirst()
             .orElse("");
   }

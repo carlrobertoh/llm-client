@@ -135,7 +135,6 @@ class OpenAIClientTest extends BaseTest {
           jsonMapResponse("choices", jsonArray(jsonMap())),
           jsonMapResponse("choices", jsonArray(jsonMap("text", null))),
           jsonMapResponse("choices", jsonArray(jsonMap("text", ""))),
-          jsonMapResponse("choices", jsonArray(jsonMap("text", " "))),
           jsonMapResponse("choices", jsonArray(jsonMap("text", "Hello"))),
           jsonMapResponse("choices", jsonArray(jsonMap("text", "!"))));
     });
@@ -200,7 +199,6 @@ class OpenAIClientTest extends BaseTest {
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap()))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", null)))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "")))),
-          jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", " ")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hello")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
