@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaEmbeddingRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaPullRequest;
@@ -57,7 +58,7 @@ public class OllamaClient {
   }
 
   public EventSource getChatCompletionAsync(
-      OllamaCompletionRequest request,
+      OllamaChatCompletionRequest request,
       CompletionEventListener<String> eventListener) {
     return EventSources.createFactory(httpClient)
         .newEventSource(
@@ -74,7 +75,7 @@ public class OllamaClient {
     }
   }
 
-  public OllamaCompletionResponse getChatCompletion(OllamaCompletionRequest request) {
+  public OllamaCompletionResponse getChatCompletion(OllamaChatCompletionRequest request) {
     try (var response = httpClient.newCall(buildPostRequest(request, "/api/chat")).execute()) {
       return DeserializationUtil.mapResponse(response, OllamaCompletionResponse.class);
     } catch (IOException e) {
