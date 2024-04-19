@@ -79,7 +79,7 @@ public class OllamaClient {
       return DeserializationUtil.mapResponse(response, OllamaCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(
-          "Could not get ollama completion for the given request:\n" + request, e);
+          "Could not get ollama chat completion for the given request:\n" + request, e);
     }
   }
 
