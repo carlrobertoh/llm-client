@@ -80,8 +80,8 @@ public class OllamaCompletionRequest implements CompletionRequest {
     private String system = null;
     private String template = null;
     private String context = null;
-    private boolean stream = false;
-    private boolean raw = false;
+    private Boolean stream = null;
+    private Boolean raw = null;
 
     public Builder(String model, String prompt) {
       this.model = model;
