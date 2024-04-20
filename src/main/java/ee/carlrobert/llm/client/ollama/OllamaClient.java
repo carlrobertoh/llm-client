@@ -12,14 +12,8 @@ import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRe
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaEmbeddingRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaPullRequest;
-import ee.carlrobert.llm.client.ollama.completion.response.OllamaCompletionResponse;
-import ee.carlrobert.llm.client.ollama.completion.response.OllamaEmbeddingResponse;
-import ee.carlrobert.llm.client.ollama.completion.response.OllamaModelInfoResponse;
-import ee.carlrobert.llm.client.ollama.completion.response.OllamaPullResponse;
-import ee.carlrobert.llm.client.ollama.completion.response.OllamaTagsResponse;
+import ee.carlrobert.llm.client.ollama.completion.response.*;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
-import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 import java.io.IOException;
@@ -63,7 +57,7 @@ public class OllamaClient {
     return EventSources.createFactory(httpClient)
         .newEventSource(
             buildPostRequest(request, "/api/chat", true),
-            getCompletionEventSourceListener(eventListener));
+            getChatCompletionEventSourceListener(eventListener));
   }
 
   public OllamaCompletionResponse getCompletion(OllamaCompletionRequest request) {
@@ -71,13 +65,13 @@ public class OllamaClient {
       return DeserializationUtil.mapResponse(response, OllamaCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(
-              "Could not get ollama completion for the given request:\n" + request, e);
+          "Could not get ollama completion for the given request:\n" + request, e);
     }
   }
 
-  public OllamaCompletionResponse getChatCompletion(OllamaChatCompletionRequest request) {
+  public OllamaChatCompletionResponse getChatCompletion(OllamaChatCompletionRequest request) {
     try (var response = httpClient.newCall(buildPostRequest(request, "/api/chat")).execute()) {
-      return DeserializationUtil.mapResponse(response, OllamaCompletionResponse.class);
+      return DeserializationUtil.mapResponse(response, OllamaChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(
           "Could not get ollama chat completion for the given request:\n" + request, e);
@@ -177,6 +171,26 @@ public class OllamaClient {
         .header("Cache-Control", "no-cache")
         .header("Content-Type", "application/json")
         .header("Accept", stream ? "text/event-stream" : "text/json");
+  }
+
+  private CompletionEventSourceListener<String> getChatCompletionEventSourceListener(
+      CompletionEventListener<String> eventListener
+  ) {
+    return new CompletionEventSourceListener<>(eventListener) {
+      @Override
+      protected String getMessage(String data) {
+        try {
+          return OBJECT_MAPPER.readValue(data, OllamaChatCompletionResponse.class).getMessage().getContent();
+        } catch (JacksonException e) {
+          return "";
+        }
+      }
+
+      @Override
+      protected ErrorDetails getErrorDetails(String error) {
+        return new ErrorDetails(error);
+      }
+    };
   }
 
   private CompletionEventSourceListener<String> getCompletionEventSourceListener(

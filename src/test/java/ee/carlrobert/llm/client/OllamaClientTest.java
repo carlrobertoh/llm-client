@@ -12,11 +12,8 @@ import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange;
 import ee.carlrobert.llm.client.ollama.OllamaClient;
-import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.*;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest.Builder;
-import ee.carlrobert.llm.client.ollama.completion.request.OllamaEmbeddingRequest;
-import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters;
-import ee.carlrobert.llm.client.ollama.completion.request.OllamaPullRequest;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaModel;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaPullResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -86,9 +83,8 @@ public class OllamaClientTest extends BaseTest {
 
     var resultMessageBuilder = new StringBuilder();
     client.getChatCompletionAsync(
-        new OllamaCompletionRequest.Builder("codellama:7b",
-            "TEST_PROMPT")
-            .setSystem("SYSTEM_PROMPT")
+        new OllamaChatCompletionRequest.Builder("codellama:7b",
+            List.of())
             .setStream(true)
             .setOptions(new OllamaParameters.Builder().temperature(0.8).build())
             .build(),
@@ -131,11 +127,11 @@ public class OllamaClientTest extends BaseTest {
       return new ResponseEntity(jsonMapResponse("response", "Hello!"));
     });
 
-    var response = client.getChatCompletion(new Builder("codellama:7b", "TEST_PROMPT")
+    var response = client.getChatCompletion(new OllamaChatCompletionRequest.Builder("codellama:7b", List.of())
         .setStream(false)
         .build());
 
-    assertThat(response.getResponse()).isEqualTo("Hello!");
+    assertThat(response.getMessage()).isEqualTo("Hello!");
   }
 
   @Test
