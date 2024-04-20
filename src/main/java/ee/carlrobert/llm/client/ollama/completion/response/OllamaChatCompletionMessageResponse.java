@@ -6,9 +6,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class OllamaChatCompletionMessageResponse {
-    private final String role;
-    private final String content;
-    private final List<String> images;
+    private String role;
+    private String content;
+    private List<String> images;
+
+    public OllamaChatCompletionMessageResponse() {}
 
     public OllamaChatCompletionMessageResponse(@NotNull String role, @NotNull String content, @Nullable List<String> images) {
         this.role = role;
@@ -29,5 +31,17 @@ public class OllamaChatCompletionMessageResponse {
     @Nullable
     public List<String> getImages() {
         return images;
+    }
+
+    public void setRole(@NotNull String role) {
+        this.role = role;
+    }
+
+    public void setContent(@NotNull String content) {
+        this.content = content;
+    }
+
+    public void setImages(@Nullable List<String> images) {
+        this.images = images;
     }
 }
