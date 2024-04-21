@@ -8,9 +8,11 @@ import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaEmbeddingRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaPullRequest;
+import ee.carlrobert.llm.client.ollama.completion.response.OllamaChatCompletionResponse;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaCompletionResponse;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaEmbeddingResponse;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaModelInfoResponse;
@@ -45,7 +47,11 @@ public class OllamaClient {
     this.port = builder.port;
   }
 
-  public EventSource getChatCompletionAsync(
+  private static RequestBody createRequestBody(Object request) throws JsonProcessingException {
+    return RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON);
+  }
+
+  public EventSource getCompletionAsync(
       OllamaCompletionRequest request,
       CompletionEventListener<String> eventListener) {
     return EventSources.createFactory(httpClient)
@@ -54,12 +60,30 @@ public class OllamaClient {
             getCompletionEventSourceListener(eventListener));
   }
 
-  public OllamaCompletionResponse getChatCompletion(OllamaCompletionRequest request) {
+  public EventSource getChatCompletionAsync(
+      OllamaChatCompletionRequest request,
+      CompletionEventListener<String> eventListener) {
+    return EventSources.createFactory(httpClient)
+        .newEventSource(
+            buildPostRequest(request, "/api/chat", true),
+            getChatCompletionEventSourceListener(eventListener));
+  }
+
+  public OllamaCompletionResponse getCompletion(OllamaCompletionRequest request) {
     try (var response = httpClient.newCall(buildPostRequest(request, "/api/generate")).execute()) {
       return DeserializationUtil.mapResponse(response, OllamaCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(
           "Could not get ollama completion for the given request:\n" + request, e);
+    }
+  }
+
+  public OllamaChatCompletionResponse getChatCompletion(OllamaChatCompletionRequest request) {
+    try (var response = httpClient.newCall(buildPostRequest(request, "/api/chat")).execute()) {
+      return DeserializationUtil.mapResponse(response, OllamaChatCompletionResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException(
+          "Could not get ollama chat completion for the given request:\n" + request, e);
     }
   }
 
@@ -141,10 +165,6 @@ public class OllamaClient {
     }
   }
 
-  private static RequestBody createRequestBody(Object request) throws JsonProcessingException {
-    return RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON);
-  }
-
   private Request.Builder defaultRequest(String path) {
     return defaultRequest(path, false);
   }
@@ -156,6 +176,27 @@ public class OllamaClient {
         .header("Cache-Control", "no-cache")
         .header("Content-Type", "application/json")
         .header("Accept", stream ? "text/event-stream" : "text/json");
+  }
+
+  private CompletionEventSourceListener<String> getChatCompletionEventSourceListener(
+      CompletionEventListener<String> eventListener
+  ) {
+    return new CompletionEventSourceListener<>(eventListener) {
+      @Override
+      protected String getMessage(String data) {
+        try {
+          return OBJECT_MAPPER.readValue(data, OllamaChatCompletionResponse.class).getMessage()
+              .getContent();
+        } catch (JacksonException e) {
+          return "";
+        }
+      }
+
+      @Override
+      protected ErrorDetails getErrorDetails(String error) {
+        return new ErrorDetails(error);
+      }
+    };
   }
 
   private CompletionEventSourceListener<String> getCompletionEventSourceListener(
