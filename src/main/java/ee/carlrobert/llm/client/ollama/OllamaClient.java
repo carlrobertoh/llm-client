@@ -12,7 +12,12 @@ import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRe
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaEmbeddingRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaPullRequest;
-import ee.carlrobert.llm.client.ollama.completion.response.*;
+import ee.carlrobert.llm.client.ollama.completion.response.OllamaChatCompletionResponse;
+import ee.carlrobert.llm.client.ollama.completion.response.OllamaCompletionResponse;
+import ee.carlrobert.llm.client.ollama.completion.response.OllamaEmbeddingResponse;
+import ee.carlrobert.llm.client.ollama.completion.response.OllamaModelInfoResponse;
+import ee.carlrobert.llm.client.ollama.completion.response.OllamaPullResponse;
+import ee.carlrobert.llm.client.ollama.completion.response.OllamaTagsResponse;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
@@ -42,9 +47,13 @@ public class OllamaClient {
     this.port = builder.port;
   }
 
+  private static RequestBody createRequestBody(Object request) throws JsonProcessingException {
+    return RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON);
+  }
+
   public EventSource getCompletionAsync(
-          OllamaCompletionRequest request,
-          CompletionEventListener<String> eventListener) {
+      OllamaCompletionRequest request,
+      CompletionEventListener<String> eventListener) {
     return EventSources.createFactory(httpClient)
         .newEventSource(
             buildPostRequest(request, "/api/generate", true),
@@ -156,10 +165,6 @@ public class OllamaClient {
     }
   }
 
-  private static RequestBody createRequestBody(Object request) throws JsonProcessingException {
-    return RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON);
-  }
-
   private Request.Builder defaultRequest(String path) {
     return defaultRequest(path, false);
   }
@@ -180,7 +185,8 @@ public class OllamaClient {
       @Override
       protected String getMessage(String data) {
         try {
-          return OBJECT_MAPPER.readValue(data, OllamaChatCompletionResponse.class).getMessage().getContent();
+          return OBJECT_MAPPER.readValue(data, OllamaChatCompletionResponse.class).getMessage()
+              .getContent();
         } catch (JacksonException e) {
           return "";
         }

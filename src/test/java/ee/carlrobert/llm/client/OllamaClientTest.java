@@ -12,8 +12,13 @@ import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange;
 import ee.carlrobert.llm.client.ollama.OllamaClient;
-import ee.carlrobert.llm.client.ollama.completion.request.*;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionMessage;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest.Builder;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaEmbeddingRequest;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters;
+import ee.carlrobert.llm.client.ollama.completion.request.OllamaPullRequest;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaModel;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaPullResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
@@ -33,32 +38,32 @@ public class OllamaClientTest extends BaseTest {
       assertThat(request.getUri().getPath()).isEqualTo("/api/generate");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
-              .extracting("model", "prompt", "options", "system", "stream")
-              .containsExactly("codellama:7b", "TEST_PROMPT", Map.of("temperature", 0.8),
-                      "SYSTEM_PROMPT", true);
+          .extracting("model", "prompt", "options", "system", "stream")
+          .containsExactly("codellama:7b", "TEST_PROMPT", Map.of("temperature", 0.8),
+              "SYSTEM_PROMPT", true);
       assertThat(request.getHeaders())
-              .flatExtracting("Accept", "Connection")
-              .containsExactly("text/event-stream", "Keep-Alive");
+          .flatExtracting("Accept", "Connection")
+          .containsExactly("text/event-stream", "Keep-Alive");
       return List.of(
-              jsonMapResponse(e("response", "Hel"), e("done", false)),
-              jsonMapResponse(e("response", "lo"), e("done", false)),
-              jsonMapResponse(e("response", "!"), e("done", true)));
+          jsonMapResponse(e("response", "Hel"), e("done", false)),
+          jsonMapResponse(e("response", "lo"), e("done", false)),
+          jsonMapResponse(e("response", "!"), e("done", true)));
     });
 
     var resultMessageBuilder = new StringBuilder();
     client.getCompletionAsync(
-            new OllamaCompletionRequest.Builder("codellama:7b",
-                    "TEST_PROMPT")
-                    .setSystem("SYSTEM_PROMPT")
-                    .setStream(true)
-                    .setOptions(new OllamaParameters.Builder().temperature(0.8).build())
-                    .build(),
-            new CompletionEventListener<>() {
-              @Override
-              public void onMessage(String message, EventSource eventSource) {
-                resultMessageBuilder.append(message);
-              }
-            });
+        new OllamaCompletionRequest.Builder("codellama:7b",
+            "TEST_PROMPT")
+            .setSystem("SYSTEM_PROMPT")
+            .setStream(true)
+            .setOptions(new OllamaParameters.Builder().temperature(0.8).build())
+            .build(),
+        new CompletionEventListener<>() {
+          @Override
+          public void onMessage(String message, EventSource eventSource) {
+            resultMessageBuilder.append(message);
+          }
+        });
 
     await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
   }
@@ -129,14 +134,14 @@ public class OllamaClientTest extends BaseTest {
       assertThat(request.getUri().getPath()).isEqualTo("/api/generate");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
-              .extracting("prompt", "stream")
-              .containsExactly("TEST_PROMPT", false);
+          .extracting("prompt", "stream")
+          .containsExactly("TEST_PROMPT", false);
       return new ResponseEntity(jsonMapResponse("response", "Hello!"));
     });
 
     var response = client.getCompletion(new Builder("codellama:7b", "TEST_PROMPT")
-            .setStream(false)
-            .build());
+        .setStream(false)
+        .build());
 
     assertThat(response.getResponse()).isEqualTo("Hello!");
   }

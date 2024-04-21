@@ -1,47 +1,49 @@
 package ee.carlrobert.llm.client.ollama.completion.response;
 
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 public class OllamaChatCompletionMessageResponse {
-    private String role;
-    private String content;
-    private List<String> images;
 
-    public OllamaChatCompletionMessageResponse() {}
+  private String role;
+  private String content;
+  private List<String> images;
 
-    public OllamaChatCompletionMessageResponse(@NotNull String role, @NotNull String content, @Nullable List<String> images) {
-        this.role = role;
-        this.content = content;
-        this.images = images;
-    }
+  public OllamaChatCompletionMessageResponse() {
+  }
 
-    @NotNull
-    public String getRole() {
-        return role;
-    }
+  public OllamaChatCompletionMessageResponse(@NotNull String role, @NotNull String content,
+      @Nullable List<String> images) {
+    this.role = role;
+    this.content = content;
+    this.images = images;
+  }
 
-    @NotNull
-    public String getContent() {
-        return content;
-    }
+  @NotNull
+  public String getRole() {
+    return role;
+  }
 
-    @Nullable
-    public List<String> getImages() {
-        return images;
-    }
+  public void setRole(@NotNull String role) {
+    this.role = role;
+  }
 
-    public void setRole(@NotNull String role) {
-        this.role = role;
-    }
+  @NotNull
+  public String getContent() {
+    return content;
+  }
 
-    public void setContent(@NotNull String content) {
-        this.content = content;
-    }
+  public void setContent(@NotNull String content) {
+    this.content = content;
+  }
 
-    public void setImages(@Nullable List<String> images) {
-        this.images = images;
-    }
+  @Nullable
+  public List<String> getImages() {
+    return images;
+  }
+
+  public void setImages(@Nullable List<String> images) {
+    this.images = images;
+  }
 }
