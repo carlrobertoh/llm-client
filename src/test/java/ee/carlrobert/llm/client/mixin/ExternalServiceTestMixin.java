@@ -6,6 +6,7 @@ import static ee.carlrobert.llm.client.mixin.ExternalService.AZURE;
 import static ee.carlrobert.llm.client.mixin.ExternalService.LLAMA;
 import static ee.carlrobert.llm.client.mixin.ExternalService.OLLAMA;
 import static ee.carlrobert.llm.client.mixin.ExternalService.OPENAI;
+import static ee.carlrobert.llm.client.mixin.ExternalService.TOGETHER;
 import static ee.carlrobert.llm.client.mixin.ExternalService.YOU;
 import static ee.carlrobert.llm.client.mixin.ExternalServiceTestMixin.Private.externalServiceServerMap;
 
@@ -60,6 +61,10 @@ public interface ExternalServiceTestMixin {
 
   default void expectYou(Exchange exchange) {
     addExpectation(YOU, exchange);
+  }
+
+  default void expectTogether(Exchange exchange) {
+    addExpectation(TOGETHER, exchange);
   }
 
   default void expectLlama(Exchange exchange) {
