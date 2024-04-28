@@ -37,7 +37,7 @@ public class OpenAIClient {
   private final String organization;
   private final String host;
 
-  protected OpenAIClient(Builder builder, OkHttpClient.Builder httpClientBuilder) {
+  private OpenAIClient(Builder builder, OkHttpClient.Builder httpClientBuilder) {
     this.httpClient = httpClientBuilder.build();
     this.apiKey = builder.apiKey;
     this.organization = builder.organization;
@@ -46,7 +46,7 @@ public class OpenAIClient {
 
   public EventSource getCompletionAsync(
       OpenAITextCompletionRequest request,
-      CompletionEventListener eventListener) {
+      CompletionEventListener<String> eventListener) {
     return EventSources.createFactory(httpClient).newEventSource(
         buildTextCompletionRequest(request),
         new OpenAITextCompletionEventSourceListener(eventListener));
@@ -54,7 +54,7 @@ public class OpenAIClient {
 
   public EventSource getChatCompletionAsync(
       OpenAIChatCompletionRequest request,
-      CompletionEventListener eventListener) {
+      CompletionEventListener<String> eventListener) {
     return EventSources.createFactory(httpClient).newEventSource(
         buildChatCompletionRequest(request),
         new OpenAIChatCompletionEventSourceListener(eventListener));
@@ -91,13 +91,13 @@ public class OpenAIClient {
         .execute()) {
 
       return Optional.ofNullable(DeserializationUtil.mapResponse(response, EmbeddingResponse.class))
-              .map(EmbeddingResponse::getData)
-              .stream()
-              .flatMap(Collection::stream)
-              .filter(Objects::nonNull)
-              .map(EmbeddingData::getEmbedding)
-              .filter(Objects::nonNull)
-              .collect(toList());
+          .map(EmbeddingResponse::getData)
+          .stream()
+          .flatMap(Collection::stream)
+          .filter(Objects::nonNull)
+          .map(EmbeddingData::getEmbedding)
+          .filter(Objects::nonNull)
+          .collect(toList());
     } catch (IOException e) {
       throw new RuntimeException("Unable to fetch embedding", e);
     }
@@ -116,7 +116,7 @@ public class OpenAIClient {
         .build();
   }
 
-  protected Request buildChatCompletionRequest(OpenAIChatCompletionRequest request) {
+  private Request buildChatCompletionRequest(OpenAIChatCompletionRequest request) {
     var headers = new HashMap<>(getRequiredHeaders());
     if (request.isStream()) {
       headers.put("Accept", "text/event-stream");
@@ -150,9 +150,10 @@ public class OpenAIClient {
   }
 
   private Map<String, String> getRequiredHeaders() {
-    var headers = new HashMap<>(Map.of(
-        "Authorization", "Bearer " + apiKey,
-        "X-LLM-Application-Tag", "codegpt"));
+    var headers = new HashMap<>(Map.of("X-LLM-Application-Tag", "codegpt"));
+    if (apiKey != null && !apiKey.isEmpty()) {
+      headers.put("Authorization", "Bearer " + apiKey);
+    }
     if (organization != null && !organization.isEmpty()) {
       headers.put("OpenAI-Organization", organization);
     }
