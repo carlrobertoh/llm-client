@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.4] - 2024-04-28
+
+### Added
+
+- Initial CodeGPT Client implementation
+
+### Removed
+
+- Together.ai client
+
 ## [0.7.3] - 2024-04-27
 
 ### Added
@@ -92,7 +102,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.7.3]: https://github.com/carlrobertoh/llm-client/compare/7c05ab491fbcdfddd74518260d6df78d878e7ce3...HEAD
+[0.7.4]: https://github.com/carlrobertoh/llm-client/compare/9074c1482f8253276fa6b9f0bb0497c0b741a5bb...HEAD
+[0.7.3]: https://github.com/carlrobertoh/llm-client/compare/7c05ab491fbcdfddd74518260d6df78d878e7ce3...9074c1482f8253276fa6b9f0bb0497c0b741a5bb
 [0.7.2]: https://github.com/carlrobertoh/llm-client/compare/21e72691b73e997764d5db3e56fc0fed3d6dc6c4...7c05ab491fbcdfddd74518260d6df78d878e7ce3
 [0.7.1]: https://github.com/carlrobertoh/llm-client/compare/27e8046091f1489790a7ec2bde4edadb5cc3d14b...21e72691b73e997764d5db3e56fc0fed3d6dc6c4
 [0.7.0]: https://github.com/carlrobertoh/llm-client/compare/0179d0c1e1d4281fe6d93bf84a23ca6714931500...0179d0c1e1d4281fe6d93bf84a23ca6714931500
