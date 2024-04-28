@@ -7,7 +7,6 @@ public enum ExternalService implements Service {
   ANTHROPIC("anthropic.baseUrl"),
   AZURE("azure.openai.baseUrl"),
   YOU("you.baseUrl"),
-  TOGETHER("together.baseUrl"),
   LLAMA("llama.baseUrl"),
   OLLAMA("ollama.baseUrl");
 
