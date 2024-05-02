@@ -47,17 +47,29 @@ public class OpenAIClient {
   public EventSource getCompletionAsync(
       OpenAITextCompletionRequest request,
       CompletionEventListener<String> eventListener) {
-    return EventSources.createFactory(httpClient).newEventSource(
-        buildTextCompletionRequest(request),
-        new OpenAITextCompletionEventSourceListener(eventListener));
+    return getCompletionAsync(request, new OpenAITextCompletionEventSourceListener(eventListener));
+  }
+
+  public EventSource getCompletionAsync(
+      OpenAITextCompletionRequest request,
+      OpenAITextCompletionEventSourceListener eventListener) {
+    return EventSources.createFactory(httpClient)
+        .newEventSource(buildTextCompletionRequest(request), eventListener);
   }
 
   public EventSource getChatCompletionAsync(
       OpenAIChatCompletionRequest request,
       CompletionEventListener<String> eventListener) {
-    return EventSources.createFactory(httpClient).newEventSource(
-        buildChatCompletionRequest(request),
+    return getChatCompletionAsync(
+        request,
         new OpenAIChatCompletionEventSourceListener(eventListener));
+  }
+
+  public EventSource getChatCompletionAsync(
+      OpenAIChatCompletionRequest request,
+      OpenAIChatCompletionEventSourceListener eventListener) {
+    return EventSources.createFactory(httpClient)
+        .newEventSource(buildChatCompletionRequest(request), eventListener);
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {

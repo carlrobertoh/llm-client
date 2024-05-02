@@ -97,8 +97,8 @@ public class AzureClient {
   }
 
   private OpenAIChatCompletionEventSourceListener getEventSourceListener(
-      CompletionEventListener<String> listeners) {
-    return new OpenAIChatCompletionEventSourceListener(listeners) {
+      CompletionEventListener<String> listener) {
+    return new OpenAIChatCompletionEventSourceListener(listener) {
       @Override
       protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
         return OBJECT_MAPPER.readValue(data, AzureApiResponseError.class).getError();

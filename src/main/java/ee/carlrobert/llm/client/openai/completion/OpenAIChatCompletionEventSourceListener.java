@@ -13,8 +13,8 @@ import java.util.stream.Stream;
 
 public class OpenAIChatCompletionEventSourceListener extends CompletionEventSourceListener<String> {
 
-  public OpenAIChatCompletionEventSourceListener(CompletionEventListener<String> listeners) {
-    super(listeners);
+  public OpenAIChatCompletionEventSourceListener(CompletionEventListener<String> listener) {
+    super(listener);
   }
 
   /**
