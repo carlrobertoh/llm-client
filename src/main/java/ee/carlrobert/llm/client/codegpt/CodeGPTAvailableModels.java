@@ -17,6 +17,10 @@ public class CodeGPTAvailableModels {
           "codellama/CodeLlama-70b-Instruct-hf",
           ModelType.CHAT),
       new CodeGPTModel(
+          "Code Llama (13B)",
+          "codellama/CodeLlama-13b-Instruct-hf",
+          ModelType.CHAT),
+      new CodeGPTModel(
           "Mixtral (8x22B)",
           "mistralai/Mixtral-8x22B-Instruct-v0.1",
           ModelType.CHAT),
@@ -42,6 +46,10 @@ public class CodeGPTAvailableModels {
       new CodeGPTModel(
           "Code Llama Python (70B)",
           "codellama/CodeLlama-70b-Python-hf",
+          ModelType.CODE),
+      new CodeGPTModel(
+          "Code Llama Python (7B)",
+          "codellama/CodeLlama-7b-Python-hf",
           ModelType.CODE),
       new CodeGPTModel(
           "WizardCoder Python (34B)",
