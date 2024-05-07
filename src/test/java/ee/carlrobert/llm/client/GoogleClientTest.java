@@ -327,14 +327,15 @@ class GoogleClientTest extends BaseTest {
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
           .extracting("contents")
-          .isEqualTo( List.of(Map.of("parts", List.of(Map.of("text", "test")))));
+          .isEqualTo(List.of(Map.of("parts", List.of(Map.of("text", "test")))));
       return new ResponseEntity(new ObjectMapper().writeValueAsString(
           Map.of("totalTokens", 1)));
     });
 
     var response = new GoogleClient.Builder("TEST_API_KEY")
         .build()
-        .getCountTokens(List.of(new GoogleCompletionContent(List.of("test"))), GoogleModel.GEMINI_1_0_PRO);
+        .getCountTokens(List.of(
+            new GoogleCompletionContent(List.of("test"))), GoogleModel.GEMINI_1_0_PRO);
 
     assertThat(response.getTotalTokens()).isEqualTo(1);
   }
