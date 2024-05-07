@@ -3,6 +3,7 @@ package ee.carlrobert.llm.client.mixin;
 
 import static ee.carlrobert.llm.client.mixin.ExternalService.ANTHROPIC;
 import static ee.carlrobert.llm.client.mixin.ExternalService.AZURE;
+import static ee.carlrobert.llm.client.mixin.ExternalService.GOOGLE;
 import static ee.carlrobert.llm.client.mixin.ExternalService.LLAMA;
 import static ee.carlrobert.llm.client.mixin.ExternalService.OLLAMA;
 import static ee.carlrobert.llm.client.mixin.ExternalService.OPENAI;
@@ -68,6 +69,10 @@ public interface ExternalServiceTestMixin {
 
   default void expectOllama(Exchange exchange) {
     addExpectation(OLLAMA, exchange);
+  }
+
+  default void expectGoogle(Exchange exchange) {
+    addExpectation(GOOGLE, exchange);
   }
 
   private void addExpectation(ExternalService externalService, Exchange exchange) {

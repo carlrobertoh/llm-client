@@ -9,7 +9,8 @@ public enum ExternalService implements Service {
   AZURE("azure.openai.baseUrl"),
   YOU("you.baseUrl"),
   LLAMA("llama.baseUrl"),
-  OLLAMA("ollama.baseUrl");
+  OLLAMA("ollama.baseUrl"),
+  GOOGLE("google.baseUrl");
 
   private final String urlProperty;
 
