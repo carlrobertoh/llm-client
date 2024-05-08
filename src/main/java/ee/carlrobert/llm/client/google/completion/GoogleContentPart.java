@@ -2,6 +2,8 @@ package ee.carlrobert.llm.client.google.completion;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 
 @JsonInclude(Include.NON_NULL)
 public class GoogleContentPart {
@@ -42,8 +44,27 @@ public class GoogleContentPart {
    */
   public static class Blob {
 
+    public static final Encoder ENCODER = Base64.getEncoder();
+
     private String mimeType;
+
+    /**
+     * base64 encoded.
+     */
     private String data;
+
+    public Blob() {
+    }
+
+    public Blob(String mimeType, byte[] data) {
+      this.mimeType = mimeType;
+      this.data = ENCODER.encodeToString(data);
+    }
+
+    public Blob(String mimeType, String base64EncodedData) {
+      this.mimeType = mimeType;
+      this.data = base64EncodedData;
+    }
 
     public String getMimeType() {
       return mimeType;
