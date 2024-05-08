@@ -23,6 +23,11 @@ public class GoogleCompletionContent {
     this.role = role;
   }
 
+  public GoogleCompletionContent(List<GoogleContentPart> parts, String role) {
+    this.parts = parts;
+    this.role = role;
+  }
+
   public List<GoogleContentPart> getParts() {
     return parts;
   }
