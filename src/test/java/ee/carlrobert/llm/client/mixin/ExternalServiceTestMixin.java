@@ -3,6 +3,7 @@ package ee.carlrobert.llm.client.mixin;
 
 import static ee.carlrobert.llm.client.mixin.ExternalService.ANTHROPIC;
 import static ee.carlrobert.llm.client.mixin.ExternalService.AZURE;
+import static ee.carlrobert.llm.client.mixin.ExternalService.CODEGPT;
 import static ee.carlrobert.llm.client.mixin.ExternalService.GOOGLE;
 import static ee.carlrobert.llm.client.mixin.ExternalService.LLAMA;
 import static ee.carlrobert.llm.client.mixin.ExternalService.OLLAMA;
@@ -45,6 +46,10 @@ public interface ExternalServiceTestMixin {
 
   static void clearAll() {
     externalServiceServerMap.values().forEach(LocalCallbackServer::clear);
+  }
+
+  default void expectCodeGPT(Exchange exchange) {
+    addExpectation(CODEGPT, exchange);
   }
 
   default void expectOpenAI(Exchange exchange) {
