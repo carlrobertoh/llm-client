@@ -5,10 +5,16 @@ import static ee.carlrobert.llm.client.util.JSONUtil.jsonMap;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.codegpt.CodeGPTClient;
+import ee.carlrobert.llm.client.http.ResponseEntity;
+import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
+import ee.carlrobert.llm.client.openai.OpenAIClient;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
@@ -137,5 +143,54 @@ public class CodeGPTClientTest extends BaseTest {
             });
 
     await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
+  }
+
+  @Test
+  void shouldGetChatCompletion() {
+    expectCodeGPT((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "temperature",
+              "stream",
+              "max_tokens",
+              "frequency_penalty",
+              "presence_penalty",
+              "messages")
+          .containsExactly(
+              "TEST_MODEL",
+              0.5,
+              false,
+              500,
+              0.1,
+              0.1,
+              List.of(Map.of("role", "user", "content", "TEST_PROMPT")));
+
+      return new ResponseEntity(new ObjectMapper().writeValueAsString(Map.of("choices", List.of(
+          Map.of("message", Map.of(
+              "role", "assistant",
+              "content", "This is a test"))))));
+    });
+
+    var response = new CodeGPTClient("TEST_API_KEY")
+        .getChatCompletion(new OpenAIChatCompletionRequest.Builder(
+            List.of(new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")))
+            .setModel("TEST_MODEL")
+            .setMaxTokens(500)
+            .setTemperature(0.5)
+            .setPresencePenalty(0.1)
+            .setFrequencyPenalty(0.1)
+            .setStream(false)
+            .build());
+
+    assertThat(response.getChoices())
+        .extracting("message")
+        .extracting("role", "content")
+        .containsExactly(tuple("assistant", "This is a test"));
   }
 }

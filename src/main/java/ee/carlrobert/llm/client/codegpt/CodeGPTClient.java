@@ -10,6 +10,7 @@ import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourc
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import okhttp3.OkHttpClient;
 import okhttp3.sse.EventSource;
@@ -40,6 +41,10 @@ public class CodeGPTClient {
       OpenAITextCompletionRequest request,
       CompletionEventListener<String> eventListener) {
     return client.getCompletionAsync(request, getTextCompletionEventSourceListener(eventListener));
+  }
+
+  public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
+    return client.getChatCompletion(request);
   }
 
   private OpenAIChatCompletionEventSourceListener getChatCompletionEventSourceListener(
