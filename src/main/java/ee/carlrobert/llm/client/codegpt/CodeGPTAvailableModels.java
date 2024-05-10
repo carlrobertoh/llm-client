@@ -13,6 +13,10 @@ public class CodeGPTAvailableModels {
           "meta-llama/Llama-3-70b-chat-hf",
           ModelType.CHAT),
       new CodeGPTModel(
+          "Llama 3 (8B)",
+          "meta-llama/Llama-3-8b-chat-hf",
+          ModelType.CHAT),
+      new CodeGPTModel(
           "Code Llama (70B)",
           "codellama/CodeLlama-70b-Instruct-hf",
           ModelType.CHAT),
