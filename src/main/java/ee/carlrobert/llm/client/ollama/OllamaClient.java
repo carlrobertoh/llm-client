@@ -38,6 +38,7 @@ public class OllamaClient {
   private final OkHttpClient httpClient;
   private final String host;
   private final Integer port;
+  private final String apiKey;
 
   protected OllamaClient(Builder builder, OkHttpClient.Builder httpClientBuilder) {
     this.httpClient = httpClientBuilder
@@ -45,6 +46,7 @@ public class OllamaClient {
         .build();
     this.host = builder.host;
     this.port = builder.port;
+    this.apiKey = builder.apiKey;
   }
 
   private static RequestBody createRequestBody(Object request) throws JsonProcessingException {
@@ -171,11 +173,15 @@ public class OllamaClient {
 
   private Request.Builder defaultRequest(String path, boolean stream) {
     var baseHost = port == null ? BASE_URL : format("http://localhost:%d", port);
-    return new Request.Builder()
+    var builder = new Request.Builder()
         .url((host == null ? baseHost : host) + path)
         .header("Cache-Control", "no-cache")
         .header("Content-Type", "application/json")
         .header("Accept", stream ? "text/event-stream" : "text/json");
+    if (apiKey != null) {
+      builder.header("Authorization", "Bearer " + apiKey);
+    }
+    return builder;
   }
 
   private CompletionEventSourceListener<String> getChatCompletionEventSourceListener(
@@ -241,6 +247,7 @@ public class OllamaClient {
 
     private String host;
     private Integer port;
+    private String apiKey;
 
     public Builder setHost(String host) {
       this.host = host;
@@ -249,6 +256,11 @@ public class OllamaClient {
 
     public Builder setPort(Integer port) {
       this.port = port;
+      return this;
+    }
+
+    public Builder setApiKey(String apiKey) {
+      this.apiKey = apiKey;
       return this;
     }
 
