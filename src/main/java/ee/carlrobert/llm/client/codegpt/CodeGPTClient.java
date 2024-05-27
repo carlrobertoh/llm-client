@@ -4,6 +4,7 @@ import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.PropertiesLoader;
+import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
@@ -12,7 +13,9 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRe
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
+import java.io.IOException;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.sse.EventSource;
 
 public class CodeGPTClient {
@@ -27,6 +30,25 @@ public class CodeGPTClient {
 
   public CodeGPTClient(String apiKey, OkHttpClient.Builder httpClientBuilder) {
     this.client = new OpenAIClient.Builder(apiKey).setHost(BASE_URL).build(httpClientBuilder);
+  }
+
+  public CodeGPTUserDetails getUserDetails(String apiKey) {
+    try (var response = new OkHttpClient.Builder().build()
+        .newCall(buildUserDetailsRequest(apiKey))
+        .execute()) {
+
+      return DeserializationUtil.mapResponse(response, CodeGPTUserDetails.class);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to fetch user details", e);
+    }
+  }
+
+  private Request buildUserDetailsRequest(String apiKey) {
+    return new Request.Builder()
+        .url(BASE_URL + "/v1/users/details")
+        .header("Authorization", "Bearer " + apiKey)
+        .get()
+        .build();
   }
 
   public EventSource getChatCompletionAsync(
