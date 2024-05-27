@@ -17,7 +17,6 @@ import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Map;
-import okhttp3.OkHttpClient;
 import okhttp3.sse.EventSource;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +54,8 @@ public class ClaudeClientTest extends BaseTest {
     });
 
     var resultMessageBuilder = new StringBuilder();
-    new ClaudeClient("TEST_API_KEY", "2000-01-01", new OkHttpClient.Builder())
+    new ClaudeClient.Builder("TEST_API_KEY", "2000-01-01")
+        .build()
         .getCompletionAsync(
             request,
             new CompletionEventListener<>() {
@@ -112,10 +112,10 @@ public class ClaudeClientTest extends BaseTest {
                   e("output_tokens", 12)))));
     });
 
-    var response = new ClaudeClient(
+    var response = new ClaudeClient.Builder(
         "TEST_API_KEY",
-        "2000-01-01",
-        new OkHttpClient.Builder())
+        "2000-01-01")
+        .build()
         .getCompletion(request);
 
     assertThat(response.getContent()).hasSize(1);

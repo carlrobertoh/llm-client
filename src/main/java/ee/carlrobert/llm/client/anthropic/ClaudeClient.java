@@ -25,17 +25,26 @@ import okhttp3.sse.EventSources;
 
 public class ClaudeClient {
 
-  private static final String BASE_URL = PropertiesLoader.getValue("anthropic.baseUrl");
   private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
 
   private final OkHttpClient httpClient;
   private final String apiKey;
   private final String apiVersion;
+  private final String host;
 
+  @Deprecated
   public ClaudeClient(String apiKey, String apiVersion, OkHttpClient.Builder httpClientBuilder) {
     this.httpClient = httpClientBuilder.build();
     this.apiKey = apiKey;
     this.apiVersion = apiVersion;
+    this.host = PropertiesLoader.getValue("anthropic.baseUrl");
+  }
+
+  public ClaudeClient(Builder builder, OkHttpClient.Builder httpClientBuilder) {
+    this.apiKey = builder.apiKey;
+    this.apiVersion = builder.apiVersion;
+    this.host = builder.host;
+    this.httpClient = httpClientBuilder.build();
   }
 
   public EventSource getCompletionAsync(
@@ -61,7 +70,7 @@ public class ClaudeClient {
     }
     try {
       return new Request.Builder()
-          .url(BASE_URL + "/v1/messages")
+          .url(host + "/v1/messages")
           .headers(Headers.of(headers))
           .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
           .build();
@@ -79,7 +88,7 @@ public class ClaudeClient {
     return new CompletionEventSourceListener<>(eventListener) {
       @Override
       protected String getMessage(String data) {
-          try {
+        try {
           return OBJECT_MAPPER.readValue(data, ClaudeCompletionStreamResponse.class)
               .getDelta()
               .getText();
@@ -103,5 +112,30 @@ public class ClaudeClient {
         }
       }
     };
+  }
+
+  public static class Builder {
+
+    private final String apiKey;
+    private final String apiVersion;
+    private String host = PropertiesLoader.getValue("anthropic.baseUrl");
+
+    public Builder(String apiKey, String apiVersion) {
+      this.apiKey = apiKey;
+      this.apiVersion = apiVersion;
+    }
+
+    public Builder setHost(String host) {
+      this.host = host;
+      return this;
+    }
+
+    public ClaudeClient build(OkHttpClient.Builder builder) {
+      return new ClaudeClient(this, builder);
+    }
+
+    public ClaudeClient build() {
+      return build(new OkHttpClient.Builder());
+    }
   }
 }
