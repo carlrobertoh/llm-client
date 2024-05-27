@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.6] - 2024-05-28
+
+### Added
+
+- Support for fetching user details (CodeGPT)
+- Support for overriding base host (Claude) 
+
 ## [0.8.5] - 2024-05-13
 
 ### Added
@@ -144,7 +151,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.8.5]: https://github.com/carlrobertoh/llm-client/compare/becc0223bd07bda1b493b13e2e9aa423accafc3a...HEAD
+[0.8.5]: https://github.com/carlrobertoh/llm-client/compare/5d1b3f4e4d8ae9c75a57425a06fbbfec4b608228...HEAD
+[0.8.5]: https://github.com/carlrobertoh/llm-client/compare/becc0223bd07bda1b493b13e2e9aa423accafc3a...5d1b3f4e4d8ae9c75a57425a06fbbfec4b608228
 [0.8.4]: https://github.com/carlrobertoh/llm-client/compare/f79729ebf02e423b3e5595c44accc8bb25ec0526...becc0223bd07bda1b493b13e2e9aa423accafc3a
 [0.8.3]: https://github.com/carlrobertoh/llm-client/compare/21808c5c1273282fc0a177a381c88a605db1bb10...f79729ebf02e423b3e5595c44accc8bb25ec0526
 [0.8.2]: https://github.com/carlrobertoh/llm-client/compare/cfa5330d0ca853e3edac7541dffec5dbe4f54e2a...21808c5c1273282fc0a177a381c88a605db1bb10
