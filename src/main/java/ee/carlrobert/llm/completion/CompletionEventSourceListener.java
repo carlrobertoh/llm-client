@@ -42,6 +42,7 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
 
   public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
     LOG.info("Request opened.");
+    listeners.onOpen();
   }
 
   public void onClosed(@NotNull EventSource eventSource) {

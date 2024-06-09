@@ -5,6 +5,9 @@ import okhttp3.sse.EventSource;
 
 public interface CompletionEventListener<T> {
 
+  default void onOpen() {
+  }
+
   default void onMessage(T message, String rawMessage, EventSource eventSource) {
   }
 
