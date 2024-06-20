@@ -11,15 +11,18 @@ public class CodeGPTUserDetails {
   private final String fullName;
   private final PricingPlan pricingPlan;
   private final List<AvailableModel> availableModels;
+  private final List<AvailableModel> toolWindowModels;
 
   @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
   public CodeGPTUserDetails(
       @JsonProperty("fullName") String fullName,
       @JsonProperty("pricingPlan") PricingPlan pricingPlan,
-      @JsonProperty("availableModels") List<AvailableModel> availableModels) {
+      @JsonProperty("availableModels") List<AvailableModel> availableModels,
+      @JsonProperty("toolWindowModels") List<AvailableModel> toolWindowModels) {
     this.fullName = fullName;
     this.pricingPlan = pricingPlan;
     this.availableModels = availableModels;
+    this.toolWindowModels = toolWindowModels;
   }
 
   public String getFullName() {
@@ -32,5 +35,9 @@ public class CodeGPTUserDetails {
 
   public List<AvailableModel> getAvailableModels() {
     return availableModels;
+  }
+
+  public List<AvailableModel> getToolWindowModels() {
+    return toolWindowModels;
   }
 }

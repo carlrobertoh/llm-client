@@ -11,17 +11,20 @@ public class AvailableModel {
   private final String code;
   private final String type;
   private final String tier;
+  private final String developedBy;
 
   @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
   public AvailableModel(
       @JsonProperty("name") String name,
       @JsonProperty("code") String code,
       @JsonProperty("type") String type,
-      @JsonProperty("tier") String tier) {
+      @JsonProperty("tier") String tier,
+      @JsonProperty("developedBy") String developedBy) {
     this.name = name;
     this.code = code;
     this.type = type;
     this.tier = tier;
+    this.developedBy = developedBy;
   }
 
   public String getName() {
@@ -38,5 +41,9 @@ public class AvailableModel {
 
   public String getTier() {
     return tier;
+  }
+
+  public String getDevelopedBy() {
+    return developedBy;
   }
 }
