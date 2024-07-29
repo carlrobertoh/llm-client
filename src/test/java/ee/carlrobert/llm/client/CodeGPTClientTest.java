@@ -13,8 +13,6 @@ import ee.carlrobert.llm.client.codegpt.CodeGPTClient;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
-import ee.carlrobert.llm.client.openai.OpenAIClient;
-import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;

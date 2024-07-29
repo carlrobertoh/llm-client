@@ -27,6 +27,7 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
   private final String toolChoice;
   @JsonProperty("response_format")
   private final ResponseFormat responseFormat;
+  private final Boolean webSearchIncluded;
 
   private OpenAIChatCompletionRequest(Builder builder) {
     this.model = builder.model;
@@ -40,6 +41,7 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     this.tools = builder.tools;
     this.toolChoice = builder.toolChoice;
     this.responseFormat = builder.responseFormat;
+    this.webSearchIncluded = builder.webSearchIncluded;
   }
 
   public void addMessage(OpenAIChatCompletionMessage message) {
@@ -90,6 +92,10 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     return responseFormat;
   }
 
+  public Boolean getWebSearchIncluded() {
+    return webSearchIncluded;
+  }
+
   public static class Builder {
 
     private final List<OpenAIChatCompletionMessage> messages;
@@ -103,6 +109,7 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     private List<Tool> tools;
     private String toolChoice;
     private ResponseFormat responseFormat;
+    private Boolean webSearchIncluded;
 
     public Builder(List<OpenAIChatCompletionMessage> messages) {
       this.messages = messages;
@@ -160,6 +167,11 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
 
     public Builder setResponseFormat(ResponseFormat responseFormat) {
       this.responseFormat = responseFormat;
+      return this;
+    }
+
+    public Builder setWebSearchIncluded(Boolean webSearchIncluded) {
+      this.webSearchIncluded = webSearchIncluded;
       return this;
     }
 

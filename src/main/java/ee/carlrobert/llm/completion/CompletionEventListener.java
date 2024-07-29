@@ -8,6 +8,9 @@ public interface CompletionEventListener<T> {
   default void onOpen() {
   }
 
+  default void onEvent(String data) {
+  }
+
   default void onMessage(T message, String rawMessage, EventSource eventSource) {
   }
 
