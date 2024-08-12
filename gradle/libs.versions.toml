@@ -7,7 +7,7 @@ jackson = "2.17.1"
 junit = "5.10.2"
 okhttp = "4.12.0"
 publish-plugin = "2.0.0"
-slf4j = "2.0.13"
+slf4j = "2.0.16"
 
 [libraries]
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
