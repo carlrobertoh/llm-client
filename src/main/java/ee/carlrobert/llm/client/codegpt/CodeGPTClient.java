@@ -74,7 +74,9 @@ public class CodeGPTClient {
   public EventSource getCompletionAsync(
       OpenAITextCompletionRequest request,
       CompletionEventListener<String> eventListener) {
-    return openaiClient.getCompletionAsync(request, getCodeCompletionEventSourceListener(eventListener));
+    return openaiClient.getCompletionAsync(
+        request,
+        getCodeCompletionEventSourceListener(eventListener));
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
