@@ -2,6 +2,8 @@ package ee.carlrobert.llm.client.openai.completion.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import ee.carlrobert.llm.completion.CompletionRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OpenAITextCompletionRequest implements CompletionRequest {
 
@@ -16,6 +18,7 @@ public class OpenAITextCompletionRequest implements CompletionRequest {
   @JsonProperty("presence_penalty")
   private final double presencePenalty;
   private final boolean stream;
+  private final List<String> stop;
 
   protected OpenAITextCompletionRequest(Builder builder) {
     this.model = builder.model;
@@ -26,6 +29,7 @@ public class OpenAITextCompletionRequest implements CompletionRequest {
     this.frequencyPenalty = builder.frequencyPenalty;
     this.presencePenalty = builder.presencePenalty;
     this.stream = builder.stream;
+    this.stop = builder.stop;
   }
 
   public int getMaxTokens() {
@@ -60,6 +64,10 @@ public class OpenAITextCompletionRequest implements CompletionRequest {
     return stream;
   }
 
+  public List<String> getStop() {
+    return stop;
+  }
+
   public static class Builder {
 
     private final String prompt;
@@ -71,6 +79,7 @@ public class OpenAITextCompletionRequest implements CompletionRequest {
     private double frequencyPenalty = 0;
     private double presencePenalty = 0.6;
     private boolean stream = true;
+    private List<String> stop = new ArrayList<>(List.of("\n\n"));
 
     public Builder(String prompt) {
       this.prompt = prompt;
@@ -108,6 +117,11 @@ public class OpenAITextCompletionRequest implements CompletionRequest {
 
     public Builder setStream(boolean stream) {
       this.stream = stream;
+      return this;
+    }
+
+    public Builder setStop(List<String> stop) {
+      this.stop = stop;
       return this;
     }
 
