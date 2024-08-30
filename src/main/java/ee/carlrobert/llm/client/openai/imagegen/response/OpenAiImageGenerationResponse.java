@@ -7,9 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.imagegen.ImageGenerationResponse;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
