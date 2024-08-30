@@ -19,7 +19,6 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
 
   /**
    * A text description of the desired image(s). The maximum length is 4000 characters.
-   * </br>
    * Optional, default values will apply if no value is provided.
    */
   @JsonProperty("size")
@@ -28,7 +27,6 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
 
   /**
    * The number of images to generate.
-   * </br>
    * Optional, default values will apply if no value is provided.
    */
   @JsonProperty("n")
@@ -36,7 +34,6 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
 
   /**
    * The format in which the generated images are returned.
-   * </br>
    * Optional, default values will apply if no value is provided.
    */
   @JsonProperty("response_format")
@@ -44,7 +41,6 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
 
   /**
    * The quality of the image that will be generated.
-   * </br>
    * Optional, default values will apply if no value is provided.
    */
   @JsonProperty("quality")
@@ -52,7 +48,6 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
 
   /**
    * The style of the generated images.
-   * </br>
    * Optional, default values will apply if no value is provided.
    */
   @JsonProperty("style")
@@ -63,8 +58,6 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
    */
   @JsonIgnore
   private final String overriddenPath;
-
-
 
 
   private OpenAIImageGenerationRequest(Builder builder) {
@@ -108,6 +101,7 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
 
 
   public static class Builder {
+
     private String prompt;
     private ImageSize size;
     private int numberOfImages;
@@ -156,7 +150,7 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
     }
 
     public void setOverriddenPath(String overriddenPath) {
-        this.overriddenPath = overriddenPath;
+      this.overriddenPath = overriddenPath;
     }
   }
 

@@ -90,55 +90,54 @@ class AzureClientTest extends BaseTest {
     await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
   }
 
-    @Test
-    void shouldGetAzureImageGeneration() {
-        var prompt = "TEST_PROMPT";
-        expectAzure((BasicHttpExchange) request -> {
-            assertThat(request.getUri().getPath()).isEqualTo(
-                    "/openai/deployments/TEST_DEPLOYMENT_ID/images/generations");
-            assertThat(request.getMethod()).isEqualTo("POST");
-            assertThat(request.getHeaders().get("Authorization").get(0))
-                    .isEqualTo("Bearer TEST_API_KEY");
-            assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
-                    .isEqualTo("codegpt");
-            assertThat(request.getBody())
-                    .extracting(
-                            "n",
-                            "quality",
-                            "response_format",
-                            "style")
-                    .containsExactly(
-                            2,
-                            OpenAIImageGenerationRequest.ImageQuality.STANDARD.getQuality(),
-                            OpenAIImageGenerationRequest.ImagesResponseFormat.URL.getResponseFormat(),
-                            OpenAIImageGenerationRequest.ImageStyle.VIVID.getStyle());
-            return new ResponseEntity(new ObjectMapper().writeValueAsString(
-                    Map.of("data", List.of(Map.of("url", "url-to-image",
-                            "revised_prompt", "revised-prompt-value")))));
-        });
+  @Test
+  void shouldGetAzureImageGeneration() {
+    var prompt = "TEST_PROMPT";
+    expectAzure((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo(
+          "/openai/deployments/TEST_DEPLOYMENT_ID/images/generations");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0))
+          .isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
+      assertThat(request.getBody())
+          .extracting(
+              "n",
+              "quality",
+              "response_format",
+              "style")
+          .containsExactly(
+              2,
+              OpenAIImageGenerationRequest.ImageQuality.STANDARD.getQuality(),
+              OpenAIImageGenerationRequest.ImagesResponseFormat.URL.getResponseFormat(),
+              OpenAIImageGenerationRequest.ImageStyle.VIVID.getStyle());
+      return new ResponseEntity(new ObjectMapper().writeValueAsString(
+          Map.of("data", List.of(Map.of("url", "url-to-image",
+              "revised_prompt", "revised-prompt-value")))));
+    });
 
-        var response = new AzureClient.Builder(
-                "TEST_API_KEY",
-                new AzureCompletionRequestParams(
-                        "TEST_RESOURCE",
-                        "TEST_DEPLOYMENT_ID",
-                        "TEST_API_VERSION"))
-                .setActiveDirectoryAuthentication(true)
-                .build()
-                .getImageGeneration(new OpenAIImageGenerationRequest.Builder(prompt)
-                        .setNumberOfImages(2)
-                        .setQuality(OpenAIImageGenerationRequest.ImageQuality.STANDARD)
-                        .setResponseFormat(OpenAIImageGenerationRequest.ImagesResponseFormat.URL)
-                        .setStyle(OpenAIImageGenerationRequest.ImageStyle.VIVID)
-                        .build());
+    var response = new AzureClient.Builder(
+        "TEST_API_KEY",
+        new AzureCompletionRequestParams(
+            "TEST_RESOURCE",
+            "TEST_DEPLOYMENT_ID",
+            "TEST_API_VERSION"))
+        .setActiveDirectoryAuthentication(true)
+        .build()
+        .getImageGeneration(new OpenAIImageGenerationRequest.Builder(prompt)
+            .setNumberOfImages(2)
+            .setQuality(OpenAIImageGenerationRequest.ImageQuality.STANDARD)
+            .setResponseFormat(OpenAIImageGenerationRequest.ImagesResponseFormat.URL)
+            .setStyle(OpenAIImageGenerationRequest.ImageStyle.VIVID)
+            .build());
 
-
-        assertThat(response)
-                .extracting("data")
-                .extracting(result -> ((List<?>) result).get(0))
-                .extracting("url", "revisedPrompt")
-                .containsExactly("url-to-image","revised-prompt-value");
-    }
+    assertThat(response)
+        .extracting("data")
+        .extracting(result -> ((List<?>) result).get(0))
+        .extracting("url", "revisedPrompt")
+        .containsExactly("url-to-image", "revised-prompt-value");
+  }
 
   @Test
   void shouldGetAzureChatCompletion() {

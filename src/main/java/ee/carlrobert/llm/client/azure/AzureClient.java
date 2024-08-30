@@ -17,13 +17,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
 
@@ -63,9 +61,9 @@ public class AzureClient {
 
   public OpenAiImageGenerationResponse getImageGeneration(OpenAIImageGenerationRequest request) {
     try (var response = httpClient.newBuilder()
-            .readTimeout(60, TimeUnit.SECONDS)
-            .callTimeout(60, TimeUnit.SECONDS).build()
-            .newCall(buildHttpRequest(request)).execute()) {
+        .readTimeout(60, TimeUnit.SECONDS)
+        .callTimeout(60, TimeUnit.SECONDS).build()
+        .newCall(buildHttpRequest(request)).execute()) {
       return DeserializationUtil.mapResponse(response, OpenAiImageGenerationResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -98,14 +96,14 @@ public class AzureClient {
     headers.put("Content-Type", "application/json");
     try {
       return new Request.Builder()
-              .url(url + getImageGenerationPath(imageRequest))
-              .headers(Headers.of(headers))
-              .post(RequestBody.create(
-                      OBJECT_MAPPER
-                              .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                              .writeValueAsString(imageRequest),
-                      APPLICATION_JSON))
-              .build();
+          .url(url + getImageGenerationPath(imageRequest))
+          .headers(Headers.of(headers))
+          .post(RequestBody.create(
+              OBJECT_MAPPER
+                  .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                  .writeValueAsString(imageRequest),
+              APPLICATION_JSON))
+          .build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to process request", e);
     }
@@ -133,11 +131,11 @@ public class AzureClient {
 
   private String getImageGenerationPath(OpenAIImageGenerationRequest request) {
     return String.format(
-            request.getOverriddenPath() == null
-                    ? "/openai/deployments/%s/images/generations?api-version=%s"
-                    : request.getOverriddenPath(),
-            requestParams.getDeploymentId(),
-            requestParams.getApiVersion());
+        request.getOverriddenPath() == null
+            ? "/openai/deployments/%s/images/generations?api-version=%s"
+            : request.getOverriddenPath(),
+        requestParams.getDeploymentId(),
+        requestParams.getApiVersion());
   }
 
   private OpenAIChatCompletionEventSourceListener getEventSourceListener(

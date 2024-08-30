@@ -7,9 +7,10 @@ public class AzureCompletionRequestParams {
   private final String apiVersion;
 
 
-  public AzureCompletionRequestParams(String resourceName,
-                                      String completionDeploymentId,
-                                      String apiVersion) {
+  public AzureCompletionRequestParams(
+      String resourceName,
+      String completionDeploymentId,
+      String apiVersion) {
     this.resourceName = resourceName;
     this.deploymentId = completionDeploymentId;
     this.apiVersion = apiVersion;

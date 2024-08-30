@@ -145,14 +145,14 @@ public class OpenAIClient {
     try {
       var overriddenPath = imageRequest.getOverriddenPath();
       return new Request.Builder()
-              .url(host + (overriddenPath == null ? "/v1/images/generations" : overriddenPath))
-              .headers(Headers.of(headers))
-              .post(RequestBody.create(
-                      OBJECT_MAPPER
-                              .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                              .writeValueAsString(imageRequest),
-                      APPLICATION_JSON))
-              .build();
+          .url(host + (overriddenPath == null ? "/v1/images/generations" : overriddenPath))
+          .headers(Headers.of(headers))
+          .post(RequestBody.create(
+              OBJECT_MAPPER
+                  .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                  .writeValueAsString(imageRequest),
+              APPLICATION_JSON))
+          .build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to process request", e);
     }
