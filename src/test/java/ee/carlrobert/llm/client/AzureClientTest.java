@@ -95,7 +95,7 @@ class AzureClientTest extends BaseTest {
     var prompt = "TEST_PROMPT";
     expectAzure((BasicHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo(
-          "/openai/deployments/TEST_DEPLOYMENT_ID/images/generations");
+          "/openai/deployments/dalle3/images/generations");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getHeaders().get("Authorization").get(0))
           .isEqualTo("Bearer TEST_API_KEY");
@@ -106,12 +106,14 @@ class AzureClientTest extends BaseTest {
               "n",
               "quality",
               "response_format",
-              "style")
+              "style",
+              "model")
           .containsExactly(
               2,
               OpenAIImageGenerationRequest.ImageQuality.STANDARD.getQuality(),
               OpenAIImageGenerationRequest.ImagesResponseFormat.URL.getResponseFormat(),
-              OpenAIImageGenerationRequest.ImageStyle.VIVID.getStyle());
+              OpenAIImageGenerationRequest.ImageStyle.VIVID.getStyle(),
+              "dalle3");
       return new ResponseEntity(new ObjectMapper().writeValueAsString(
           Map.of("data", List.of(Map.of("url", "url-to-image",
               "revised_prompt", "revised-prompt-value")))));
@@ -127,6 +129,7 @@ class AzureClientTest extends BaseTest {
         .build()
         .getImageGeneration(new OpenAIImageGenerationRequest.Builder(prompt)
             .setNumberOfImages(2)
+            .setModel("dalle3")
             .setQuality(OpenAIImageGenerationRequest.ImageQuality.STANDARD)
             .setResponseFormat(OpenAIImageGenerationRequest.ImagesResponseFormat.URL)
             .setStyle(OpenAIImageGenerationRequest.ImageStyle.VIVID)

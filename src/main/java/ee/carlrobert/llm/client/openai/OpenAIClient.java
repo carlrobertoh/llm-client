@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -84,7 +85,10 @@ public class OpenAIClient {
   }
 
   public OpenAiImageGenerationResponse getImageGeneration(OpenAIImageGenerationRequest request) {
-    try (var response = httpClient.newCall(buildImageGenerationRequest(request)).execute()) {
+    try (var response = httpClient.newBuilder()
+        .readTimeout(60, TimeUnit.SECONDS)
+        .callTimeout(60, TimeUnit.SECONDS).build().newCall(buildImageGenerationRequest(request))
+        .execute()) {
       return DeserializationUtil.mapResponse(response, OpenAiImageGenerationResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);

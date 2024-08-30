@@ -16,6 +16,13 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
   @JsonProperty("prompt")
   private final String prompt;
 
+  /**
+   * Model that should be used for image generation.
+   * Needs to be the deployment-id of the image generation model for Azure.
+   * For OpenAI this can be left empty in order to use the default.
+   */
+  @JsonProperty("model")
+  private final String model;
 
   /**
    * A text description of the desired image(s). The maximum length is 4000 characters.
@@ -68,6 +75,7 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
     this.quality = builder.quality;
     this.numberOfImages = builder.numberOfImages;
     this.overriddenPath = builder.overriddenPath;
+    this.model = builder.model;
   }
 
   public String getPrompt() {
@@ -94,6 +102,10 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
     return style;
   }
 
+  public String getModel() {
+    return model;
+  }
+
   @JsonIgnore
   public String getOverriddenPath() {
     return this.overriddenPath;
@@ -109,6 +121,7 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
     private ImageQuality quality;
     private ImageStyle style;
     private String overriddenPath;
+    private String model;
 
     public Builder(String prompt) {
       this.prompt = prompt;
@@ -127,6 +140,11 @@ public class OpenAIImageGenerationRequest implements ImageGenerationRequest {
 
     public Builder setSize(ImageSize size) {
       this.size = size;
+      return this;
+    }
+
+    public Builder setModel(String model) {
+      this.model = model;
       return this;
     }
 

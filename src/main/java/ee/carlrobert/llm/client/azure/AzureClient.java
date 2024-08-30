@@ -134,7 +134,7 @@ public class AzureClient {
         request.getOverriddenPath() == null
             ? "/openai/deployments/%s/images/generations?api-version=%s"
             : request.getOverriddenPath(),
-        requestParams.getDeploymentId(),
+        request.getModel(),
         requestParams.getApiVersion());
   }
 
