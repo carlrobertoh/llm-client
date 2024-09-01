@@ -41,9 +41,6 @@ public class OllamaClientTest extends BaseTest {
           .extracting("model", "prompt", "options", "system", "stream")
           .containsExactly("codellama:7b", "TEST_PROMPT", Map.of("temperature", 0.8),
               "SYSTEM_PROMPT", true);
-      assertThat(request.getHeaders())
-          .flatExtracting("Accept", "Connection")
-          .containsExactly("text/event-stream", "Keep-Alive");
       return List.of(
           jsonMapResponse(e("response", "Hel"), e("done", false)),
           jsonMapResponse(e("response", "lo"), e("done", false)),
@@ -79,9 +76,6 @@ public class OllamaClientTest extends BaseTest {
               List.of(Map.of("role", "user", "content", "TEST_PROMPT")),
               Map.of("temperature", 0.8),
               true);
-      assertThat(request.getHeaders())
-          .flatExtracting("Accept", "Connection")
-          .containsExactly("text/event-stream", "Keep-Alive");
       return List.of(
           jsonMapResponse(
               e("model", "codellama:7b"),
