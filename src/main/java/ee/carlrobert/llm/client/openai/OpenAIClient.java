@@ -84,10 +84,10 @@ public class OpenAIClient {
     }
   }
 
-  public OpenAiImageGenerationResponse getImageGeneration(OpenAIImageGenerationRequest request) {
+  public OpenAiImageGenerationResponse getImage(OpenAIImageGenerationRequest request) {
     try (var response = httpClient.newBuilder()
         .readTimeout(60, TimeUnit.SECONDS)
-        .callTimeout(60, TimeUnit.SECONDS).build().newCall(buildImageGenerationRequest(request))
+        .callTimeout(60, TimeUnit.SECONDS).build().newCall(buildImageRequest(request))
         .execute()) {
       return DeserializationUtil.mapResponse(response, OpenAiImageGenerationResponse.class);
     } catch (IOException e) {
@@ -143,7 +143,7 @@ public class OpenAIClient {
         .build();
   }
 
-  public Request buildImageGenerationRequest(OpenAIImageGenerationRequest imageRequest) {
+  public Request buildImageRequest(OpenAIImageGenerationRequest imageRequest) {
     var headers = new HashMap<>(getRequiredHeaders());
     headers.put("Content-Type", "application/json");
     try {

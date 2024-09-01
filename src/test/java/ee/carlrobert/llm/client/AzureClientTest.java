@@ -127,7 +127,7 @@ class AzureClientTest extends BaseTest {
             "TEST_API_VERSION"))
         .setActiveDirectoryAuthentication(true)
         .build()
-        .getImageGeneration(new OpenAIImageGenerationRequest.Builder(prompt)
+        .getImage(new OpenAIImageGenerationRequest.Builder(prompt)
             .setNumberOfImages(2)
             .setModel("dalle3")
             .setQuality(OpenAIImageGenerationRequest.ImageQuality.STANDARD)

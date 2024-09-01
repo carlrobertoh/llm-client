@@ -48,29 +48,30 @@ public class AzureClient {
       OpenAIChatCompletionRequest request,
       CompletionEventListener<String> completionEventListener) {
     return EventSources.createFactory(httpClient)
-        .newEventSource(buildHttpRequest(request), getEventSourceListener(completionEventListener));
+        .newEventSource(buildChatRequest(request), getEventSourceListener(completionEventListener));
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
-    try (var response = httpClient.newCall(buildHttpRequest(request)).execute()) {
+    try (var response = httpClient.newCall(buildChatRequest(request)).execute()) {
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public OpenAiImageGenerationResponse getImageGeneration(OpenAIImageGenerationRequest request) {
+  public OpenAiImageGenerationResponse getImage(OpenAIImageGenerationRequest request) {
     try (var response = httpClient.newBuilder()
         .readTimeout(60, TimeUnit.SECONDS)
-        .callTimeout(60, TimeUnit.SECONDS).build()
-        .newCall(buildHttpRequest(request)).execute()) {
+        .callTimeout(60, TimeUnit.SECONDS)
+        .build()
+        .newCall(buildImageRequest(request)).execute()) {
       return DeserializationUtil.mapResponse(response, OpenAiImageGenerationResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public Request buildHttpRequest(OpenAIChatCompletionRequest completionRequest) {
+  private Request buildChatRequest(OpenAIChatCompletionRequest completionRequest) {
     var headers = new HashMap<>(getRequiredHeaders());
     if (completionRequest.isStream()) {
       headers.put("Accept", "text/event-stream");
@@ -90,8 +91,7 @@ public class AzureClient {
     }
   }
 
-
-  public Request buildHttpRequest(OpenAIImageGenerationRequest imageRequest) {
+  private Request buildImageRequest(OpenAIImageGenerationRequest imageRequest) {
     var headers = new HashMap<>(getRequiredHeaders());
     headers.put("Content-Type", "application/json");
     try {
