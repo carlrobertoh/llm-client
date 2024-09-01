@@ -10,10 +10,13 @@ import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
+import ee.carlrobert.llm.client.openai.imagegen.request.OpenAIImageGenerationRequest;
+import ee.carlrobert.llm.client.openai.imagegen.response.OpenAiImageGenerationResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -45,18 +48,30 @@ public class AzureClient {
       OpenAIChatCompletionRequest request,
       CompletionEventListener<String> completionEventListener) {
     return EventSources.createFactory(httpClient)
-        .newEventSource(buildHttpRequest(request), getEventSourceListener(completionEventListener));
+        .newEventSource(buildChatRequest(request), getEventSourceListener(completionEventListener));
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
-    try (var response = httpClient.newCall(buildHttpRequest(request)).execute()) {
+    try (var response = httpClient.newCall(buildChatRequest(request)).execute()) {
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public Request buildHttpRequest(OpenAIChatCompletionRequest completionRequest) {
+  public OpenAiImageGenerationResponse getImage(OpenAIImageGenerationRequest request) {
+    try (var response = httpClient.newBuilder()
+        .readTimeout(60, TimeUnit.SECONDS)
+        .callTimeout(60, TimeUnit.SECONDS)
+        .build()
+        .newCall(buildImageRequest(request)).execute()) {
+      return DeserializationUtil.mapResponse(response, OpenAiImageGenerationResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private Request buildChatRequest(OpenAIChatCompletionRequest completionRequest) {
     var headers = new HashMap<>(getRequiredHeaders());
     if (completionRequest.isStream()) {
       headers.put("Accept", "text/event-stream");
@@ -69,6 +84,24 @@ public class AzureClient {
               OBJECT_MAPPER
                   .setSerializationInclusion(JsonInclude.Include.NON_NULL)
                   .writeValueAsString(completionRequest),
+              APPLICATION_JSON))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to process request", e);
+    }
+  }
+
+  private Request buildImageRequest(OpenAIImageGenerationRequest imageRequest) {
+    var headers = new HashMap<>(getRequiredHeaders());
+    headers.put("Content-Type", "application/json");
+    try {
+      return new Request.Builder()
+          .url(url + getImageGenerationPath(imageRequest))
+          .headers(Headers.of(headers))
+          .post(RequestBody.create(
+              OBJECT_MAPPER
+                  .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                  .writeValueAsString(imageRequest),
               APPLICATION_JSON))
           .build();
     } catch (JsonProcessingException e) {
@@ -93,6 +126,15 @@ public class AzureClient {
             ? "/openai/deployments/%s/chat/completions?api-version=%s"
             : request.getOverriddenPath(),
         requestParams.getDeploymentId(),
+        requestParams.getApiVersion());
+  }
+
+  private String getImageGenerationPath(OpenAIImageGenerationRequest request) {
+    return String.format(
+        request.getOverriddenPath() == null
+            ? "/openai/deployments/%s/images/generations?api-version=%s"
+            : request.getOverriddenPath(),
+        request.getModel(),
         requestParams.getApiVersion());
   }
 

@@ -3,6 +3,7 @@ package ee.carlrobert.llm.client.openai;
 import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 import static java.util.stream.Collectors.toList;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
@@ -13,6 +14,8 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRe
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingData;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingResponse;
+import ee.carlrobert.llm.client.openai.imagegen.request.OpenAIImageGenerationRequest;
+import ee.carlrobert.llm.client.openai.imagegen.response.OpenAiImageGenerationResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
 import java.util.Collection;
@@ -21,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -80,6 +84,17 @@ public class OpenAIClient {
     }
   }
 
+  public OpenAiImageGenerationResponse getImage(OpenAIImageGenerationRequest request) {
+    try (var response = httpClient.newBuilder()
+        .readTimeout(60, TimeUnit.SECONDS)
+        .callTimeout(60, TimeUnit.SECONDS).build().newCall(buildImageRequest(request))
+        .execute()) {
+      return DeserializationUtil.mapResponse(response, OpenAiImageGenerationResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   /**
    * First non-null embedding response (or null).
    *
@@ -126,6 +141,25 @@ public class OpenAIClient {
                 "model", "text-embedding-ada-002")),
             APPLICATION_JSON))
         .build();
+  }
+
+  public Request buildImageRequest(OpenAIImageGenerationRequest imageRequest) {
+    var headers = new HashMap<>(getRequiredHeaders());
+    headers.put("Content-Type", "application/json");
+    try {
+      var overriddenPath = imageRequest.getOverriddenPath();
+      return new Request.Builder()
+          .url(host + (overriddenPath == null ? "/v1/images/generations" : overriddenPath))
+          .headers(Headers.of(headers))
+          .post(RequestBody.create(
+              OBJECT_MAPPER
+                  .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                  .writeValueAsString(imageRequest),
+              APPLICATION_JSON))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to process request", e);
+    }
   }
 
   private Request buildChatCompletionRequest(OpenAIChatCompletionRequest request) {
