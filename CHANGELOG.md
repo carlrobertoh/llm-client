@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.15] - 2024-09-05
+
+### Added
+
+- Azure and OpenAI image generation support
+
+### Fixed
+
+- Ollama streaming completion requests
+
 ## [0.8.14] - 2024-08-26
 
 ### Added
@@ -200,7 +210,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.8.14]: https://github.com/carlrobertoh/llm-client/compare/6461c8458325e7b2a33670fc09493b3357eb094c...HEAD
+[0.8.15]: https://github.com/carlrobertoh/llm-client/compare/fa0539e06d6cd8d21a4d0fa3336c747c2cb68fcc...HEAD
+[0.8.14]: https://github.com/carlrobertoh/llm-client/compare/6461c8458325e7b2a33670fc09493b3357eb094c...fa0539e06d6cd8d21a4d0fa3336c747c2cb68fcc
 [0.8.13]: https://github.com/carlrobertoh/llm-client/compare/a55fe7dcefbe6b911d5b99950d402dd06a66ec1e...6461c8458325e7b2a33670fc09493b3357eb094c
 [0.8.12]: https://github.com/carlrobertoh/llm-client/compare/6fdf91d29194bfed92c7e23280953d47614e62a5...a55fe7dcefbe6b911d5b99950d402dd06a66ec1e
 [0.8.11]: https://github.com/carlrobertoh/llm-client/compare/f381269da86b7f909d2f0fa2e5ecf11ec3c05da4...6fdf91d29194bfed92c7e23280953d47614e62a5
