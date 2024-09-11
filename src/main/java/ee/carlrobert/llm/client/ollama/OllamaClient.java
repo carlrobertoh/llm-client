@@ -244,7 +244,8 @@ public class OllamaClient {
   private HttpRequest buildPostHttpRequest(
       Object request,
       String path) throws JsonProcessingException {
-    var requestBuilder = HttpRequest.newBuilder(URI.create(BASE_URL + path))
+    var baseHost = port == null ? BASE_URL : format("http://localhost:%d", port);
+    var requestBuilder = HttpRequest.newBuilder(URI.create((host == null ? baseHost : host) + path))
         .POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(request)))
         .header("Content-Type", "application/x-ndjson");
 
