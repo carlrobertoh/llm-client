@@ -244,10 +244,16 @@ public class OllamaClient {
   private HttpRequest buildPostHttpRequest(
       Object request,
       String path) throws JsonProcessingException {
-    return HttpRequest.newBuilder(URI.create(BASE_URL + path))
+    var baseHost = port == null ? BASE_URL : format("http://localhost:%d", port);
+    var requestBuilder = HttpRequest.newBuilder(URI.create((host == null ? baseHost : host) + path))
         .POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(request)))
-        .header("Content-Type", "application/json")
-        .timeout(Duration.ofSeconds(30))
+        .header("Content-Type", "application/x-ndjson");
+
+    if (apiKey != null) {
+      requestBuilder.header("Authorization", "Bearer " + apiKey);
+    }
+
+    return requestBuilder.timeout(Duration.ofSeconds(30))
         .build();
   }
 
