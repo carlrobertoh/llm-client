@@ -6,10 +6,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IBMAuthBearerToken {
 
+  @JsonProperty("token")
+  String token;
   @JsonProperty("access_token")
   String accessToken;
   @JsonProperty("expiration")
-  int expiration;
+  Integer expiration;
+
+  String getToken() {
+    return this.token;
+  }
+
+  public void setToken(String token) {
+    this.token = token;
+  }
 
   String getAccessToken() {
     return this.accessToken;
@@ -19,7 +29,7 @@ public class IBMAuthBearerToken {
     this.accessToken = accessToken;
   }
 
-  int getExpiration() {
+  Integer getExpiration() {
     return this.expiration;
   }
 

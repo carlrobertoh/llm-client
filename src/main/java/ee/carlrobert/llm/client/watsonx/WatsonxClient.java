@@ -68,8 +68,9 @@ public class WatsonxClient {
       headers.put("Accept", "text/event-stream");
     }
     try {
-      String path = (request.getDeploymentId() == null || request.getDeploymentId().isEmpty()) ? "text/"
-          : "deployments/" + request.getDeploymentId() + "/";
+      String path =
+          (request.getDeploymentId() == null || request.getDeploymentId().isEmpty()) ? "text/"
+              : "deployments/" + request.getDeploymentId() + "/";
       String generation = request.getStream() ? "generation_stream" : "generation";
       return new Request.Builder()
           .url(host + "/ml/v1/" + path + generation + "?version=" + apiVersion)

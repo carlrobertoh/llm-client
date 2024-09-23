@@ -20,9 +20,10 @@ public class WatsonxAuthenticator {
   IBMAuthBearerToken bearerToken;
   OkHttpClient client;
   Request request;
+  Request expiryRequest;
   Boolean isZenApiKey = false;
 
-  // On Cloud
+  // Watsonx SaaS
   public WatsonxAuthenticator(String apiKey) {
     this.client = new OkHttpClient().newBuilder()
         .build();
@@ -55,7 +56,7 @@ public class WatsonxAuthenticator {
 
   // Watsonx API Key
   public WatsonxAuthenticator(String username, String apiKey,
-      String host) {//TODO add support for password
+      String host) { // TODO add support for password
     this.client = new OkHttpClient().newBuilder()
         .build();
     ObjectMapper mapper = new ObjectMapper();
@@ -72,16 +73,30 @@ public class WatsonxAuthenticator {
 
     MediaType mediaType = MediaType.parse("application/json");
     RequestBody body = RequestBody.create(mediaType, authParamsStr);
+    // TODO add support for IAM endpoint v1/auth/identitytoken
     this.request = new Request.Builder()
         .url(host
-            + "/icp4d-api/v1/authorize") // TODO add support for IAM endpoint v1/auth/identitytoken
+            + "/icp4d-api/v1/authorize")
         .method("POST", body)
         .addHeader("Content-Type", "application/json")
         .build();
+
+    this.expiryRequest = new Request.Builder()
+        .url(host + "/usermgmt/v1/user/tokenExpiry")
+        .addHeader("Accept", "application/json")
+        .addHeader("Authorization", "Bearer " + this.bearerToken.getAccessToken())
+        .build();
+
     try {
       Response response = client.newCall(request).execute();
       this.bearerToken = OBJECT_MAPPER.readValue(response.body().string(),
           IBMAuthBearerToken.class);
+
+      Response expiry = client.newCall(request).execute();
+      this.bearerToken.setExpiration(
+          OBJECT_MAPPER.readValue(expiry.body().string(), IBMAuthTokenExpiry.class)
+              .getExpiry());
+
     } catch (IOException e) {
       System.out.println(e);
     }
@@ -92,6 +107,12 @@ public class WatsonxAuthenticator {
       Response response = client.newCall(request).execute();
       this.bearerToken = OBJECT_MAPPER.readValue(response.body().string(),
           IBMAuthBearerToken.class);
+      if (this.bearerToken.getExpiration() == null) {
+        Response expiry = client.newCall(expiryRequest).execute();
+        this.bearerToken.setExpiration(
+            OBJECT_MAPPER.readValue(expiry.body().string(), IBMAuthTokenExpiry.class)
+                .getExpiry());
+      }
     } catch (IOException e) {
       System.out.println(e);
     }
