@@ -2,6 +2,7 @@ package ee.carlrobert.llm.client.google.completion;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import ee.carlrobert.llm.client.google.completion.GoogleCompletionRequest.HarmCategory;
+import ee.carlrobert.llm.completion.CompletionResponse;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  * href="https://ai.google.dev/api/rest/v1/GenerateContentResponse?authuser=1">GenerateContentResponse</a>.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoogleCompletionResponse {
+public class GoogleCompletionResponse implements CompletionResponse {
 
   private List<Candidate> candidates;
   private PromptFeedback promptFeedback;
