@@ -40,12 +40,14 @@ public class OpenAIClient {
   private final String apiKey;
   private final String organization;
   private final String host;
+  private final String pluginVersion;
 
   private OpenAIClient(Builder builder, OkHttpClient.Builder httpClientBuilder) {
     this.httpClient = httpClientBuilder.build();
     this.apiKey = builder.apiKey;
     this.organization = builder.organization;
     this.host = builder.host;
+    this.pluginVersion = builder.pluginVersion;
   }
 
   public EventSource getCompletionAsync(
@@ -134,7 +136,7 @@ public class OpenAIClient {
       throws JsonProcessingException {
     return new Request.Builder()
         .url(url)
-        .headers(Headers.of(getRequiredHeaders()))
+        .headers(Headers.of(getHeaders()))
         .post(RequestBody.create(
             OBJECT_MAPPER.writeValueAsString(Map.of(
                 "input", texts,
@@ -144,7 +146,7 @@ public class OpenAIClient {
   }
 
   public Request buildImageRequest(OpenAIImageGenerationRequest imageRequest) {
-    var headers = new HashMap<>(getRequiredHeaders());
+    var headers = new HashMap<>(getHeaders());
     headers.put("Content-Type", "application/json");
     try {
       var overriddenPath = imageRequest.getOverriddenPath();
@@ -163,7 +165,7 @@ public class OpenAIClient {
   }
 
   private Request buildChatCompletionRequest(OpenAIChatCompletionRequest request) {
-    var headers = new HashMap<>(getRequiredHeaders());
+    var headers = new HashMap<>(getHeaders());
     if (request.isStream()) {
       headers.put("Accept", "text/event-stream");
     }
@@ -180,7 +182,7 @@ public class OpenAIClient {
   }
 
   private Request buildTextCompletionRequest(OpenAITextCompletionRequest request) {
-    var headers = new HashMap<>(getRequiredHeaders());
+    var headers = new HashMap<>(getHeaders());
     if (request.isStream()) {
       headers.put("Accept", "text/event-stream");
     }
@@ -195,10 +197,13 @@ public class OpenAIClient {
     }
   }
 
-  private Map<String, String> getRequiredHeaders() {
+  private Map<String, String> getHeaders() {
     var headers = new HashMap<>(Map.of("X-LLM-Application-Tag", "codegpt"));
     if (apiKey != null && !apiKey.isEmpty()) {
       headers.put("Authorization", "Bearer " + apiKey);
+    }
+    if (pluginVersion != null && !pluginVersion.isEmpty()) {
+      headers.put("X-Plugin-Version", pluginVersion);
     }
     if (organization != null && !organization.isEmpty()) {
       headers.put("OpenAI-Organization", organization);
@@ -211,6 +216,7 @@ public class OpenAIClient {
     private final String apiKey;
     private String host = PropertiesLoader.getValue("openai.baseUrl");
     private String organization;
+    private String pluginVersion;
 
     public Builder(String apiKey) {
       this.apiKey = apiKey;
@@ -223,6 +229,11 @@ public class OpenAIClient {
 
     public Builder setOrganization(String organization) {
       this.organization = organization;
+      return this;
+    }
+
+    public Builder setPluginVersion(String pluginVersion) {
+      this.pluginVersion = pluginVersion;
       return this;
     }
 

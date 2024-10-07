@@ -31,6 +31,7 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
   private final ResponseFormat responseFormat;
   private final Boolean webSearchIncluded;
   private final RequestDocumentationDetails documentationDetails;
+  private final Context context;
 
   private OpenAIChatCompletionRequest(Builder builder) {
     this.model = builder.model;
@@ -47,6 +48,7 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     this.responseFormat = builder.responseFormat;
     this.webSearchIncluded = builder.webSearchIncluded;
     this.documentationDetails = builder.documentationDetails;
+    this.context = builder.context;
   }
 
   public void addMessage(OpenAIChatCompletionMessage message) {
@@ -109,6 +111,10 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     return documentationDetails;
   }
 
+  public Context getContext() {
+    return context;
+  }
+
   public static class Builder {
 
     private final List<OpenAIChatCompletionMessage> messages;
@@ -125,6 +131,7 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     private ResponseFormat responseFormat;
     private Boolean webSearchIncluded;
     private RequestDocumentationDetails documentationDetails;
+    private Context context;
 
     public Builder(List<OpenAIChatCompletionMessage> messages) {
       this.messages = messages;
@@ -197,6 +204,11 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
 
     public Builder setDocumentationDetails(RequestDocumentationDetails documentationDetails) {
       this.documentationDetails = documentationDetails;
+      return this;
+    }
+
+    public Builder setContext(Context context) {
+      this.context = context;
       return this;
     }
 

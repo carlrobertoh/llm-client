@@ -49,6 +49,8 @@ class OpenAIClientTest extends BaseTest {
           .isEqualTo("TEST_ORGANIZATION");
       assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
           .isEqualTo("codegpt");
+      assertThat(request.getHeaders().get("X-plugin-version").get(0))
+          .isEqualTo("IJ-2.10.0");
       assertThat(request.getBody())
           .extracting(
               "model",
@@ -76,6 +78,7 @@ class OpenAIClientTest extends BaseTest {
 
     new OpenAIClient.Builder("TEST_API_KEY")
         .setOrganization("TEST_ORGANIZATION")
+        .setPluginVersion("IJ-2.10.0")
         .build()
         .getChatCompletionAsync(
             new OpenAIChatCompletionRequest.Builder(
