@@ -18,6 +18,7 @@ import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
+import ee.carlrobert.llm.client.openai.imagegen.request.OpenAIImageGenerationRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +91,58 @@ class AzureClientTest extends BaseTest {
   }
 
   @Test
+  void shouldGetAzureImageGeneration() {
+    var prompt = "TEST_PROMPT";
+    expectAzure((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo(
+          "/openai/deployments/dalle3/images/generations");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0))
+          .isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
+      assertThat(request.getBody())
+          .extracting(
+              "n",
+              "quality",
+              "response_format",
+              "style",
+              "model")
+          .containsExactly(
+              2,
+              OpenAIImageGenerationRequest.ImageQuality.STANDARD.getQuality(),
+              OpenAIImageGenerationRequest.ImagesResponseFormat.URL.getResponseFormat(),
+              OpenAIImageGenerationRequest.ImageStyle.VIVID.getStyle(),
+              "dalle3");
+      return new ResponseEntity(new ObjectMapper().writeValueAsString(
+          Map.of("data", List.of(Map.of("url", "url-to-image",
+              "revised_prompt", "revised-prompt-value")))));
+    });
+
+    var response = new AzureClient.Builder(
+        "TEST_API_KEY",
+        new AzureCompletionRequestParams(
+            "TEST_RESOURCE",
+            "TEST_DEPLOYMENT_ID",
+            "TEST_API_VERSION"))
+        .setActiveDirectoryAuthentication(true)
+        .build()
+        .getImage(new OpenAIImageGenerationRequest.Builder(prompt)
+            .setNumberOfImages(2)
+            .setModel("dalle3")
+            .setQuality(OpenAIImageGenerationRequest.ImageQuality.STANDARD)
+            .setResponseFormat(OpenAIImageGenerationRequest.ImagesResponseFormat.URL)
+            .setStyle(OpenAIImageGenerationRequest.ImageStyle.VIVID)
+            .build());
+
+    assertThat(response)
+        .extracting("data")
+        .extracting(result -> ((List<?>) result).get(0))
+        .extracting("url", "revisedPrompt")
+        .containsExactly("url-to-image", "revised-prompt-value");
+  }
+
+  @Test
   void shouldGetAzureChatCompletion() {
     var prompt = "TEST_PROMPT";
     expectAzure((BasicHttpExchange) request -> {
@@ -121,7 +174,10 @@ class AzureClientTest extends BaseTest {
 
     var response = new AzureClient.Builder(
         "TEST_API_KEY",
-        new AzureCompletionRequestParams("TEST_RESOURCE", "TEST_DEPLOYMENT_ID", "TEST_API_VERSION"))
+        new AzureCompletionRequestParams(
+                "TEST_RESOURCE",
+                "TEST_DEPLOYMENT_ID",
+                "TEST_API_VERSION"))
         .setActiveDirectoryAuthentication(true)
         .build()
         .getChatCompletion(new OpenAIChatCompletionRequest.Builder(

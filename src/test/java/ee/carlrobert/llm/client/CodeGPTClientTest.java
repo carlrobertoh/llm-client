@@ -10,11 +10,10 @@ import static org.awaitility.Awaitility.await;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.codegpt.CodeGPTClient;
+import ee.carlrobert.llm.client.codegpt.request.CodeCompletionRequest;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
-import ee.carlrobert.llm.client.openai.OpenAIClient;
-import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
@@ -136,6 +135,64 @@ public class CodeGPTClientTest extends BaseTest {
                 .setFrequencyPenalty(0.1)
                 .build(),
             new CompletionEventListener<String>() {
+              @Override
+              public void onMessage(String message, EventSource eventSource) {
+                resultMessageBuilder.append(message);
+              }
+            });
+
+    await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
+  }
+
+  @Test
+  void shouldStreamCodeCompletion() {
+    var resultMessageBuilder = new StringBuilder();
+    expectCodeGPT((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/code/completions");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "prefix",
+              "suffix",
+              "fileExtension",
+              "fileContent",
+              "stagedDiff",
+              "unstagedDiff")
+          .containsExactly(
+              "TEST_MODEL",
+              "TEST_PREFIX",
+              "TEST_SUFFIX",
+              "txt",
+              "TEST_FILE_CONTENT",
+              "TEST_STAGED_DIFF",
+              "TEST_UNSTAGED_DIFF");
+      return List.of(
+          "{}",
+          jsonMapResponse("choices", null),
+          jsonMapResponse("choices", jsonArray()),
+          jsonMapResponse("choices", jsonArray((Map<String, ?>) null)),
+          jsonMapResponse("choices", jsonArray(jsonMap())),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", null))),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", ""))),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", "Hello"))),
+          jsonMapResponse("choices", jsonArray(jsonMap("text", "!"))));
+    });
+
+    new CodeGPTClient("TEST_API_KEY")
+        .getCodeCompletionAsync(new CodeCompletionRequest.Builder()
+                .setPrefix("TEST_PREFIX")
+                .setSuffix("TEST_SUFFIX")
+                .setModel("TEST_MODEL")
+                .setFileExtension("txt")
+                .setFileContent("TEST_FILE_CONTENT")
+                .setStagedDiff("TEST_STAGED_DIFF")
+                .setUnstagedDiff("TEST_UNSTAGED_DIFF")
+                .build(),
+            new CompletionEventListener<>() {
               @Override
               public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);

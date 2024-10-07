@@ -21,6 +21,7 @@ public class OllamaCompletionRequest implements CompletionRequest {
   private final String context;
   private final Boolean stream;
   private final Boolean raw;
+  private final String suffix;
 
   public OllamaCompletionRequest(Builder builder) {
     this.prompt = builder.prompt;
@@ -32,6 +33,7 @@ public class OllamaCompletionRequest implements CompletionRequest {
     this.context = builder.context;
     this.stream = builder.stream;
     this.raw = builder.raw;
+    this.suffix = builder.suffix;
   }
 
   public String getModel() {
@@ -70,6 +72,10 @@ public class OllamaCompletionRequest implements CompletionRequest {
     return raw;
   }
 
+  public String getSuffix() {
+    return suffix;
+  }
+
   public static class Builder {
 
     private final String model;
@@ -82,6 +88,7 @@ public class OllamaCompletionRequest implements CompletionRequest {
     private String context = null;
     private Boolean stream = null;
     private Boolean raw = null;
+    private String suffix = null;
 
     public Builder(String model, String prompt) {
       this.model = model;
@@ -121,6 +128,11 @@ public class OllamaCompletionRequest implements CompletionRequest {
     public Builder setRaw(boolean raw) {
       this.raw = raw;
       return Builder.this;
+    }
+
+    public Builder setSuffix(String suffix) {
+      this.suffix = suffix;
+      return  Builder.this;
     }
 
     public OllamaCompletionRequest build() {

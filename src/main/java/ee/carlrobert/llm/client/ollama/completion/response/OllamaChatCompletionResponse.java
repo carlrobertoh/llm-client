@@ -1,12 +1,15 @@
 package ee.carlrobert.llm.client.ollama.completion.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import ee.carlrobert.llm.completion.CompletionResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class OllamaChatCompletionResponse {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class OllamaChatCompletionResponse implements CompletionResponse {
 
   private String model;
   private String createdAt;
