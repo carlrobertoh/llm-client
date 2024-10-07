@@ -20,18 +20,18 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
 
   private static final Logger LOG = LoggerFactory.getLogger(CompletionEventSourceListener.class);
 
-  private final CompletionEventListener<T> listeners;
+  private final CompletionEventListener<T> listener;
   private final StringBuilder messageBuilder = new StringBuilder();
   private final boolean retryOnReadTimeout;
   private final Consumer<String> onRetry;
 
-  public CompletionEventSourceListener(CompletionEventListener<T> listeners) {
-    this(listeners, false, null);
+  public CompletionEventSourceListener(CompletionEventListener<T> listener) {
+    this(listener, false, null);
   }
 
-  public CompletionEventSourceListener(CompletionEventListener<T> listeners,
+  public CompletionEventSourceListener(CompletionEventListener<T> listener,
       boolean retryOnReadTimeout, Consumer<String> onRetry) {
-    this.listeners = listeners;
+    this.listener = listener;
     this.retryOnReadTimeout = retryOnReadTimeout;
     this.onRetry = onRetry;
   }
@@ -42,12 +42,12 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
 
   public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
     LOG.info("Request opened.");
-    listeners.onOpen();
+    listener.onOpen();
   }
 
   public void onClosed(@NotNull EventSource eventSource) {
     LOG.info("Request closed.");
-    listeners.onComplete(messageBuilder);
+    listener.onComplete(messageBuilder);
   }
 
   public void onEvent(
@@ -56,6 +56,8 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
       String type,
       @NotNull String data) {
     try {
+      listener.onEvent(data);
+
       // Redundant end signal so just ignore
       if ("[DONE]".equals(data)) {
         return;
@@ -64,8 +66,8 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
       var message = getMessage(data);
       if (message != null) {
         messageBuilder.append(message);
-        listeners.onMessage(message, eventSource);
-        listeners.onMessage(message, data, eventSource);
+        listener.onMessage(message, eventSource);
+        listener.onMessage(message, data, eventSource);
       }
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to deserialize payload.", e);
@@ -80,7 +82,7 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
         || (throwable instanceof SocketException
         && "Socket closed".equals(throwable.getMessage()))) {
       LOG.info("Stream was cancelled");
-      listeners.onCancelled(messageBuilder);
+      listener.onCancelled(messageBuilder);
       return;
     }
 
@@ -91,7 +93,7 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
         return;
       }
 
-      listeners.onError(
+      listener.onError(
           new ErrorDetails("Request timed out. This may be due to the server being overloaded."),
           throwable);
       return;
@@ -99,7 +101,7 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
 
     try {
       if (response == null) {
-        listeners.onError(new ErrorDetails(throwable.getMessage()), throwable);
+        listener.onError(new ErrorDetails(throwable.getMessage()), throwable);
         return;
       }
 
@@ -111,17 +113,17 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
           if (errorDetails == null
               || errorDetails.getMessage() == null
               || errorDetails.getMessage().isEmpty()) {
-            listeners.onError(toUnknownErrorResponse(response, jsonBody), new RuntimeException());
+            listener.onError(toUnknownErrorResponse(response, jsonBody), new RuntimeException());
           } else {
-            listeners.onError(errorDetails, new RuntimeException());
+            listener.onError(errorDetails, new RuntimeException());
           }
         } catch (JsonProcessingException e) {
           LOG.error("Could not serialize error response", throwable);
-          listeners.onError(toUnknownErrorResponse(response, jsonBody), e);
+          listener.onError(toUnknownErrorResponse(response, jsonBody), e);
         }
       }
     } catch (IOException ex) {
-      listeners.onError(new ErrorDetails(ex.getMessage()), ex);
+      listener.onError(new ErrorDetails(ex.getMessage()), ex);
     }
   }
 

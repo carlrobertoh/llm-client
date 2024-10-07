@@ -1,9 +1,10 @@
 package ee.carlrobert.llm.client.llama.completion;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import ee.carlrobert.llm.completion.CompletionResponse;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LlamaCompletionResponse {
+public class LlamaCompletionResponse implements CompletionResponse {
 
   private String content;
   private boolean stop;

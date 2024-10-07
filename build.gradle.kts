@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "0.8.9"
+version = "0.8.21"
 
 repositories {
     mavenCentral()
@@ -93,10 +93,13 @@ publishing {
 }
 
 signing {
-    val signingKey = (findProperty("signingKey") ?: "") as String
-    val signingPassword = (findProperty("signingPassword") ?: "") as String
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign(publishing.publications["mavenJava"])
+    val signingKey = findProperty("signingKey") as String?
+    val signingPassword = findProperty("signingPassword") as String?
+
+    if (signingKey != null && signingPassword != null) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign(publishing.publications["mavenJava"])
+    }
 }
 
 tasks {

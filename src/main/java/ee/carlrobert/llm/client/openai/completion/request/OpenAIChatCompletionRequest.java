@@ -13,12 +13,14 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
   private final String model;
   private final List<OpenAIChatCompletionMessage> messages;
   @JsonProperty("max_tokens")
-  private final int maxTokens;
-  private final double temperature;
+  private final Integer maxTokens;
+  @JsonProperty("max_completion_tokens")
+  private final Integer maxCompletionTokens;
+  private final Double temperature;
   @JsonProperty("frequency_penalty")
-  private final double frequencyPenalty;
+  private final Double frequencyPenalty;
   @JsonProperty("presence_penalty")
-  private final double presencePenalty;
+  private final Double presencePenalty;
   private final boolean stream;
   @JsonIgnore
   private final String overriddenPath;
@@ -27,11 +29,15 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
   private final String toolChoice;
   @JsonProperty("response_format")
   private final ResponseFormat responseFormat;
+  private final Boolean webSearchIncluded;
+  private final RequestDocumentationDetails documentationDetails;
+  private final Context context;
 
   private OpenAIChatCompletionRequest(Builder builder) {
     this.model = builder.model;
     this.messages = builder.messages;
     this.maxTokens = builder.maxTokens;
+    this.maxCompletionTokens = builder.maxCompletionTokens;
     this.temperature = builder.temperature;
     this.frequencyPenalty = builder.frequencyPenalty;
     this.presencePenalty = builder.presencePenalty;
@@ -40,6 +46,9 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     this.tools = builder.tools;
     this.toolChoice = builder.toolChoice;
     this.responseFormat = builder.responseFormat;
+    this.webSearchIncluded = builder.webSearchIncluded;
+    this.documentationDetails = builder.documentationDetails;
+    this.context = builder.context;
   }
 
   public void addMessage(OpenAIChatCompletionMessage message) {
@@ -54,19 +63,23 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     return model;
   }
 
-  public int getMaxTokens() {
+  public Integer getMaxTokens() {
     return maxTokens;
   }
 
-  public double getTemperature() {
+  public Integer getMaxCompletionTokens() {
+    return maxCompletionTokens;
+  }
+
+  public Double getTemperature() {
     return temperature;
   }
 
-  public double getFrequencyPenalty() {
+  public Double getFrequencyPenalty() {
     return frequencyPenalty;
   }
 
-  public double getPresencePenalty() {
+  public Double getPresencePenalty() {
     return presencePenalty;
   }
 
@@ -90,19 +103,35 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     return responseFormat;
   }
 
+  public Boolean getWebSearchIncluded() {
+    return webSearchIncluded;
+  }
+
+  public RequestDocumentationDetails getDocumentationDetails() {
+    return documentationDetails;
+  }
+
+  public Context getContext() {
+    return context;
+  }
+
   public static class Builder {
 
     private final List<OpenAIChatCompletionMessage> messages;
     private String model;
-    private int maxTokens = 1000;
-    private double temperature = 0.9;
-    private double frequencyPenalty = 0;
-    private double presencePenalty = 0.6;
+    private Integer maxTokens = 4096;
+    private Integer maxCompletionTokens;
+    private Double temperature = 0.9;
+    private Double frequencyPenalty = 0.0;
+    private Double presencePenalty = 0.6;
     private boolean stream = true;
     private String overriddenPath;
     private List<Tool> tools;
     private String toolChoice;
     private ResponseFormat responseFormat;
+    private Boolean webSearchIncluded;
+    private RequestDocumentationDetails documentationDetails;
+    private Context context;
 
     public Builder(List<OpenAIChatCompletionMessage> messages) {
       this.messages = messages;
@@ -118,22 +147,27 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
       return this;
     }
 
-    public Builder setMaxTokens(int maxTokens) {
+    public Builder setMaxTokens(Integer maxTokens) {
       this.maxTokens = maxTokens;
       return this;
     }
 
-    public Builder setTemperature(double temperature) {
+    public Builder setMaxCompletionTokens(Integer maxCompletionTokens) {
+      this.maxCompletionTokens = maxCompletionTokens;
+      return this;
+    }
+
+    public Builder setTemperature(Double temperature) {
       this.temperature = temperature;
       return this;
     }
 
-    public Builder setFrequencyPenalty(double frequencyPenalty) {
+    public Builder setFrequencyPenalty(Double frequencyPenalty) {
       this.frequencyPenalty = frequencyPenalty;
       return this;
     }
 
-    public Builder setPresencePenalty(double presencePenalty) {
+    public Builder setPresencePenalty(Double presencePenalty) {
       this.presencePenalty = presencePenalty;
       return this;
     }
@@ -160,6 +194,21 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
 
     public Builder setResponseFormat(ResponseFormat responseFormat) {
       this.responseFormat = responseFormat;
+      return this;
+    }
+
+    public Builder setWebSearchIncluded(Boolean webSearchIncluded) {
+      this.webSearchIncluded = webSearchIncluded;
+      return this;
+    }
+
+    public Builder setDocumentationDetails(RequestDocumentationDetails documentationDetails) {
+      this.documentationDetails = documentationDetails;
+      return this;
+    }
+
+    public Builder setContext(Context context) {
+      this.context = context;
       return this;
     }
 

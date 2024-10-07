@@ -2,13 +2,14 @@ package ee.carlrobert.llm.client.ollama.completion.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaResponseFormat;
+import ee.carlrobert.llm.completion.CompletionRequest;
 import java.util.List;
 
 /*
  * See <a href="https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-chat-completion">ollama/api</a>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OllamaChatCompletionRequest {
+public class OllamaChatCompletionRequest implements CompletionRequest {
 
   private final String model;
   private final List<OllamaChatCompletionMessage> messages;
