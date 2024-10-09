@@ -1,11 +1,11 @@
-package ee.carlrobert.llm.client.openai.completion.request;
+package ee.carlrobert.llm.client.codegpt.request.chat;
 
-public class FileContext {
+public class ContextFile {
 
   private final String name;
   private final String content;
 
-  public FileContext(String name, String content) {
+  public ContextFile(String name, String content) {
     this.name = name;
     this.content = content;
   }

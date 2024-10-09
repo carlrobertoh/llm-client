@@ -11,16 +11,19 @@ import static org.awaitility.Awaitility.await;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.client.codegpt.CodeGPTClient;
 import ee.carlrobert.llm.client.codegpt.request.CodeCompletionRequest;
+import ee.carlrobert.llm.client.codegpt.request.chat.AdditionalRequestContext;
+import ee.carlrobert.llm.client.codegpt.request.chat.ChatCompletionRequest;
+import ee.carlrobert.llm.client.codegpt.request.chat.ContextFile;
+import ee.carlrobert.llm.client.codegpt.request.chat.DocumentationDetails;
+import ee.carlrobert.llm.client.codegpt.request.chat.Metadata;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.request.ResponseFormat;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import okhttp3.sse.EventSource;
 import org.junit.jupiter.api.Test;
 
@@ -28,10 +31,7 @@ public class CodeGPTClientTest extends BaseTest {
 
   @Test
   void shouldStreamChatCompletion() {
-    var prompt = "TEST_PROMPT";
-    var resultMessageBuilder = new StringBuilder();
-    var responseFormat = new ResponseFormat();
-    responseFormat.setType("TEST_TYPE");
+    var sessionId = UUID.randomUUID();
     expectCodeGPT((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
@@ -43,96 +43,47 @@ public class CodeGPTClientTest extends BaseTest {
               "model",
               "temperature",
               "stream",
-              "max_tokens",
-              "frequency_penalty",
-              "presence_penalty",
-              "response_format",
-              "messages")
+              "maxTokens",
+              "messages",
+              "webSearchIncluded",
+              "documentationDetails",
+              "context",
+              "metadata")
           .containsExactly(
               "TEST_MODEL",
               0.5,
               true,
               500,
-              0.1,
-              0.1,
-              Map.of("type", responseFormat.getType()),
-              List.of(Map.of("role", "user", "content", prompt)));
+              List.of(Map.of("role", "user", "content", "TEST_PROMPT")),
+              true,
+              Map.of("name", "TEST_DOC_NAME", "url", "TEST_DOC_URL"),
+              Map.of("files",
+                  List.of(Map.of("name", "TEST_FILE_NAME", "content", "TEST_FILE_CONTENT"))),
+              Map.of(
+                  "pluginVersion", "TEST_PLUGIN_VERSION",
+                  "platformVersion", "TEST_PLATFORM_VERSION"));
       return List.of(
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("role", "assistant")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "Hello")))),
           jsonMapResponse("choices", jsonArray(jsonMap("delta", jsonMap("content", "!")))));
     });
+    var resultMessageBuilder = new StringBuilder();
 
     new CodeGPTClient("TEST_API_KEY")
         .getChatCompletionAsync(
-            new OpenAIChatCompletionRequest.Builder(
-                List.of(new OpenAIChatCompletionStandardMessage("user", prompt)))
+            new ChatCompletionRequest.Builder(
+                List.of(new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")))
                 .setModel("TEST_MODEL")
                 .setMaxTokens(500)
                 .setTemperature(0.5)
-                .setPresencePenalty(0.1)
-                .setFrequencyPenalty(0.1)
-                .setResponseFormat(responseFormat)
-                .build(),
-            new CompletionEventListener<String>() {
-              @Override
-              public void onMessage(String message, EventSource eventSource) {
-                resultMessageBuilder.append(message);
-              }
-            });
-
-    await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
-  }
-
-  @Test
-  void shouldStreamCompletion() {
-    var resultMessageBuilder = new StringBuilder();
-    expectCodeGPT((StreamHttpExchange) request -> {
-      assertThat(request.getUri().getPath()).isEqualTo("/v1/completions");
-      assertThat(request.getMethod()).isEqualTo("POST");
-      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
-      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
-          .isEqualTo("codegpt");
-      assertThat(request.getBody())
-          .extracting(
-              "model",
-              "prompt",
-              "suffix",
-              "temperature",
-              "stream",
-              "max_tokens",
-              "frequency_penalty",
-              "presence_penalty")
-          .containsExactly(
-              "TEST_MODEL",
-              "TEST_PROMPT",
-              "TEST_SUFFIX",
-              0.5,
-              true,
-              500,
-              0.1,
-              0.1);
-      return List.of(
-          "{}",
-          jsonMapResponse("choices", null),
-          jsonMapResponse("choices", jsonArray()),
-          jsonMapResponse("choices", jsonArray((Map<String, ?>) null)),
-          jsonMapResponse("choices", jsonArray(jsonMap())),
-          jsonMapResponse("choices", jsonArray(jsonMap("text", null))),
-          jsonMapResponse("choices", jsonArray(jsonMap("text", ""))),
-          jsonMapResponse("choices", jsonArray(jsonMap("text", "Hello"))),
-          jsonMapResponse("choices", jsonArray(jsonMap("text", "!"))));
-    });
-
-    new CodeGPTClient("TEST_API_KEY")
-        .getCompletionAsync(new OpenAITextCompletionRequest.Builder("TEST_PROMPT")
-                .setSuffix("TEST_SUFFIX")
+                .setSessionId(sessionId)
+                .setMetadata(new Metadata("TEST_PLUGIN_VERSION", "TEST_PLATFORM_VERSION"))
                 .setStream(true)
-                .setModel("TEST_MODEL")
-                .setMaxTokens(500)
-                .setTemperature(0.5)
-                .setPresencePenalty(0.1)
-                .setFrequencyPenalty(0.1)
+                .setWebSearchIncluded(true)
+                .setContext(
+                    new AdditionalRequestContext(List.of(
+                        new ContextFile("TEST_FILE_NAME", "TEST_FILE_CONTENT"))))
+                .setDocumentationDetails(new DocumentationDetails("TEST_DOC_NAME", "TEST_DOC_URL"))
                 .build(),
             new CompletionEventListener<String>() {
               @Override
@@ -215,17 +166,13 @@ public class CodeGPTClientTest extends BaseTest {
               "model",
               "temperature",
               "stream",
-              "max_tokens",
-              "frequency_penalty",
-              "presence_penalty",
+              "maxTokens",
               "messages")
           .containsExactly(
               "TEST_MODEL",
               0.5,
               false,
               500,
-              0.1,
-              0.1,
               List.of(Map.of("role", "user", "content", "TEST_PROMPT")));
 
       return new ResponseEntity(new ObjectMapper().writeValueAsString(Map.of("choices", List.of(
@@ -235,13 +182,11 @@ public class CodeGPTClientTest extends BaseTest {
     });
 
     var response = new CodeGPTClient("TEST_API_KEY")
-        .getChatCompletion(new OpenAIChatCompletionRequest.Builder(
+        .getChatCompletion(new ChatCompletionRequest.Builder(
             List.of(new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")))
             .setModel("TEST_MODEL")
             .setMaxTokens(500)
             .setTemperature(0.5)
-            .setPresencePenalty(0.1)
-            .setFrequencyPenalty(0.1)
             .setStream(false)
             .build());
 
