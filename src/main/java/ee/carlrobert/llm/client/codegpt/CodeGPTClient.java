@@ -5,8 +5,10 @@ import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
+import ee.carlrobert.llm.client.codegpt.request.AutoApplyRequest;
 import ee.carlrobert.llm.client.codegpt.request.CodeCompletionRequest;
 import ee.carlrobert.llm.client.codegpt.request.chat.ChatCompletionRequest;
+import ee.carlrobert.llm.client.codegpt.response.AutoApplyResponse;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
@@ -42,10 +44,7 @@ public class CodeGPTClient {
   }
 
   public CodeGPTUserDetails getUserDetails(String apiKey) {
-    try (var response = new OkHttpClient.Builder().build()
-        .newCall(buildUserDetailsRequest(apiKey))
-        .execute()) {
-
+    try (var response = httpClient.newCall(buildUserDetailsRequest(apiKey)).execute()) {
       return DeserializationUtil.mapResponse(response, CodeGPTUserDetails.class);
     } catch (IOException e) {
       throw new RuntimeException("Unable to fetch user details", e);
@@ -72,7 +71,15 @@ public class CodeGPTClient {
     try (var response = httpClient.newCall(buildChatCompletionRequest(request)).execute()) {
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Unable to get chat completion", e);
+    }
+  }
+
+  public AutoApplyResponse applySuggestedChanges(AutoApplyRequest request) {
+    try (var response = httpClient.newCall(buildAutoApplyRequest(request)).execute()) {
+      return DeserializationUtil.mapResponse(response, AutoApplyResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to apply suggested changes", e);
     }
   }
 
@@ -114,6 +121,18 @@ public class CodeGPTClient {
         .header("Authorization", "Bearer " + apiKey)
         .get()
         .build();
+  }
+
+  private Request buildAutoApplyRequest(AutoApplyRequest request) {
+    try {
+      return new Request.Builder()
+          .url(BASE_URL + "/v1/files/apply-changes")
+          .header("Authorization", "Bearer " + apiKey)
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to build file diff request", e);
+    }
   }
 
   private Map<String, String> getRequiredHeaders() {
