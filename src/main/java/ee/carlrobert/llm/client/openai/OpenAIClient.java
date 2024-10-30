@@ -13,6 +13,7 @@ import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRe
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingData;
+import ee.carlrobert.llm.client.openai.embeddings.EmbeddingRequest;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingResponse;
 import ee.carlrobert.llm.client.openai.imagegen.request.OpenAIImageGenerationRequest;
 import ee.carlrobert.llm.client.openai.imagegen.response.OpenAiImageGenerationResponse;
@@ -104,19 +105,19 @@ public class OpenAIClient {
    * @return First non-null embedding response (if there is one)
    */
   public double[] getEmbedding(String input) {
-    var embeddings = getEmbeddings(List.of(input));
+    var embeddings = getEmbeddings(new EmbeddingRequest("text-embedding-3-large", List.of(input)));
     return embeddings.isEmpty() ? null : embeddings.get(0);
   }
 
   /**
    * Embeddings response (empty list if none could be found).
    *
-   * @param texts Request texts
+   * @param request Embedding request
    * @return Non-null response embeddings
    */
-  public List<double[]> getEmbeddings(List<String> texts) {
+  public List<double[]> getEmbeddings(EmbeddingRequest request) {
     try (var response = httpClient
-        .newCall(buildEmbeddingsRequest(host + "/v1/embeddings", texts))
+        .newCall(buildEmbeddingsRequest(host + "/v1/embeddings", request))
         .execute()) {
 
       return Optional.ofNullable(DeserializationUtil.mapResponse(response, EmbeddingResponse.class))
@@ -132,16 +133,12 @@ public class OpenAIClient {
     }
   }
 
-  private Request buildEmbeddingsRequest(String url, List<String> texts)
+  private Request buildEmbeddingsRequest(String url, EmbeddingRequest request)
       throws JsonProcessingException {
     return new Request.Builder()
         .url(url)
         .headers(Headers.of(getHeaders()))
-        .post(RequestBody.create(
-            OBJECT_MAPPER.writeValueAsString(Map.of(
-                "input", texts,
-                "model", "text-embedding-ada-002")),
-            APPLICATION_JSON))
+        .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
         .build();
   }
 
