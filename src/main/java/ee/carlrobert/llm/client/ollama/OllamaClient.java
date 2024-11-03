@@ -220,7 +220,15 @@ public class OllamaClient {
     try {
       var httpResponse =
           HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofInputStream());
+
       int statusCode = httpResponse.statusCode();
+      if (statusCode == 200) {
+        eventListener.onOpen();
+      } else {
+        eventListener.onError(
+            new ErrorDetails("The request failed with status code " + statusCode),
+            new RuntimeException());
+      }
 
       var inputStream = httpResponse.body();
       responseStreamManager.setInputStream(inputStream);
@@ -228,11 +236,6 @@ public class OllamaClient {
       try (var reader = new BufferedReader(
           new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
         responseStreamManager.processStream(reader, onMessageReceived, eventListener, eventSource);
-      }
-      if (statusCode != 200) {
-        eventListener.onError(
-            new ErrorDetails("The request failed with status code " + statusCode),
-            new RuntimeException());
       }
     } catch (IOException | InterruptedException e) {
       if (!(e instanceof InterruptedException) && !"closed".equals(e.getMessage())) {
