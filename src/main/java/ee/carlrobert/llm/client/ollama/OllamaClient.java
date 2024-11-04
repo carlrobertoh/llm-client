@@ -6,7 +6,6 @@ import static java.lang.String.format;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
@@ -20,29 +19,19 @@ import ee.carlrobert.llm.client.ollama.completion.response.OllamaModelInfoRespon
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaPullResponse;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaTagsResponse;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-import kotlin.Pair;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
-import org.jetbrains.annotations.NotNull;
 
 public class OllamaClient {
 
@@ -70,62 +59,28 @@ public class OllamaClient {
   public EventSource getCompletionAsync(
       OllamaCompletionRequest request,
       CompletionEventListener<String> eventListener) {
-    var responseStreamManager = new ResponseStreamManager();
-    var eventSource =
-        getEventSource(() -> responseStreamManager.cancelStream(eventListener));
+    return EventSources.createFactory(httpClient)
+        .newEventSource(
+            buildPostRequest(request, "/api/generate", true),
+            getCompletionEventSourceListener(eventListener));
+  }
 
-    CompletableFuture.runAsync(() -> {
-      try {
-        processStreamRequest(
-            buildPostHttpRequest(request, "/api/generate"),
-            eventListener,
-            eventSource,
-            responseStreamManager,
-            message -> {
-              OllamaCompletionResponse response;
-              try {
-                response = new ObjectMapper().readValue(message, OllamaCompletionResponse.class);
-              } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-              }
-              return new Pair<>(response.getResponse(), response.isDone());
-            });
-      } catch (IOException e) {
-        eventListener.onError(new ErrorDetails("Something went wrong"), e);
-      }
-    });
-    return eventSource;
+  public EventSource getChatCompletionAsync(
+      OpenAIChatCompletionRequest request,
+      CompletionEventListener<String> eventListener) {
+    return EventSources.createFactory(httpClient)
+        .newEventSource(
+            buildPostRequest(request, "/v1/chat/completions", true),
+            new OpenAIChatCompletionEventSourceListener(eventListener));
   }
 
   public EventSource getChatCompletionAsync(
       OllamaChatCompletionRequest request,
       CompletionEventListener<String> eventListener) {
-    var responseStreamManager = new ResponseStreamManager();
-    var eventSource =
-        getEventSource(() -> responseStreamManager.cancelStream(eventListener));
-
-    CompletableFuture.runAsync(
-        () -> {
-          try {
-            processStreamRequest(
-                buildPostHttpRequest(request, "/api/chat"),
-                eventListener,
-                eventSource,
-                responseStreamManager,
-                message -> {
-                  try {
-                    var response =
-                        new ObjectMapper().readValue(message, OllamaChatCompletionResponse.class);
-                    return new Pair<>(response.getMessage().getContent(), response.isDone());
-                  } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                  }
-                });
-          } catch (IOException e) {
-            eventListener.onError(new ErrorDetails("Something went wrong"), e);
-          }
-        });
-    return eventSource;
+    return EventSources.createFactory(httpClient)
+        .newEventSource(
+            buildPostRequest(request, "/api/chat", true),
+            getChatCompletionEventSourceListener(eventListener));
   }
 
   public OllamaCompletionResponse getCompletion(OllamaCompletionRequest request) {
@@ -143,6 +98,15 @@ public class OllamaClient {
     } catch (IOException e) {
       throw new RuntimeException(
           "Could not get ollama chat completion for the given request:\n" + request, e);
+    }
+  }
+
+  public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
+    try (var response =
+        httpClient.newCall(buildPostRequest(request, "/v1/chat/completions", false)).execute()) {
+      return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -210,56 +174,6 @@ public class OllamaClient {
     }
   }
 
-  private void processStreamRequest(
-      HttpRequest request,
-      CompletionEventListener<String> eventListener,
-      EventSource eventSource,
-      ResponseStreamManager responseStreamManager,
-      Function<String, Pair<String, Boolean>> onMessageReceived
-  ) {
-    try {
-      var httpResponse =
-          HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofInputStream());
-
-      int statusCode = httpResponse.statusCode();
-      if (statusCode == 200) {
-        eventListener.onOpen();
-      } else {
-        eventListener.onError(
-            new ErrorDetails("The request failed with status code " + statusCode),
-            new RuntimeException());
-      }
-
-      var inputStream = httpResponse.body();
-      responseStreamManager.setInputStream(inputStream);
-
-      try (var reader = new BufferedReader(
-          new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-        responseStreamManager.processStream(reader, onMessageReceived, eventListener, eventSource);
-      }
-    } catch (IOException | InterruptedException e) {
-      if (!(e instanceof InterruptedException) && !"closed".equals(e.getMessage())) {
-        eventListener.onError(new ErrorDetails("Something went wrong"), e);
-      }
-    }
-  }
-
-  private HttpRequest buildPostHttpRequest(
-      Object request,
-      String path) throws JsonProcessingException {
-    var baseHost = port == null ? BASE_URL : format("http://localhost:%d", port);
-    var requestBuilder = HttpRequest.newBuilder(URI.create((host == null ? baseHost : host) + path))
-        .POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(request)))
-        .header("Content-Type", "application/x-ndjson");
-
-    if (apiKey != null) {
-      requestBuilder.header("Authorization", "Bearer " + apiKey);
-    }
-
-    return requestBuilder.timeout(Duration.ofSeconds(30))
-        .build();
-  }
-
   private Request buildPostRequest(Object request, String path) {
     return buildPostRequest(request, path, false);
   }
@@ -284,7 +198,7 @@ public class OllamaClient {
         .url((host == null ? baseHost : host) + path)
         .header("Cache-Control", "no-cache")
         .header("Content-Type", "application/json")
-        .header("Accept", stream ? "application/x-ndjson" : "text/json");
+        .header("Accept", stream ? "text/event-stream" : "text/json");
     if (apiKey != null) {
       builder.header("Authorization", "Bearer " + apiKey);
     }
@@ -348,59 +262,6 @@ public class OllamaClient {
         return new ErrorDetails(error);
       }
     };
-  }
-
-  private EventSource getEventSource(Runnable onCancel) {
-    return new EventSource() {
-      @NotNull
-      @Override
-      public Request request() {
-        return new Request.Builder().build();
-      }
-
-      @Override
-      public void cancel() {
-        onCancel.run();
-      }
-    };
-  }
-
-  static class ResponseStreamManager {
-
-    private final StringBuilder responseBuffer = new StringBuilder();
-    private InputStream responseBodyStream;
-
-    public void setInputStream(InputStream inputStream) {
-      this.responseBodyStream = inputStream;
-    }
-
-    public void cancelStream(CompletionEventListener<?> eventListener) {
-      if (responseBodyStream != null) {
-        try {
-          responseBodyStream.close();
-          eventListener.onCancelled(responseBuffer);
-        } catch (IOException e) {
-          eventListener.onError(new ErrorDetails("Unable to close stream"), e);
-        }
-      }
-    }
-
-    public void processStream(BufferedReader reader,
-        Function<String, Pair<String, Boolean>> onMessageReceived,
-        CompletionEventListener<String> eventListener,
-        EventSource eventSource) throws IOException {
-      String line;
-      while ((line = reader.readLine()) != null) {
-        var processedContent = onMessageReceived.apply(line);
-        var message = processedContent.getFirst();
-        var done = processedContent.getSecond();
-        eventListener.onMessage(message, eventSource);
-        if (!done) {
-          responseBuffer.append(message);
-        }
-      }
-      eventListener.onComplete(responseBuffer);
-    }
   }
 
   public static class Builder {
