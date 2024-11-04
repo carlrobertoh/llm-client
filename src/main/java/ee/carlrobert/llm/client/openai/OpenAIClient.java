@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
+import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
+import ee.carlrobert.llm.client.openai.completion.ApiResponseError;
+import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -81,6 +84,19 @@ public class OpenAIClient {
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
     try (var response = httpClient.newCall(buildChatCompletionRequest(request)).execute()) {
+      if (!response.isSuccessful()) {
+        var body = response.body();
+        if (body == null) {
+          throw new RuntimeException("Unable to get response body");
+        }
+
+        var error = OBJECT_MAPPER.readValue(body.string(), ApiResponseError.class);
+        var ex = new CodeGPTException();
+        ex.setDetail(error.getError().getMessage());
+        ex.setStatus(response.code());
+        throw ex;
+      }
+
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
