@@ -9,6 +9,7 @@ import ee.carlrobert.llm.client.codegpt.request.AutoApplyRequest;
 import ee.carlrobert.llm.client.codegpt.request.CodeCompletionRequest;
 import ee.carlrobert.llm.client.codegpt.request.chat.ChatCompletionRequest;
 import ee.carlrobert.llm.client.codegpt.response.AutoApplyResponse;
+import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
@@ -69,6 +70,15 @@ public class CodeGPTClient {
 
   public OpenAIChatCompletionResponse getChatCompletion(ChatCompletionRequest request) {
     try (var response = httpClient.newCall(buildChatCompletionRequest(request)).execute()) {
+      if (!response.isSuccessful()) {
+        var body = response.body();
+        if (body == null) {
+          throw new RuntimeException("Unable to get response body");
+        }
+
+        throw OBJECT_MAPPER.readValue(body.string(), CodeGPTException.class);
+      }
+
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException("Unable to get chat completion", e);
