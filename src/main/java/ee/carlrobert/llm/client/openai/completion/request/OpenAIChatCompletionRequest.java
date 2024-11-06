@@ -29,6 +29,8 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
   private final String toolChoice;
   @JsonProperty("response_format")
   private final ResponseFormat responseFormat;
+  private final List<String> stop;
+  private final Prediction prediction;
 
   private OpenAIChatCompletionRequest(Builder builder) {
     this.model = builder.model;
@@ -43,6 +45,8 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     this.tools = builder.tools;
     this.toolChoice = builder.toolChoice;
     this.responseFormat = builder.responseFormat;
+    this.stop = builder.stop;
+    this.prediction = builder.prediction;
   }
 
   public void addMessage(OpenAIChatCompletionMessage message) {
@@ -97,6 +101,14 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     return responseFormat;
   }
 
+  public List<String> getStop() {
+    return stop;
+  }
+
+  public Prediction getPrediction() {
+    return prediction;
+  }
+
   public static class Builder {
 
     private final List<OpenAIChatCompletionMessage> messages;
@@ -110,7 +122,9 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     private String overriddenPath;
     private List<Tool> tools;
     private String toolChoice;
+    private List<String> stop;
     private ResponseFormat responseFormat;
+    private Prediction prediction;
 
     public Builder(List<OpenAIChatCompletionMessage> messages) {
       this.messages = messages;
@@ -171,8 +185,18 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
       return this;
     }
 
+    public Builder setStop(List<String> stop) {
+      this.stop = stop;
+      return this;
+    }
+
     public Builder setResponseFormat(ResponseFormat responseFormat) {
       this.responseFormat = responseFormat;
+      return this;
+    }
+
+    public Builder setPrediction(Prediction prediction) {
+      this.prediction = prediction;
       return this;
     }
 
