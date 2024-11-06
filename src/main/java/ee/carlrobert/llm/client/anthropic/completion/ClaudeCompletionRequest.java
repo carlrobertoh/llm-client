@@ -17,6 +17,8 @@ public class ClaudeCompletionRequest implements CompletionRequest {
   private int topK;
   @JsonProperty("top_p")
   private int topP;
+  @JsonProperty("stop_sequences")
+  private List<String> stopSequences;
 
   public String getModel() {
     return model;
@@ -80,5 +82,13 @@ public class ClaudeCompletionRequest implements CompletionRequest {
 
   public void setTopP(int topP) {
     this.topP = topP;
+  }
+
+  public List<String> getStopSequences() {
+    return stopSequences;
+  }
+
+  public void setStopSequences(List<String> stopSequences) {
+    this.stopSequences = stopSequences;
   }
 }
