@@ -1,6 +1,7 @@
 package ee.carlrobert.llm.client.codegpt.request;
 
 import ee.carlrobert.llm.completion.CompletionRequest;
+import java.util.List;
 import java.util.UUID;
 
 public class CodeCompletionRequest implements CompletionRequest {
@@ -12,6 +13,7 @@ public class CodeCompletionRequest implements CompletionRequest {
   private final String fileContent;
   private final String stagedDiff;
   private final String unstagedDiff;
+  private final List<String> stop;
   private final UUID sessionId;
   private final String platformVersion;
   private final String pluginVersion;
@@ -24,6 +26,7 @@ public class CodeCompletionRequest implements CompletionRequest {
     this.fileContent = builder.fileContent;
     this.stagedDiff = builder.stagedDiff;
     this.unstagedDiff = builder.unstagedDiff;
+    this.stop = builder.stop;
     this.sessionId = builder.sessionId;
     this.platformVersion = builder.platformVersion;
     this.pluginVersion = builder.pluginVersion;
@@ -57,6 +60,10 @@ public class CodeCompletionRequest implements CompletionRequest {
     return unstagedDiff;
   }
 
+  public List<String> getStop() {
+    return stop;
+  }
+
   public UUID getSessionId() {
     return sessionId;
   }
@@ -78,6 +85,7 @@ public class CodeCompletionRequest implements CompletionRequest {
     private String fileContent;
     private String stagedDiff;
     private String unstagedDiff;
+    private List<String> stop;
     private UUID sessionId;
     private String platformVersion;
     private String pluginVersion;
@@ -114,6 +122,11 @@ public class CodeCompletionRequest implements CompletionRequest {
 
     public Builder setUnstagedDiff(String unstagedDiff) {
       this.unstagedDiff = unstagedDiff;
+      return this;
+    }
+
+    public Builder setStop(List<String> stop) {
+      this.stop = stop;
       return this;
     }
 
