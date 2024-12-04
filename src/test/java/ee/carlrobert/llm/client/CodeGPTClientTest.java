@@ -109,18 +109,16 @@ public class CodeGPTClientTest extends BaseTest {
               "model",
               "prefix",
               "suffix",
+              "cursorOffset",
               "fileExtension",
-              "fileContent",
-              "stagedDiff",
-              "unstagedDiff")
+              "fileContent")
           .containsExactly(
               "TEST_MODEL",
               "TEST_PREFIX",
               "TEST_SUFFIX",
+              10,
               "txt",
-              "TEST_FILE_CONTENT",
-              "TEST_STAGED_DIFF",
-              "TEST_UNSTAGED_DIFF");
+              "TEST_FILE_CONTENT");
       return List.of(
           "{}",
           jsonMapResponse("choices", null),
@@ -140,8 +138,7 @@ public class CodeGPTClientTest extends BaseTest {
                 .setModel("TEST_MODEL")
                 .setFileExtension("txt")
                 .setFileContent("TEST_FILE_CONTENT")
-                .setStagedDiff("TEST_STAGED_DIFF")
-                .setUnstagedDiff("TEST_UNSTAGED_DIFF")
+                .setCursorOffset(10)
                 .build(),
             new CompletionEventListener<>() {
               @Override

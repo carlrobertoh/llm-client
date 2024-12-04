@@ -11,8 +11,7 @@ public class CodeCompletionRequest implements CompletionRequest {
   private final String suffix;
   private final String fileExtension;
   private final String fileContent;
-  private final String stagedDiff;
-  private final String unstagedDiff;
+  private final int cursorOffset;
   private final List<String> stop;
   private final UUID sessionId;
   private final String platformVersion;
@@ -24,8 +23,7 @@ public class CodeCompletionRequest implements CompletionRequest {
     this.suffix = builder.suffix;
     this.fileExtension = builder.fileExtension;
     this.fileContent = builder.fileContent;
-    this.stagedDiff = builder.stagedDiff;
-    this.unstagedDiff = builder.unstagedDiff;
+    this.cursorOffset = builder.cursorOffset;
     this.stop = builder.stop;
     this.sessionId = builder.sessionId;
     this.platformVersion = builder.platformVersion;
@@ -52,12 +50,8 @@ public class CodeCompletionRequest implements CompletionRequest {
     return fileContent;
   }
 
-  public String getStagedDiff() {
-    return stagedDiff;
-  }
-
-  public String getUnstagedDiff() {
-    return unstagedDiff;
+  public int getCursorOffset() {
+    return cursorOffset;
   }
 
   public List<String> getStop() {
@@ -78,13 +72,12 @@ public class CodeCompletionRequest implements CompletionRequest {
 
   public static class Builder {
 
-    private String model = "gpt-3.5-turbo-instruct";
+    private String model = "codestral";
     private String prefix;
     private String suffix;
     private String fileExtension;
     private String fileContent;
-    private String stagedDiff;
-    private String unstagedDiff;
+    private int cursorOffset;
     private List<String> stop;
     private UUID sessionId;
     private String platformVersion;
@@ -115,13 +108,8 @@ public class CodeCompletionRequest implements CompletionRequest {
       return this;
     }
 
-    public Builder setStagedDiff(String stagedDiff) {
-      this.stagedDiff = stagedDiff;
-      return this;
-    }
-
-    public Builder setUnstagedDiff(String unstagedDiff) {
-      this.unstagedDiff = unstagedDiff;
+    public Builder setCursorOffset(int cursorOffset) {
+      this.cursorOffset = cursorOffset;
       return this;
     }
 
