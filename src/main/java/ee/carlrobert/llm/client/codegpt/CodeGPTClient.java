@@ -8,8 +8,11 @@ import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.codegpt.request.AutoApplyRequest;
 import ee.carlrobert.llm.client.codegpt.request.CodeCompletionRequest;
 import ee.carlrobert.llm.client.codegpt.request.chat.ChatCompletionRequest;
+import ee.carlrobert.llm.client.codegpt.request.prediction.AutocompletionPredictionRequest;
+import ee.carlrobert.llm.client.codegpt.request.prediction.DirectPredictionRequest;
 import ee.carlrobert.llm.client.codegpt.response.AutoApplyResponse;
 import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
+import ee.carlrobert.llm.client.codegpt.response.PredictionResponse;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
@@ -18,6 +21,7 @@ import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import okhttp3.Call;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -93,6 +97,30 @@ public class CodeGPTClient {
     }
   }
 
+  public Request buildAutocompletionPredictionRequest(AutocompletionPredictionRequest request) {
+    return buildPredictionRequest("/v1/predictions/autocompletion", request);
+  }
+
+  public Request buildLookupPredictionRequest(AutocompletionPredictionRequest request) {
+    return buildPredictionRequest("/v1/predictions/lookup", request);
+  }
+
+  public Request buildDirectPredictionRequest(DirectPredictionRequest request) {
+    return buildPredictionRequest("/v1/predictions/direct", request);
+  }
+
+  public PredictionResponse getPrediction(Call call) {
+    try (var response = call.execute()) {
+      return DeserializationUtil.mapResponse(response, PredictionResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to get prediction response", e);
+    }
+  }
+
+  public Call createNewCall(Request request) {
+    return httpClient.newCall(request);
+  }
+
   private EventSource createNewEventSource(
       Request request,
       EventSourceListener eventSourceListener) {
@@ -142,6 +170,18 @@ public class CodeGPTClient {
           .build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to build file diff request", e);
+    }
+  }
+
+  private Request buildPredictionRequest(String url, Object request) {
+    try {
+      return new Request.Builder()
+          .url(BASE_URL + url)
+          .header("Authorization", "Bearer " + apiKey)
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to build generic prediction request", e);
     }
   }
 
