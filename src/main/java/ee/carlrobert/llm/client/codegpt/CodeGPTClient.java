@@ -10,6 +10,7 @@ import ee.carlrobert.llm.client.codegpt.request.CodeCompletionRequest;
 import ee.carlrobert.llm.client.codegpt.request.chat.ChatCompletionRequest;
 import ee.carlrobert.llm.client.codegpt.request.prediction.AutocompletionPredictionRequest;
 import ee.carlrobert.llm.client.codegpt.request.prediction.DirectPredictionRequest;
+import ee.carlrobert.llm.client.codegpt.request.prediction.PastePredictionRequest;
 import ee.carlrobert.llm.client.codegpt.response.AutoApplyResponse;
 import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
 import ee.carlrobert.llm.client.codegpt.response.PredictionResponse;
@@ -107,6 +108,10 @@ public class CodeGPTClient {
 
   public Request buildDirectPredictionRequest(DirectPredictionRequest request) {
     return buildPredictionRequest("/v1/predictions/direct", request);
+  }
+
+  public Request buildPastePredictionRequest(PastePredictionRequest request) {
+    return buildPredictionRequest("/v1/predictions/paste", request);
   }
 
   public PredictionResponse getPrediction(Call call) {
