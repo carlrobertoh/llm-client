@@ -11,13 +11,16 @@ public class OpenAIChatCompletionResponse implements CompletionResponse {
 
   private final String id;
   private final List<OpenAIChatCompletionResponseChoice> choices;
+  private final OpenAIChatCompletionResponseUsage usage;
 
   @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
   public OpenAIChatCompletionResponse(
       @JsonProperty("id") String id,
-      @JsonProperty("choices") List<OpenAIChatCompletionResponseChoice> choices) {
+      @JsonProperty("choices") List<OpenAIChatCompletionResponseChoice> choices,
+      @JsonProperty("usage") OpenAIChatCompletionResponseUsage usage) {
     this.id = id;
     this.choices = choices;
+    this.usage = usage;
   }
 
   public String getId() {
@@ -26,5 +29,9 @@ public class OpenAIChatCompletionResponse implements CompletionResponse {
 
   public List<OpenAIChatCompletionResponseChoice> getChoices() {
     return choices;
+  }
+
+  public OpenAIChatCompletionResponseUsage getUsage() {
+    return usage;
   }
 }

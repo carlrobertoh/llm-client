@@ -5,24 +5,31 @@ import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
+import ee.carlrobert.llm.client.codegpt.request.AutoApplyRequest;
 import ee.carlrobert.llm.client.codegpt.request.CodeCompletionRequest;
-import ee.carlrobert.llm.client.openai.OpenAIClient;
+import ee.carlrobert.llm.client.codegpt.request.chat.ChatCompletionRequest;
+import ee.carlrobert.llm.client.codegpt.request.prediction.AutocompletionPredictionRequest;
+import ee.carlrobert.llm.client.codegpt.request.prediction.DirectPredictionRequest;
+import ee.carlrobert.llm.client.codegpt.request.prediction.PastePredictionRequest;
+import ee.carlrobert.llm.client.codegpt.response.AutoApplyResponse;
+import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
+import ee.carlrobert.llm.client.codegpt.response.PredictionResponse;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
-import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import okhttp3.Call;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.sse.EventSource;
+import okhttp3.sse.EventSourceListener;
 import okhttp3.sse.EventSources;
 
 public class CodeGPTClient {
@@ -30,7 +37,7 @@ public class CodeGPTClient {
   private static final String BASE_URL = PropertiesLoader.getValue("codegpt.baseUrl");
   private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
 
-  private final OpenAIClient openaiClient;
+  private final OkHttpClient httpClient;
   private final String apiKey;
 
   public CodeGPTClient(String apiKey) {
@@ -39,14 +46,11 @@ public class CodeGPTClient {
 
   public CodeGPTClient(String apiKey, OkHttpClient.Builder httpClientBuilder) {
     this.apiKey = apiKey;
-    this.openaiClient = new OpenAIClient.Builder(apiKey).setHost(BASE_URL).build(httpClientBuilder);
+    this.httpClient = httpClientBuilder.build();
   }
 
   public CodeGPTUserDetails getUserDetails(String apiKey) {
-    try (var response = new OkHttpClient.Builder().build()
-        .newCall(buildUserDetailsRequest(apiKey))
-        .execute()) {
-
+    try (var response = httpClient.newCall(buildUserDetailsRequest(apiKey)).execute()) {
       return DeserializationUtil.mapResponse(response, CodeGPTUserDetails.class);
     } catch (IOException e) {
       throw new RuntimeException("Unable to fetch user details", e);
@@ -54,33 +58,91 @@ public class CodeGPTClient {
   }
 
   public EventSource getChatCompletionAsync(
-      OpenAIChatCompletionRequest request,
+      ChatCompletionRequest request,
       CompletionEventListener<String> eventListener) {
-    return openaiClient.getChatCompletionAsync(
-        request,
+    return createNewEventSource(
+        buildChatCompletionRequest(request),
         getChatCompletionEventSourceListener(eventListener));
   }
 
   public EventSource getCodeCompletionAsync(
       CodeCompletionRequest request,
       CompletionEventListener<String> eventListener) {
-    return EventSources.createFactory(new OkHttpClient.Builder().build())
-        .newEventSource(
-            buildCodeCompletionRequest(request),
-            getCodeCompletionEventSourceListener(eventListener));
-  }
-
-  @Deprecated
-  public EventSource getCompletionAsync(
-      OpenAITextCompletionRequest request,
-      CompletionEventListener<String> eventListener) {
-    return openaiClient.getCompletionAsync(
-        request,
+    return createNewEventSource(
+        buildCodeCompletionRequest(request),
         getCodeCompletionEventSourceListener(eventListener));
   }
 
-  public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
-    return openaiClient.getChatCompletion(request);
+  public OpenAIChatCompletionResponse getChatCompletion(ChatCompletionRequest request) {
+    try (var response = httpClient.newCall(buildChatCompletionRequest(request)).execute()) {
+      if (!response.isSuccessful()) {
+        var body = response.body();
+        if (body == null) {
+          throw new RuntimeException("Unable to get response body");
+        }
+
+        throw OBJECT_MAPPER.readValue(body.string(), CodeGPTException.class);
+      }
+
+      return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to get chat completion", e);
+    }
+  }
+
+  public AutoApplyResponse applySuggestedChanges(AutoApplyRequest request) {
+    try (var response = httpClient.newCall(buildAutoApplyRequest(request)).execute()) {
+      return DeserializationUtil.mapResponse(response, AutoApplyResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to apply suggested changes", e);
+    }
+  }
+
+  public Request buildAutocompletionPredictionRequest(AutocompletionPredictionRequest request) {
+    return buildPredictionRequest("/v1/predictions/autocompletion", request);
+  }
+
+  public Request buildLookupPredictionRequest(AutocompletionPredictionRequest request) {
+    return buildPredictionRequest("/v1/predictions/lookup", request);
+  }
+
+  public Request buildDirectPredictionRequest(DirectPredictionRequest request) {
+    return buildPredictionRequest("/v1/predictions/direct", request);
+  }
+
+  public Request buildPastePredictionRequest(PastePredictionRequest request) {
+    return buildPredictionRequest("/v1/predictions/paste", request);
+  }
+
+  public PredictionResponse getPrediction(Call call) {
+    try (var response = call.execute()) {
+      return DeserializationUtil.mapResponse(response, PredictionResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to get prediction response", e);
+    }
+  }
+
+  public Call createNewCall(Request request) {
+    return httpClient.newCall(request);
+  }
+
+  private EventSource createNewEventSource(
+      Request request,
+      EventSourceListener eventSourceListener) {
+    return EventSources.createFactory(httpClient).newEventSource(request, eventSourceListener);
+  }
+
+  private Request buildChatCompletionRequest(ChatCompletionRequest request) {
+    var headers = new HashMap<>(getRequiredHeaders());
+    try {
+      return new Request.Builder()
+          .url(BASE_URL + "/v1/chat/completions")
+          .headers(Headers.of(headers))
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to process request", e);
+    }
   }
 
   private Request buildCodeCompletionRequest(CodeCompletionRequest request) {
@@ -102,6 +164,30 @@ public class CodeGPTClient {
         .header("Authorization", "Bearer " + apiKey)
         .get()
         .build();
+  }
+
+  private Request buildAutoApplyRequest(AutoApplyRequest request) {
+    try {
+      return new Request.Builder()
+          .url(BASE_URL + "/v1/files/apply-changes")
+          .header("Authorization", "Bearer " + apiKey)
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to build file diff request", e);
+    }
+  }
+
+  private Request buildPredictionRequest(String url, Object request) {
+    try {
+      return new Request.Builder()
+          .url(BASE_URL + url)
+          .header("Authorization", "Bearer " + apiKey)
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to build generic prediction request", e);
+    }
   }
 
   private Map<String, String> getRequiredHeaders() {

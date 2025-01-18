@@ -22,7 +22,7 @@ jobs:
         # Build and dry-run maven-publish (metadata and pom, but no signing)
         run: ./gradlew build generateMetadataFileForMavenJavaPublication generatePomFileForMavenJavaPublication --no-daemon
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           ignore-unfixed: true
           scan-ref: 'build/publications/mavenJava'
@@ -31,6 +31,8 @@ jobs:
           severity: 'MEDIUM,HIGH,CRITICAL'
         env:
           TRIVY_FILE_PATTERNS: "pom:pom.*.xml"
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db,aquasec/trivy-db,ghcr.io/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db,aquasec/trivy-java-db,ghcr.io/aquasecurity/trivy-java-db
 
   publish:
     name: Publish Artifacts

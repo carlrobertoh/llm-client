@@ -5,6 +5,99 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.33] - 2025-01-06
+
+### Added
+
+- Paste Predictions API support (CodeGPT)
+
+## [0.8.32] - 2024-12-26
+
+### Added
+
+- Predictions API support (CodeGPT)
+
+## [0.8.31] - 2024-12-09
+
+### Added
+
+- rewrite_speculation API field
+
+## [0.8.30] - 2024-12-01
+
+### Added
+
+- Cursor offset API field (CodeGPT)
+
+## [0.8.29] - 2024-11-30
+
+### Added
+
+- Stop tokens field (CodeGPT)
+
+## [0.8.28] - 2024-11-14
+
+### Improved
+
+- Completions error handling (CodeGPT)
+
+## [0.8.27] - 2024-11-06
+
+### Added
+
+- Missing stop and prediction properties (OpenAI, Anthropic)
+
+## [0.8.26] - 2024-11-04
+
+### Fixed
+
+- Error handling for non-stream chat completions (CodeGPT, OpenAI)
+
+## [0.8.25] - 2024-11-03
+
+### Added
+
+- Missing `onOpen` event callback (Ollama) 
+
+## [0.8.24] - 2024-10-30
+
+- Support other embedding models (OpenAI)
+
+## [0.8.23] - 2024-10-25
+
+- Auto Apply integration (CodeGPT)
+
+## [0.8.22] - 2024-10-09
+
+### Added
+
+- Gemini 1.5 Pro model (Google)
+- Separate class for chat completions request body, breaking change (CodeGPT)
+
+## [0.8.21] - 2024-10-07
+
+### Added
+
+- New context and plugin version request body params (CodeGPT)
+
+## [0.8.20] - 2024-10-01
+
+### Added
+
+- Support for OpenAI completion response usage
+
+## [0.8.19] - 2024-10-01
+
+### Added
+
+- o1 models (OpenAI)
+
+## [0.8.18] - 2024-09-23
+
+### Added
+
+- Missing implementations for request/response concrete classes
+
 ## [0.8.17] - 2024-09-12
 
 ### Fixed
@@ -222,7 +315,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.8.17]: https://github.com/carlrobertoh/llm-client/compare/6b7e26477b8e3454e78c8c639e97c8803fa5a301...HEAD
+[0.8.32]: https://github.com/carlrobertoh/llm-client/compare/a6bef6a750aec3dd735b5b2bd1758efa763ee075...HEAD
+[0.8.31]: https://github.com/carlrobertoh/llm-client/compare/158ca83fee59bbc1b01e8bdd6666dc5276562a1e...a6bef6a750aec3dd735b5b2bd1758efa763ee075
+[0.8.30]: https://github.com/carlrobertoh/llm-client/compare/80fa1759a7ef6818204f9c351ad777e4e53a7666...158ca83fee59bbc1b01e8bdd6666dc5276562a1e
+[0.8.29]: https://github.com/carlrobertoh/llm-client/compare/b50ad56c96078a85605cbe130ea171a1d8476aa1...80fa1759a7ef6818204f9c351ad777e4e53a7666
+[0.8.28]: https://github.com/carlrobertoh/llm-client/compare/c6d311690a6a47f4a8cad521118b37ead11eca39...b50ad56c96078a85605cbe130ea171a1d8476aa1
+[0.8.27]: https://github.com/carlrobertoh/llm-client/compare/84b2d6204381e7eb4aa7c0504b7f0c46ee87f880...c6d311690a6a47f4a8cad521118b37ead11eca39
+[0.8.26]: https://github.com/carlrobertoh/llm-client/compare/a315976138c73fbfcc00dfdcfa6ffbea01c0c6dd...84b2d6204381e7eb4aa7c0504b7f0c46ee87f880
+[0.8.25]: https://github.com/carlrobertoh/llm-client/compare/aad0d7187cbc1d2d1f46efd0f0d929ca74357764...a315976138c73fbfcc00dfdcfa6ffbea01c0c6dd
+[0.8.24]: https://github.com/carlrobertoh/llm-client/compare/9c8a34339402d765d83f50273b1fa02c2a4a4b2c...aad0d7187cbc1d2d1f46efd0f0d929ca74357764
+[0.8.23]: https://github.com/carlrobertoh/llm-client/compare/488583ec3c6b47d75d309bd9381a048743f9c891...9c8a34339402d765d83f50273b1fa02c2a4a4b2c
+[0.8.22]: https://github.com/carlrobertoh/llm-client/compare/cc6299c71e18c7c52665ff49eba78f357402fe78...488583ec3c6b47d75d309bd9381a048743f9c891
+[0.8.21]: https://github.com/carlrobertoh/llm-client/compare/b492dc4a2dabca6467985e464b25ab56eb30fc48...cc6299c71e18c7c52665ff49eba78f357402fe78
+[0.8.20]: https://github.com/carlrobertoh/llm-client/compare/59a92c5d9db18856b9c35a70e5f2ebe8d23ea29e...b492dc4a2dabca6467985e464b25ab56eb30fc48
+[0.8.19]: https://github.com/carlrobertoh/llm-client/compare/933b363c24947884b0fcf7fc9be7c9f34d3b2d33...59a92c5d9db18856b9c35a70e5f2ebe8d23ea29e
+[0.8.18]: https://github.com/carlrobertoh/llm-client/compare/0940ecb8e83956c273f62e63f007b4f1bc4550cb...933b363c24947884b0fcf7fc9be7c9f34d3b2d33
+[0.8.17]: https://github.com/carlrobertoh/llm-client/compare/6b7e26477b8e3454e78c8c639e97c8803fa5a301...0940ecb8e83956c273f62e63f007b4f1bc4550cb
 [0.8.16]: https://github.com/carlrobertoh/llm-client/compare/d714854331915387da583c9a5b24877cc06286e...6b7e26477b8e3454e78c8c639e97c8803fa5a301
 [0.8.15]: https://github.com/carlrobertoh/llm-client/compare/fa0539e06d6cd8d21a4d0fa3336c747c2cb68fcc...d714854331915387da583c9a5b24877cc06286e
 [0.8.14]: https://github.com/carlrobertoh/llm-client/compare/6461c8458325e7b2a33670fc09493b3357eb094c...fa0539e06d6cd8d21a4d0fa3336c747c2cb68fcc

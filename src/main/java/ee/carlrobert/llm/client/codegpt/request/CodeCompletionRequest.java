@@ -1,6 +1,8 @@
 package ee.carlrobert.llm.client.codegpt.request;
 
 import ee.carlrobert.llm.completion.CompletionRequest;
+import java.util.List;
+import java.util.UUID;
 
 public class CodeCompletionRequest implements CompletionRequest {
 
@@ -9,17 +11,23 @@ public class CodeCompletionRequest implements CompletionRequest {
   private final String suffix;
   private final String fileExtension;
   private final String fileContent;
-  private final String stagedDiff;
-  private final String unstagedDiff;
+  private final int cursorOffset;
+  private final List<String> stop;
+  private final UUID sessionId;
+  private final String platformVersion;
+  private final String pluginVersion;
 
-  protected CodeCompletionRequest(CodeCompletionRequest.Builder builder) {
+  protected CodeCompletionRequest(Builder builder) {
     this.model = builder.model;
     this.prefix = builder.prefix;
     this.suffix = builder.suffix;
     this.fileExtension = builder.fileExtension;
     this.fileContent = builder.fileContent;
-    this.stagedDiff = builder.stagedDiff;
-    this.unstagedDiff = builder.unstagedDiff;
+    this.cursorOffset = builder.cursorOffset;
+    this.stop = builder.stop;
+    this.sessionId = builder.sessionId;
+    this.platformVersion = builder.platformVersion;
+    this.pluginVersion = builder.pluginVersion;
   }
 
   public String getModel() {
@@ -42,57 +50,86 @@ public class CodeCompletionRequest implements CompletionRequest {
     return fileContent;
   }
 
-  public String getStagedDiff() {
-    return stagedDiff;
+  public int getCursorOffset() {
+    return cursorOffset;
   }
 
-  public String getUnstagedDiff() {
-    return unstagedDiff;
+  public List<String> getStop() {
+    return stop;
+  }
+
+  public UUID getSessionId() {
+    return sessionId;
+  }
+
+  public String getPlatformVersion() {
+    return platformVersion;
+  }
+
+  public String getPluginVersion() {
+    return pluginVersion;
   }
 
   public static class Builder {
 
-    private String model = "gpt-3.5-turbo-instruct";
+    private String model = "codestral";
     private String prefix;
     private String suffix;
     private String fileExtension;
     private String fileContent;
-    private String stagedDiff;
-    private String unstagedDiff;
+    private int cursorOffset;
+    private List<String> stop;
+    private UUID sessionId;
+    private String platformVersion;
+    private String pluginVersion;
 
-    public CodeCompletionRequest.Builder setModel(String model) {
+    public Builder setModel(String model) {
       this.model = model;
       return this;
     }
 
-    public CodeCompletionRequest.Builder setPrefix(String prefix) {
+    public Builder setPrefix(String prefix) {
       this.prefix = prefix;
       return this;
     }
 
-
-    public CodeCompletionRequest.Builder setSuffix(String suffix) {
+    public Builder setSuffix(String suffix) {
       this.suffix = suffix;
       return this;
     }
 
-    public CodeCompletionRequest.Builder setFileExtension(String fileExtension) {
+    public Builder setFileExtension(String fileExtension) {
       this.fileExtension = fileExtension;
       return this;
     }
 
-    public CodeCompletionRequest.Builder setFileContent(String fileContent) {
+    public Builder setFileContent(String fileContent) {
       this.fileContent = fileContent;
       return this;
     }
 
-    public CodeCompletionRequest.Builder setStagedDiff(String stagedDiff) {
-      this.stagedDiff = stagedDiff;
+    public Builder setCursorOffset(int cursorOffset) {
+      this.cursorOffset = cursorOffset;
       return this;
     }
 
-    public CodeCompletionRequest.Builder setUnstagedDiff(String unstagedDiff) {
-      this.unstagedDiff = unstagedDiff;
+    public Builder setStop(List<String> stop) {
+      this.stop = stop;
+      return this;
+    }
+
+    public Builder setSessionId(UUID sessionId) {
+      this.sessionId = sessionId;
+      return this;
+    }
+
+    public Builder setPluginVersion(String pluginVersion) {
+      this.pluginVersion = pluginVersion;
+      return this;
+    }
+
+    public Builder setPlatformVersion(String platformVersion) {
+      this.platformVersion = platformVersion;
       return this;
     }
 

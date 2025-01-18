@@ -12,8 +12,10 @@ public enum OpenAIChatCompletionModel implements CompletionModel {
   GPT_4_1106_128k("gpt-4-1106-preview", "GPT-4 Turbo (Legacy) (128k)", 128000),
   GPT_4_0125_128k("gpt-4-0125-preview", "GPT-4 Turbo (128k)", 128000),
   GPT_4_VISION_PREVIEW("gpt-4-vision-preview", "GPT-4 Vision Preview (128k)", 128000),
+  GPT_4_O_MINI("gpt-4o-mini", "GPT-4o mini (128k)", 128000),
   GPT_4_O("gpt-4o", "GPT-4o (128k)", 128000),
-  GPT_4_O_MINI("gpt-4o-mini", "GPT-4o mini (128k)", 128000);
+  O_1_MINI("o1-mini", "o1-mini", 128000),
+  O_1_PREVIEW("o1-preview", "o1-preview", 128000);
 
   private final String code;
   private final String description;

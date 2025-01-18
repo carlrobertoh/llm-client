@@ -7,12 +7,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
+import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
+import ee.carlrobert.llm.client.openai.completion.ApiResponseError;
+import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingData;
+import ee.carlrobert.llm.client.openai.embeddings.EmbeddingRequest;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingResponse;
 import ee.carlrobert.llm.client.openai.imagegen.request.OpenAIImageGenerationRequest;
 import ee.carlrobert.llm.client.openai.imagegen.response.OpenAiImageGenerationResponse;
@@ -40,12 +44,14 @@ public class OpenAIClient {
   private final String apiKey;
   private final String organization;
   private final String host;
+  private final String pluginVersion;
 
   private OpenAIClient(Builder builder, OkHttpClient.Builder httpClientBuilder) {
     this.httpClient = httpClientBuilder.build();
     this.apiKey = builder.apiKey;
     this.organization = builder.organization;
     this.host = builder.host;
+    this.pluginVersion = builder.pluginVersion;
   }
 
   public EventSource getCompletionAsync(
@@ -78,6 +84,19 @@ public class OpenAIClient {
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
     try (var response = httpClient.newCall(buildChatCompletionRequest(request)).execute()) {
+      if (!response.isSuccessful()) {
+        var body = response.body();
+        if (body == null) {
+          throw new RuntimeException("Unable to get response body");
+        }
+
+        var error = OBJECT_MAPPER.readValue(body.string(), ApiResponseError.class);
+        var ex = new CodeGPTException();
+        ex.setDetail(error.getError().getMessage());
+        ex.setStatus(response.code());
+        throw ex;
+      }
+
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -102,19 +121,19 @@ public class OpenAIClient {
    * @return First non-null embedding response (if there is one)
    */
   public double[] getEmbedding(String input) {
-    var embeddings = getEmbeddings(List.of(input));
+    var embeddings = getEmbeddings(new EmbeddingRequest("text-embedding-3-large", List.of(input)));
     return embeddings.isEmpty() ? null : embeddings.get(0);
   }
 
   /**
    * Embeddings response (empty list if none could be found).
    *
-   * @param texts Request texts
+   * @param request Embedding request
    * @return Non-null response embeddings
    */
-  public List<double[]> getEmbeddings(List<String> texts) {
+  public List<double[]> getEmbeddings(EmbeddingRequest request) {
     try (var response = httpClient
-        .newCall(buildEmbeddingsRequest(host + "/v1/embeddings", texts))
+        .newCall(buildEmbeddingsRequest(host + "/v1/embeddings", request))
         .execute()) {
 
       return Optional.ofNullable(DeserializationUtil.mapResponse(response, EmbeddingResponse.class))
@@ -130,21 +149,17 @@ public class OpenAIClient {
     }
   }
 
-  private Request buildEmbeddingsRequest(String url, List<String> texts)
+  private Request buildEmbeddingsRequest(String url, EmbeddingRequest request)
       throws JsonProcessingException {
     return new Request.Builder()
         .url(url)
-        .headers(Headers.of(getRequiredHeaders()))
-        .post(RequestBody.create(
-            OBJECT_MAPPER.writeValueAsString(Map.of(
-                "input", texts,
-                "model", "text-embedding-ada-002")),
-            APPLICATION_JSON))
+        .headers(Headers.of(getHeaders()))
+        .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
         .build();
   }
 
   public Request buildImageRequest(OpenAIImageGenerationRequest imageRequest) {
-    var headers = new HashMap<>(getRequiredHeaders());
+    var headers = new HashMap<>(getHeaders());
     headers.put("Content-Type", "application/json");
     try {
       var overriddenPath = imageRequest.getOverriddenPath();
@@ -163,7 +178,7 @@ public class OpenAIClient {
   }
 
   private Request buildChatCompletionRequest(OpenAIChatCompletionRequest request) {
-    var headers = new HashMap<>(getRequiredHeaders());
+    var headers = new HashMap<>(getHeaders());
     if (request.isStream()) {
       headers.put("Accept", "text/event-stream");
     }
@@ -180,7 +195,7 @@ public class OpenAIClient {
   }
 
   private Request buildTextCompletionRequest(OpenAITextCompletionRequest request) {
-    var headers = new HashMap<>(getRequiredHeaders());
+    var headers = new HashMap<>(getHeaders());
     if (request.isStream()) {
       headers.put("Accept", "text/event-stream");
     }
@@ -195,10 +210,13 @@ public class OpenAIClient {
     }
   }
 
-  private Map<String, String> getRequiredHeaders() {
+  private Map<String, String> getHeaders() {
     var headers = new HashMap<>(Map.of("X-LLM-Application-Tag", "codegpt"));
     if (apiKey != null && !apiKey.isEmpty()) {
       headers.put("Authorization", "Bearer " + apiKey);
+    }
+    if (pluginVersion != null && !pluginVersion.isEmpty()) {
+      headers.put("X-Plugin-Version", pluginVersion);
     }
     if (organization != null && !organization.isEmpty()) {
       headers.put("OpenAI-Organization", organization);
@@ -211,6 +229,7 @@ public class OpenAIClient {
     private final String apiKey;
     private String host = PropertiesLoader.getValue("openai.baseUrl");
     private String organization;
+    private String pluginVersion;
 
     public Builder(String apiKey) {
       this.apiKey = apiKey;
@@ -223,6 +242,11 @@ public class OpenAIClient {
 
     public Builder setOrganization(String organization) {
       this.organization = organization;
+      return this;
+    }
+
+    public Builder setPluginVersion(String pluginVersion) {
+      this.pluginVersion = pluginVersion;
       return this;
     }
 
