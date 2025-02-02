@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.34] - 2025-02-02
+
+### Added
+
+- o3-mini model (OpenAI)
+
 ## [0.8.33] - 2025-01-06
 
 ### Added
@@ -315,7 +321,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.8.32]: https://github.com/carlrobertoh/llm-client/compare/a6bef6a750aec3dd735b5b2bd1758efa763ee075...HEAD
+[0.8.34]: https://github.com/carlrobertoh/llm-client/compare/6a61d6fa69b50707fca12a260748629bf45bb353...HEAD
+[0.8.33]: https://github.com/carlrobertoh/llm-client/compare/43b11112a443bbbdb9b057423173bb10be002f9d...6a61d6fa69b50707fca12a260748629bf45bb353
+[0.8.32]: https://github.com/carlrobertoh/llm-client/compare/a6bef6a750aec3dd735b5b2bd1758efa763ee075...43b11112a443bbbdb9b057423173bb10be002f9d
 [0.8.31]: https://github.com/carlrobertoh/llm-client/compare/158ca83fee59bbc1b01e8bdd6666dc5276562a1e...a6bef6a750aec3dd735b5b2bd1758efa763ee075
 [0.8.30]: https://github.com/carlrobertoh/llm-client/compare/80fa1759a7ef6818204f9c351ad777e4e53a7666...158ca83fee59bbc1b01e8bdd6666dc5276562a1e
 [0.8.29]: https://github.com/carlrobertoh/llm-client/compare/b50ad56c96078a85605cbe130ea171a1d8476aa1...80fa1759a7ef6818204f9c351ad777e4e53a7666
