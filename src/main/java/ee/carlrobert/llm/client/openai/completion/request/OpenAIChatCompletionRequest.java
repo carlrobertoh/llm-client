@@ -31,6 +31,8 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
   private final ResponseFormat responseFormat;
   private final List<String> stop;
   private final Prediction prediction;
+  @JsonProperty("reasoning_effort")
+  private final String reasoningEffort;
   @JsonProperty("rewrite_speculation")
   private final Boolean rewriteSpeculation;
 
@@ -49,6 +51,7 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     this.responseFormat = builder.responseFormat;
     this.stop = builder.stop;
     this.prediction = builder.prediction;
+    this.reasoningEffort = builder.reasoningEffort;
     this.rewriteSpeculation = builder.rewriteSpeculation;
   }
 
@@ -112,6 +115,10 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     return prediction;
   }
 
+  public String getReasoningEffort() {
+    return reasoningEffort;
+  }
+
   public Boolean getRewriteSpeculation() {
     return rewriteSpeculation;
   }
@@ -132,6 +139,7 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
     private List<String> stop;
     private ResponseFormat responseFormat;
     private Prediction prediction;
+    private String reasoningEffort;
     private Boolean rewriteSpeculation;
 
     public Builder(List<OpenAIChatCompletionMessage> messages) {
@@ -205,6 +213,11 @@ public class OpenAIChatCompletionRequest implements CompletionRequest {
 
     public Builder setPrediction(Prediction prediction) {
       this.prediction = prediction;
+      return this;
+    }
+
+    public Builder setReasoningEffort(String reasoningEffort) {
+      this.reasoningEffort = reasoningEffort;
       return this;
     }
 
