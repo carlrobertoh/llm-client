@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.37] - 2025-02-11
+
+### Added
+
+- Latest Gemini models: 2.0 Pro (exp), 2.0 Flash Thinking (exp), 2.0 Flash (Google)
+
 ## [0.8.36] - 2025-02-05
 
 ### Added
@@ -333,7 +339,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.8.35]: https://github.com/carlrobertoh/llm-client/compare/216c4ee6c2a9477bc51db184df07f2b47544edd1...HEAD
+[0.8.37]: https://github.com/carlrobertoh/llm-client/compare/d97cb4865c8502f7fb5e62d1f96f4631535675bd...HEAD
+[0.8.36]: https://github.com/carlrobertoh/llm-client/compare/216c4ee6c2a9477bc51db184df07f2b47544edd1...d97cb4865c8502f7fb5e62d1f96f4631535675bd
 [0.8.35]: https://github.com/carlrobertoh/llm-client/compare/4a99162ee5cb5ba9068f5b966cf1ead71d82e39d...216c4ee6c2a9477bc51db184df07f2b47544edd1
 [0.8.34]: https://github.com/carlrobertoh/llm-client/compare/6a61d6fa69b50707fca12a260748629bf45bb353...4a99162ee5cb5ba9068f5b966cf1ead71d82e39d
 [0.8.33]: https://github.com/carlrobertoh/llm-client/compare/43b11112a443bbbdb9b057423173bb10be002f9d...6a61d6fa69b50707fca12a260748629bf45bb353
