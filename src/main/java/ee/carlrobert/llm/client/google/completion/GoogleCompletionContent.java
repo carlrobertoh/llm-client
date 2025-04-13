@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * See <a href="https://ai.google.dev/api/caching?authuser=1&hl=en#Content">Content</a>.
+ */
 @JsonInclude(Include.NON_NULL)
 public class GoogleCompletionContent {
 

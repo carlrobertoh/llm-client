@@ -5,22 +5,31 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Base64;
 import java.util.Base64.Encoder;
 
+/**
+ * See <a href="https://ai.google.dev/api/caching?authuser=1&hl=en#Part">Part</a>.
+ */
 @JsonInclude(Include.NON_NULL)
 public class GoogleContentPart {
 
   private String text;
   private Blob inlineData;
+  private Boolean thought;
 
   public GoogleContentPart() {
   }
 
   public GoogleContentPart(String text) {
-    this(text, null);
+    this(text, null, null);
   }
 
   public GoogleContentPart(String text, Blob inlineData) {
+    this(text, inlineData, null);
+  }
+
+  public GoogleContentPart(String text, Blob inlineData, Boolean thought) {
     this.text = text;
     this.inlineData = inlineData;
+    this.thought = thought;
   }
 
   public String getText() {
@@ -37,6 +46,14 @@ public class GoogleContentPart {
 
   public void setInlineData(Blob inlineData) {
     this.inlineData = inlineData;
+  }
+
+  public Boolean getThought() {
+    return thought;
+  }
+
+  public void setThought(Boolean thought) {
+    this.thought = thought;
   }
 
   /**

@@ -4,16 +4,21 @@ import ee.carlrobert.llm.completion.CompletionRequest;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * See <a href="https://ai.google.dev/api/generate-content?hl=en&authuser=1#request-body">Request-Body</a>.
+ */
 public class GoogleCompletionRequest implements CompletionRequest {
 
   private final List<GoogleCompletionContent> contents;
   private final List<SafetySetting> safetySettings;
   private final GoogleGenerationConfig generationConfig;
+  private final GoogleCompletionContent systemInstruction;
 
   public GoogleCompletionRequest(Builder builder) {
     this.contents = builder.contents;
     this.safetySettings = builder.safetySettings;
     this.generationConfig = builder.generationConfig;
+    this.systemInstruction = builder.systemInstruction;
   }
 
   public List<GoogleCompletionContent> getContents() {
@@ -26,6 +31,10 @@ public class GoogleCompletionRequest implements CompletionRequest {
 
   public GoogleGenerationConfig getGenerationConfig() {
     return generationConfig;
+  }
+
+  public GoogleCompletionContent getSystemInstruction() {
+    return systemInstruction;
   }
 
   /**
@@ -81,6 +90,7 @@ public class GoogleCompletionRequest implements CompletionRequest {
     private List<GoogleCompletionContent> contents;
     private List<SafetySetting> safetySettings = new ArrayList<>();
     private GoogleGenerationConfig generationConfig = new GoogleGenerationConfig.Builder().build();
+    private GoogleCompletionContent systemInstruction = null;
 
     public Builder(List<GoogleCompletionContent> contents) {
       this.contents = contents;
@@ -93,6 +103,16 @@ public class GoogleCompletionRequest implements CompletionRequest {
 
     public Builder generationConfig(GoogleGenerationConfig generationConfig) {
       this.generationConfig = generationConfig;
+      return this;
+    }
+
+    public Builder systemInstruction(GoogleCompletionContent systemInstruction) {
+      this.systemInstruction = systemInstruction;
+      return this;
+    }
+
+    public Builder systemInstruction(String systemInstruction) {
+      this.systemInstruction = new GoogleCompletionContent(List.of(systemInstruction));
       return this;
     }
 
