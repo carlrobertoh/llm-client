@@ -10,16 +10,19 @@ public class OpenAIChatCompletionResponseChoiceDelta {
 
   private final String role;
   private final String content;
+  private final String reasoningContent;
   private final List<ToolCall> toolCalls;
 
   @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
   public OpenAIChatCompletionResponseChoiceDelta(
       @JsonProperty("role") String role,
       @JsonProperty("content") String content,
+      @JsonProperty("reasoning_content") String reasoningContent,
       @JsonProperty("tool_calls") List<ToolCall> toolCalls) {
     this.role = role;
     this.content = content;
     this.toolCalls = toolCalls;
+    this.reasoningContent = reasoningContent;
   }
 
   public String getRole() {
@@ -32,5 +35,9 @@ public class OpenAIChatCompletionResponseChoiceDelta {
 
   public List<ToolCall> getToolCalls() {
     return toolCalls;
+  }
+
+  public String getReasoningContent() {
+    return reasoningContent;
   }
 }
