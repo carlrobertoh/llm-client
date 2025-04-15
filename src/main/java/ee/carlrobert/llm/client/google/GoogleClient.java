@@ -290,7 +290,13 @@ public class GoogleClient {
               .getCandidates();
           return (candidates == null ? Stream.<Candidate>empty() : candidates.stream())
               .filter(Objects::nonNull)
-              .flatMap(candidate -> candidate.getContent().getParts().stream())
+              .flatMap(candidate -> {
+                // when finishReason = MAX_TOKENS, the content does not have a "parts" field
+                if (candidate.getContent() != null && candidate.getContent().getParts() != null) {
+                  return candidate.getContent().getParts().stream();
+                }
+                return Stream.empty();
+              })
               .filter(Objects::nonNull)
               .findFirst()
               .map(GoogleContentPart::getText)
