@@ -57,17 +57,30 @@ public class GoogleClient {
 
   public EventSource getChatCompletionAsync(
       GoogleCompletionRequest request,
-      GoogleModel model,
+      String model,
       CompletionEventListener<String> eventListener) {
-    return getChatCompletionAsync(request, model.getCode(), eventListener);
+    var googleModel = GoogleModel.findByCode(model);
+    if (googleModel == null) {
+      return getChatCompletionAsync(request, model, eventListener, false);
+    }
+    return getChatCompletionAsync(request, googleModel, eventListener);
   }
 
   public EventSource getChatCompletionAsync(
       GoogleCompletionRequest request,
-      String model,
+      GoogleModel model,
       CompletionEventListener<String> eventListener) {
+    return getChatCompletionAsync(request, model.getCode(), eventListener, model.isExperimental());
+  }
+
+  private EventSource getChatCompletionAsync(
+      GoogleCompletionRequest request,
+      String model,
+      CompletionEventListener<String> eventListener,
+      boolean isExperimental) {
     return EventSources.createFactory(httpClient)
-        .newEventSource(buildPostRequest(request, model, "streamGenerateContent", true),
+        .newEventSource(
+            buildPostRequest(request, model, "streamGenerateContent", true, isExperimental),
             getEventSourceListener(eventListener));
   }
 
@@ -227,11 +240,20 @@ public class GoogleClient {
     }
   }
 
-  private Request buildPostRequest(Object request, String model, String path,
-      boolean stream) {
+  private Request buildPostRequest(Object request, String model, String path, boolean stream) {
+    return buildPostRequest(request, model, path, stream, false);
+  }
+
+  private Request buildPostRequest(
+      Object request,
+      String model,
+      String path,
+      boolean stream,
+      boolean experimentalModel) {
     try {
       Request.Builder builder = defaultRequestBuilder(
-          host + format("/v1/models/%s:%s", model, path), stream)
+          host + format("/%s/models/%s:%s", experimentalModel ? "v1alpha" : "v1", model, path),
+          stream)
           .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON));
       return builder.build();
     } catch (JsonProcessingException e) {
@@ -268,7 +290,13 @@ public class GoogleClient {
               .getCandidates();
           return (candidates == null ? Stream.<Candidate>empty() : candidates.stream())
               .filter(Objects::nonNull)
-              .flatMap(candidate -> candidate.getContent().getParts().stream())
+              .flatMap(candidate -> {
+                // when finishReason = MAX_TOKENS, the content does not have a "parts" field
+                if (candidate.getContent() != null && candidate.getContent().getParts() != null) {
+                  return candidate.getContent().getParts().stream();
+                }
+                return Stream.empty();
+              })
               .filter(Objects::nonNull)
               .findFirst()
               .map(GoogleContentPart::getText)

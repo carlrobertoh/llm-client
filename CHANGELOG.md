@@ -5,6 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.38] - 2025-04-01
+
+### Added
+
+- Latest Gemini 2.5 Pro (exp) model (Google)
+
+## [0.8.37] - 2025-02-11
+
+### Added
+
+- Latest Gemini models: 2.0 Pro (exp), 2.0 Flash Thinking (exp), 2.0 Flash (Google)
+
+## [0.8.36] - 2025-02-05
+
+### Added
+
+- `reasoning_effort` chat request parameter (OpenAI)
+
+## [0.8.35] - 2025-02-03
+
+### Added
+
+- Avatar image for chats (CodeGPT)
+
+## [0.8.34] - 2025-02-02
+
+### Added
+
+- o3-mini model (OpenAI)
+
+## [0.8.33] - 2025-01-06
+
+### Added
+
+- Paste Predictions API support (CodeGPT)
+
+## [0.8.32] - 2024-12-26
+
+### Added
+
+- Predictions API support (CodeGPT)
+
+## [0.8.31] - 2024-12-09
+
+### Added
+
+- rewrite_speculation API field
+
+## [0.8.30] - 2024-12-01
+
+### Added
+
+- Cursor offset API field (CodeGPT)
+
+## [0.8.29] - 2024-11-30
+
+### Added
+
+- Stop tokens field (CodeGPT)
+
 ## [0.8.28] - 2024-11-14
 
 ### Improved
@@ -285,7 +345,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.8.28]: https://github.com/carlrobertoh/llm-client/compare/c6d311690a6a47f4a8cad521118b37ead11eca39...HEAD
+[0.8.38]: https://github.com/carlrobertoh/llm-client/compare/87c3dc1e0501a07ddb877f45d4a8cbf1120a3a4e...HEAD
+[0.8.37]: https://github.com/carlrobertoh/llm-client/compare/d97cb4865c8502f7fb5e62d1f96f4631535675bd...87c3dc1e0501a07ddb877f45d4a8cbf1120a3a4e
+[0.8.36]: https://github.com/carlrobertoh/llm-client/compare/216c4ee6c2a9477bc51db184df07f2b47544edd1...d97cb4865c8502f7fb5e62d1f96f4631535675bd
+[0.8.35]: https://github.com/carlrobertoh/llm-client/compare/4a99162ee5cb5ba9068f5b966cf1ead71d82e39d...216c4ee6c2a9477bc51db184df07f2b47544edd1
+[0.8.34]: https://github.com/carlrobertoh/llm-client/compare/6a61d6fa69b50707fca12a260748629bf45bb353...4a99162ee5cb5ba9068f5b966cf1ead71d82e39d
+[0.8.33]: https://github.com/carlrobertoh/llm-client/compare/43b11112a443bbbdb9b057423173bb10be002f9d...6a61d6fa69b50707fca12a260748629bf45bb353
+[0.8.32]: https://github.com/carlrobertoh/llm-client/compare/a6bef6a750aec3dd735b5b2bd1758efa763ee075...43b11112a443bbbdb9b057423173bb10be002f9d
+[0.8.31]: https://github.com/carlrobertoh/llm-client/compare/158ca83fee59bbc1b01e8bdd6666dc5276562a1e...a6bef6a750aec3dd735b5b2bd1758efa763ee075
+[0.8.30]: https://github.com/carlrobertoh/llm-client/compare/80fa1759a7ef6818204f9c351ad777e4e53a7666...158ca83fee59bbc1b01e8bdd6666dc5276562a1e
+[0.8.29]: https://github.com/carlrobertoh/llm-client/compare/b50ad56c96078a85605cbe130ea171a1d8476aa1...80fa1759a7ef6818204f9c351ad777e4e53a7666
+[0.8.28]: https://github.com/carlrobertoh/llm-client/compare/c6d311690a6a47f4a8cad521118b37ead11eca39...b50ad56c96078a85605cbe130ea171a1d8476aa1
 [0.8.27]: https://github.com/carlrobertoh/llm-client/compare/84b2d6204381e7eb4aa7c0504b7f0c46ee87f880...c6d311690a6a47f4a8cad521118b37ead11eca39
 [0.8.26]: https://github.com/carlrobertoh/llm-client/compare/a315976138c73fbfcc00dfdcfa6ffbea01c0c6dd...84b2d6204381e7eb4aa7c0504b7f0c46ee87f880
 [0.8.25]: https://github.com/carlrobertoh/llm-client/compare/aad0d7187cbc1d2d1f46efd0f0d929ca74357764...a315976138c73fbfcc00dfdcfa6ffbea01c0c6dd
