@@ -17,6 +17,10 @@ public enum GoogleModel {
       "Gemini 2.0 Pro (Experimental)", 2000000 + 8192, true),
   GEMINI_2_5_PRO_EXP("gemini-2.5-pro-exp-03-25",
       "Gemini 2.5 Pro (Experimental)", 2000000 + 8192, true),
+  GEMINI_2_5_PRO_PREVIEW("gemini-2.5-pro-preview-03-25",
+      "Gemini 2.5 Pro (Preview)", 1048576, true),
+  GEMINI_2_5_FLASH_PREVIEW("gemini-2.5-flash-preview-04-17",
+      "Gemini 2.5 Flash (Preview)", 1048576, true),
   GEMINI_PRO_VISION("gemini-pro-vision", "Gemini Pro Vision (16k)", 12288 + 4096),
   EMBEDDING_001("embedding-001", "Embedding 001 (2k)", 2048 + 1),
   TEXT_EMBEDDING_004("text-embedding-004", "Text Embedding (2k)", 2048 + 1);
