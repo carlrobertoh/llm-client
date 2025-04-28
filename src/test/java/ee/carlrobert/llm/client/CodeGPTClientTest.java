@@ -58,7 +58,10 @@ public class CodeGPTClientTest extends BaseTest {
               true,
               Map.of("name", "TEST_DOC_NAME", "url", "TEST_DOC_URL"),
               Map.of("files",
-                  List.of(Map.of("name", "TEST_FILE_NAME", "content", "TEST_FILE_CONTENT"))),
+                  List.of(Map.of(
+                      "name", "TEST_FILE_NAME",
+                      "path", "TEST_FILE_PATH",
+                      "content", "TEST_FILE_CONTENT"))),
               Map.of(
                   "pluginVersion", "TEST_PLUGIN_VERSION",
                   "platformVersion", "TEST_PLATFORM_VERSION"));
@@ -82,7 +85,7 @@ public class CodeGPTClientTest extends BaseTest {
                 .setWebSearchIncluded(true)
                 .setContext(
                     new AdditionalRequestContext(List.of(
-                        new ContextFile("TEST_FILE_NAME", "TEST_FILE_CONTENT"))))
+                        new ContextFile("TEST_FILE_NAME", "TEST_FILE_PATH", "TEST_FILE_CONTENT"))))
                 .setDocumentationDetails(new DocumentationDetails("TEST_DOC_NAME", "TEST_DOC_URL"))
                 .build(),
             new CompletionEventListener<String>() {
