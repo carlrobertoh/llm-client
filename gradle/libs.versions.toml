@@ -2,7 +2,7 @@
 assertj = "3.27.3"
 awaitility = "4.3.0"
 checkstyle = "10.15.0"
-commons-io = "2.18.0"
+commons-io = "2.19.0"
 jackson = "2.18.2"
 junit = "5.11.4"
 okhttp = "4.12.0"
