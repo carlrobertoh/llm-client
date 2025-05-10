@@ -9,6 +9,7 @@ import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
 import ee.carlrobert.llm.client.openai.completion.ApiResponseError;
+import ee.carlrobert.llm.client.openai.completion.ChatCompletionResponseData;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
@@ -69,7 +70,7 @@ public class OpenAIClient {
 
   public EventSource getChatCompletionAsync(
       OpenAIChatCompletionRequest request,
-      CompletionEventListener<String> eventListener) {
+      CompletionEventListener<ChatCompletionResponseData> eventListener) {
     return getChatCompletionAsync(
         request,
         new OpenAIChatCompletionEventSourceListener(eventListener));

@@ -14,6 +14,7 @@ import ee.carlrobert.llm.client.codegpt.request.prediction.PastePredictionReques
 import ee.carlrobert.llm.client.codegpt.response.AutoApplyResponse;
 import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
 import ee.carlrobert.llm.client.codegpt.response.PredictionResponse;
+import ee.carlrobert.llm.client.openai.completion.ChatCompletionResponseData;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
@@ -59,7 +60,7 @@ public class CodeGPTClient {
 
   public EventSource getChatCompletionAsync(
       ChatCompletionRequest request,
-      CompletionEventListener<String> eventListener) {
+      CompletionEventListener<ChatCompletionResponseData> eventListener) {
     return createNewEventSource(
         buildChatCompletionRequest(request),
         getChatCompletionEventSourceListener(eventListener));
@@ -201,7 +202,7 @@ public class CodeGPTClient {
   }
 
   private OpenAIChatCompletionEventSourceListener getChatCompletionEventSourceListener(
-      CompletionEventListener<String> listener) {
+      CompletionEventListener<ChatCompletionResponseData> listener) {
     return new OpenAIChatCompletionEventSourceListener(listener) {
       @Override
       protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
