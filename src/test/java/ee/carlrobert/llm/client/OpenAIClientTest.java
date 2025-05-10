@@ -14,6 +14,7 @@ import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.openai.OpenAIClient;
+import ee.carlrobert.llm.client.openai.completion.ChatCompletionResponseData;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionModel;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -90,10 +91,10 @@ class OpenAIClientTest extends BaseTest {
                 .setFrequencyPenalty(0.1)
                 .setResponseFormat(responseFormat)
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<ChatCompletionResponseData>() {
               @Override
-              public void onMessage(String message, EventSource eventSource) {
-                resultMessageBuilder.append(message);
+              public void onMessage(ChatCompletionResponseData message, EventSource eventSource) {
+                resultMessageBuilder.append(message.getContent());
               }
             });
 
@@ -219,10 +220,10 @@ class OpenAIClientTest extends BaseTest {
                 .setFrequencyPenalty(0.1)
                 .setOverriddenPath("/v1/test/segment")
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<ChatCompletionResponseData>() {
               @Override
-              public void onMessage(String message, EventSource eventSource) {
-                resultMessageBuilder.append(message);
+              public void onMessage(ChatCompletionResponseData message, EventSource eventSource) {
+                resultMessageBuilder.append(message.getContent());
               }
             });
 
@@ -407,7 +408,7 @@ class OpenAIClientTest extends BaseTest {
                 List.of(new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<ChatCompletionResponseData>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
                 assertThat(error.getCode()).isEqualTo("invalid_api_key");
@@ -436,7 +437,7 @@ class OpenAIClientTest extends BaseTest {
                 List.of(new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<ChatCompletionResponseData>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
                 errorMessageBuilder.append(error.getMessage());

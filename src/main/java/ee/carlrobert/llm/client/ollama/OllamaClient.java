@@ -18,6 +18,7 @@ import ee.carlrobert.llm.client.ollama.completion.response.OllamaEmbeddingRespon
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaModelInfoResponse;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaPullResponse;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaTagsResponse;
+import ee.carlrobert.llm.client.openai.completion.ChatCompletionResponseData;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -67,7 +68,7 @@ public class OllamaClient {
 
   public EventSource getChatCompletionAsync(
       OpenAIChatCompletionRequest request,
-      CompletionEventListener<String> eventListener) {
+      CompletionEventListener<ChatCompletionResponseData> eventListener) {
     return EventSources.createFactory(httpClient)
         .newEventSource(
             buildPostRequest(request, "/v1/chat/completions", true),

@@ -1,45 +1,39 @@
 package ee.carlrobert.llm.client.openai.completion;
 
-import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponseChoice;
-import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponseChoiceDelta;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 import java.util.Objects;
-import java.util.stream.Stream;
 
-public class OpenAIChatCompletionEventSourceListener extends CompletionEventSourceListener<String> {
+import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 
-  public OpenAIChatCompletionEventSourceListener(CompletionEventListener<String> listener) {
+public class OpenAIChatCompletionEventSourceListener extends CompletionEventSourceListener<ChatCompletionResponseData> {
+
+
+  public OpenAIChatCompletionEventSourceListener(CompletionEventListener<ChatCompletionResponseData> listener) {
     super(listener);
   }
 
   /**
-   * Content of the first choice.
-   * <ul>
-   *     <li>Search all choices which are not null</li>
-   *     <li>Search all deltas which are not null</li>
-   *     <li>Use first content which is not null or blank (whitespace)</li>
-   *     <li>Otherwise use "" (empty string) if no match can be found</li>
-   * </ul>
+   * Returns the first valid message content extracted from the OpenAI Chat Completion response.
    *
-   * @return First non-blank content which can be found, otherwise {@code ""}
+   * @param data the JSON string received from the OpenAI Chat Completion API.
+   * @return ChatCompletionResponseData object containing content and reasoningContent
+   * @throws JsonProcessingException if an error occurs during JSON processing.
    */
-  protected String getMessage(String data) throws JsonProcessingException {
-    var choices = OBJECT_MAPPER
-        .readValue(data, OpenAIChatCompletionResponse.class)
-        .getChoices();
-    return (choices == null ? Stream.<OpenAIChatCompletionResponseChoice>empty() : choices.stream())
+  protected ChatCompletionResponseData getMessage(String data) throws JsonProcessingException {
+    var response = OBJECT_MAPPER.readValue(data, OpenAIChatCompletionResponse.class);
+    var choices = response.getChoices();
+
+    return choices == null ? new ChatCompletionResponseData(null, null) : choices.stream()
             .filter(Objects::nonNull)
             .map(OpenAIChatCompletionResponseChoice::getDelta)
             .filter(Objects::nonNull)
-            .map(OpenAIChatCompletionResponseChoiceDelta::getContent)
-            .filter(Objects::nonNull)
+            .map(delta -> new ChatCompletionResponseData(delta.getContent(), delta.getReasoningContent()))
             .findFirst()
-            .orElse("");
+            .orElse(new ChatCompletionResponseData(null, null));
   }
 
   @Override

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
+import ee.carlrobert.llm.client.openai.completion.ChatCompletionResponseData;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
@@ -46,7 +47,7 @@ public class AzureClient {
 
   public EventSource getChatCompletionAsync(
       OpenAIChatCompletionRequest request,
-      CompletionEventListener<String> completionEventListener) {
+      CompletionEventListener<ChatCompletionResponseData> completionEventListener) {
     return EventSources.createFactory(httpClient)
         .newEventSource(buildChatRequest(request), getEventSourceListener(completionEventListener));
   }
@@ -139,7 +140,7 @@ public class AzureClient {
   }
 
   private OpenAIChatCompletionEventSourceListener getEventSourceListener(
-      CompletionEventListener<String> listener) {
+      CompletionEventListener<ChatCompletionResponseData> listener) {
     return new OpenAIChatCompletionEventSourceListener(listener) {
       @Override
       protected ErrorDetails getErrorDetails(String data) throws JsonProcessingException {
