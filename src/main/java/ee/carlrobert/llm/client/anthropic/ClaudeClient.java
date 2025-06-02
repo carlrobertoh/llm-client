@@ -89,9 +89,15 @@ public class ClaudeClient {
       @Override
       protected String getMessage(String data) {
         try {
-          return OBJECT_MAPPER.readValue(data, ClaudeCompletionStreamResponse.class)
-              .getDelta()
-              .getText();
+          var delta = OBJECT_MAPPER.readValue(data, ClaudeCompletionStreamResponse.class)
+              .getDelta();
+
+          if (delta.getThinking() != null) {
+            eventListener.onThinking(delta.getThinking());
+            return "";
+          }
+
+          return delta.getText();
         } catch (Exception e) {
           try {
             return OBJECT_MAPPER.readValue(data, ClaudeCompletionErrorDetails.class)

@@ -7,6 +7,7 @@ public class ClaudeCompletionResponseMessage {
 
   private String type;
   private String text;
+  private String thinking;
 
   public String getType() {
     return type;
@@ -22,5 +23,13 @@ public class ClaudeCompletionResponseMessage {
 
   public void setText(String text) {
     this.text = text;
+  }
+
+  public String getThinking() {
+    return thinking;
+  }
+
+  public void setThinking(String thinking) {
+    this.thinking = thinking;
   }
 }

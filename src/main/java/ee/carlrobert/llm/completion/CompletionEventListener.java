@@ -11,6 +11,9 @@ public interface CompletionEventListener<T> {
   default void onEvent(String data) {
   }
 
+  default void onThinking(String thinking) {
+  }
+
   default void onMessage(T message, String rawMessage, EventSource eventSource) {
   }
 

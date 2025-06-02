@@ -12,13 +12,14 @@ public class ClaudeCompletionRequest implements CompletionRequest {
   @JsonProperty("max_tokens")
   private int maxTokens;
   private boolean stream;
-  private double temperature;
+  private Double temperature = 0.0;
   @JsonProperty("top_k")
-  private int topK;
+  private Integer topK;
   @JsonProperty("top_p")
-  private int topP;
+  private Integer topP;
   @JsonProperty("stop_sequences")
   private List<String> stopSequences;
+  private ClaudeCompletionRequestThinking thinking;
 
   public String getModel() {
     return model;
@@ -60,27 +61,27 @@ public class ClaudeCompletionRequest implements CompletionRequest {
     this.stream = stream;
   }
 
-  public double getTemperature() {
+  public Double getTemperature() {
     return temperature;
   }
 
-  public void setTemperature(double temperature) {
+  public void setTemperature(Double temperature) {
     this.temperature = temperature;
   }
 
-  public int getTopK() {
+  public Integer getTopK() {
     return topK;
   }
 
-  public void setTopK(int topK) {
+  public void setTopK(Integer topK) {
     this.topK = topK;
   }
 
-  public int getTopP() {
+  public Integer getTopP() {
     return topP;
   }
 
-  public void setTopP(int topP) {
+  public void setTopP(Integer topP) {
     this.topP = topP;
   }
 
@@ -90,5 +91,13 @@ public class ClaudeCompletionRequest implements CompletionRequest {
 
   public void setStopSequences(List<String> stopSequences) {
     this.stopSequences = stopSequences;
+  }
+
+  public ClaudeCompletionRequestThinking getThinking() {
+    return thinking;
+  }
+
+  public void setThinking(ClaudeCompletionRequestThinking thinking) {
+    this.thinking = thinking;
   }
 }
