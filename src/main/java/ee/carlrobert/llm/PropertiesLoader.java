@@ -7,6 +7,11 @@ import java.util.Properties;
 public class PropertiesLoader {
 
   public static String getValue(String key) {
+    var systemProperty = System.getProperty(key);
+    if (systemProperty != null) {
+      return systemProperty;
+    }
+
     var value = (String) loadProperties().get(key);
     if (value == null) {
       return System.getProperty(key);
