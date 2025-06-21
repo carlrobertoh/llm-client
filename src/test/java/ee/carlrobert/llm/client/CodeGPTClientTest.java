@@ -3,6 +3,7 @@ package ee.carlrobert.llm.client;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonArray;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMap;
 import static ee.carlrobert.llm.client.util.JSONUtil.jsonMapResponse;
+import static java.util.Collections.emptyList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -21,6 +22,7 @@ import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.completion.CompletionEventListener;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -57,11 +59,12 @@ public class CodeGPTClientTest extends BaseTest {
               List.of(Map.of("role", "user", "content", "TEST_PROMPT")),
               true,
               Map.of("name", "TEST_DOC_NAME", "url", "TEST_DOC_URL"),
-              Map.of("files",
-                  List.of(Map.of(
+              Map.of(
+                  "files", List.of(Map.of(
                       "name", "TEST_FILE_NAME",
                       "path", "TEST_FILE_PATH",
-                      "content", "TEST_FILE_CONTENT"))),
+                      "content", "TEST_FILE_CONTENT")),
+                  "conversationsHistory", "TEST_CONVERSATIONS_HISTORY"),
               Map.of(
                   "pluginVersion", "TEST_PLUGIN_VERSION",
                   "platformVersion", "TEST_PLATFORM_VERSION"));
@@ -85,7 +88,8 @@ public class CodeGPTClientTest extends BaseTest {
                 .setWebSearchIncluded(true)
                 .setContext(
                     new AdditionalRequestContext(List.of(
-                        new ContextFile("TEST_FILE_NAME", "TEST_FILE_PATH", "TEST_FILE_CONTENT"))))
+                        new ContextFile("TEST_FILE_NAME", "TEST_FILE_PATH", "TEST_FILE_CONTENT")),
+                        "TEST_CONVERSATIONS_HISTORY"))
                 .setDocumentationDetails(new DocumentationDetails("TEST_DOC_NAME", "TEST_DOC_URL"))
                 .build(),
             new CompletionEventListener<String>() {
