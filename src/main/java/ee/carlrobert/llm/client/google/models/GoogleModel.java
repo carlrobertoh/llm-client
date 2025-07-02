@@ -12,7 +12,7 @@ public enum GoogleModel {
           "Gemini 2.0 Flash Thinking (Experimental)", 2000000 + 8192, true),
   GEMINI_2_0_PRO_EXP("gemini-2.0-pro-exp-02-05",
           "Gemini 2.0 Pro (Experimental)", 2000000 + 8192, true),
-  GEMINI_2_5_PRO_PREVIEW("gemini-2.5-pro-preview-03-25",
+  GEMINI_2_5_PRO_PREVIEW("gemini-2.5-pro-preview-06-05",
           "Gemini 2.5 Pro (Preview)", 1048576, true),
   GEMINI_2_5_PRO("gemini-2.5-pro",
           "Gemini 2.5 Pro", 1048576),
