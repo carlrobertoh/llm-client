@@ -38,7 +38,7 @@ class GoogleClientTest extends BaseTest {
     var resultMessageBuilder = new StringBuilder();
     expectGoogle((StreamHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo(
-          "/v1/models/gemini-1.0-pro:streamGenerateContent");
+          "/v1/models/gemini-1.5-pro:streamGenerateContent");
       assertThat(request.getUri().getQuery()).isEqualTo("key=TEST_API_KEY&alt=sse");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
@@ -69,7 +69,7 @@ class GoogleClientTest extends BaseTest {
                     .maxOutputTokens(500)
                     .build())
                 .build(),
-            GoogleModel.GEMINI_1_0_PRO,
+            GoogleModel.GEMINI_1_5_PRO,
             new CompletionEventListener<String>() {
               @Override
               public void onMessage(String message, EventSource eventSource) {
@@ -86,7 +86,7 @@ class GoogleClientTest extends BaseTest {
     var prompt = "TEST_PROMPT";
     expectGoogle((BasicHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo(
-          "/v1/models/gemini-1.0-pro:generateContent");
+          "/v1/models/gemini-1.5-pro:generateContent");
       assertThat(request.getUri().getQuery()).isEqualTo("key=TEST_API_KEY");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
@@ -115,7 +115,7 @@ class GoogleClientTest extends BaseTest {
                     .temperature(0.5)
                     .build())
                 .build(),
-            GoogleModel.GEMINI_1_0_PRO);
+            GoogleModel.GEMINI_1_5_PRO);
 
     assertThat(response.getCandidates())
         .extracting("content.role")
@@ -140,7 +140,7 @@ class GoogleClientTest extends BaseTest {
         e("code", "400")));
     expectGoogle((BasicHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo(
-          "/v1/models/gemini-1.0-pro:streamGenerateContent");
+          "/v1/models/gemini-1.5-pro:streamGenerateContent");
       return new ResponseEntity(400, errorResponse);
     });
 
@@ -150,7 +150,7 @@ class GoogleClientTest extends BaseTest {
             new GoogleCompletionRequest.Builder(
                 List.of(new GoogleCompletionContent("user", List.of("TEST_USER_PROMPT"))))
                 .build(),
-            GoogleModel.GEMINI_1_0_PRO,
+            GoogleModel.GEMINI_1_5_PRO,
             new CompletionEventListener<>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
@@ -173,7 +173,7 @@ class GoogleClientTest extends BaseTest {
     var errorResponse = jsonMapResponse("error_details", "Server error");
     expectGoogle((BasicHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo(
-          "/v1/models/gemini-1.0-pro:streamGenerateContent");
+          "/v1/models/gemini-1.5-pro:streamGenerateContent");
       return new ResponseEntity(500, errorResponse);
     });
 
@@ -183,7 +183,7 @@ class GoogleClientTest extends BaseTest {
             new GoogleCompletionRequest.Builder(
                 List.of(new GoogleCompletionContent("user", List.of("TEST_PROMPT"))))
                 .build(),
-            GoogleModel.GEMINI_1_0_PRO,
+            GoogleModel.GEMINI_1_5_PRO,
             new CompletionEventListener<>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
@@ -322,7 +322,7 @@ class GoogleClientTest extends BaseTest {
   void shouldGetCountTokens() {
     expectGoogle((BasicHttpExchange) request -> {
       assertThat(request.getUri().getPath()).isEqualTo(
-          "/v1/models/gemini-1.0-pro:countTokens");
+          "/v1/models/gemini-1.5-pro:countTokens");
       assertThat(request.getUri().getQuery()).isEqualTo("key=TEST_API_KEY");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
@@ -335,7 +335,7 @@ class GoogleClientTest extends BaseTest {
     var response = new GoogleClient.Builder("TEST_API_KEY")
         .build()
         .getCountTokens(List.of(
-            new GoogleCompletionContent(List.of("test"))), GoogleModel.GEMINI_1_0_PRO);
+            new GoogleCompletionContent(List.of("test"))), GoogleModel.GEMINI_1_5_PRO);
 
     assertThat(response.getTotalTokens()).isEqualTo(1);
   }
