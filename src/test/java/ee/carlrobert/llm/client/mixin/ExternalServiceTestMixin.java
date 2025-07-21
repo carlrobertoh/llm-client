@@ -6,6 +6,7 @@ import static ee.carlrobert.llm.client.mixin.ExternalService.AZURE;
 import static ee.carlrobert.llm.client.mixin.ExternalService.CODEGPT;
 import static ee.carlrobert.llm.client.mixin.ExternalService.GOOGLE;
 import static ee.carlrobert.llm.client.mixin.ExternalService.LLAMA;
+import static ee.carlrobert.llm.client.mixin.ExternalService.MISTRAL;
 import static ee.carlrobert.llm.client.mixin.ExternalService.OLLAMA;
 import static ee.carlrobert.llm.client.mixin.ExternalService.OPENAI;
 import static ee.carlrobert.llm.client.mixin.ExternalService.YOU;
@@ -78,6 +79,10 @@ public interface ExternalServiceTestMixin {
 
   default void expectGoogle(Exchange exchange) {
     addExpectation(GOOGLE, exchange);
+  }
+
+  default void expectMistral(Exchange exchange) {
+    addExpectation(MISTRAL, exchange);
   }
 
   private void addExpectation(ExternalService externalService, Exchange exchange) {

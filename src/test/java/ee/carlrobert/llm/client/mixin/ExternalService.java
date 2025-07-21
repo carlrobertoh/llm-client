@@ -10,7 +10,8 @@ public enum ExternalService implements Service {
   YOU("you.baseUrl"),
   LLAMA("llama.baseUrl"),
   OLLAMA("ollama.baseUrl"),
-  GOOGLE("google.baseUrl");
+  GOOGLE("google.baseUrl"),
+  MISTRAL("mistral.baseUrl");
 
   private final String urlProperty;
 
