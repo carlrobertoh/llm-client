@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "ee.carlrobert"
-version = "0.8.45"
+version = "0.8.46"
 
 repositories {
     mavenCentral()

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.46] - 2025-07-21
+
+### Fixed
+
+- Mistral client private access
+
 ## [0.8.45] - 2025-07-21
 
 ### Added
@@ -392,7 +398,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.8.45]: https://github.com/carlrobertoh/llm-client/compare/faeb1ab0b9f0042c5a8a525fbbffcfe93ff5b537...HEAD
+[0.8.46]: https://github.com/carlrobertoh/llm-client/compare/87f8d261398b14edc114321a7863754473bb13a9...HEAD
+[0.8.45]: https://github.com/carlrobertoh/llm-client/compare/faeb1ab0b9f0042c5a8a525fbbffcfe93ff5b537...87f8d261398b14edc114321a7863754473bb13a9
 [0.8.44]: https://github.com/carlrobertoh/llm-client/compare/401f403a4e90d4726ff978aa7dd3063b13ee2a40...faeb1ab0b9f0042c5a8a525fbbffcfe93ff5b537
 [0.8.43]: https://github.com/carlrobertoh/llm-client/compare/06d9bd4f90718192bc3de99bf21f8f22e9ced0c1...401f403a4e90d4726ff978aa7dd3063b13ee2a40
 [0.8.42]: https://github.com/carlrobertoh/llm-client/compare/0134cc0d52ac6e9eb304b1da4de4158de74446ed...06d9bd4f90718192bc3de99bf21f8f22e9ced0c1
