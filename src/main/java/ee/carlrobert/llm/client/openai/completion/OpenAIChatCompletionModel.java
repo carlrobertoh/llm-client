@@ -19,7 +19,9 @@ public enum OpenAIChatCompletionModel implements CompletionModel {
   GPT_4_1_NANO("gpt-4.1-nano", "GPT-4.1-nano (1M)", 1047576),
   O_1_MINI("o1-mini", "o1-mini", 128000),
   O_1_PREVIEW("o1-preview", "o1-preview", 128000),
-  O_3_MINI("o3-mini", "o3-mini", 200000);
+  O_3_MINI("o3-mini", "o3-mini", 200000),
+  O_3("o3", "o3", 200000),
+  O_4_MINI("o4-mini", "o4-mini", 200000);
 
   private final String code;
   private final String description;
