@@ -32,7 +32,7 @@ public class MistralClient {
   private final OkHttpClient httpClient;
   private final String apiKey;
 
-  private MistralClient(String apiKey, OkHttpClient.Builder httpClientBuilder) {
+  public MistralClient(String apiKey, OkHttpClient.Builder httpClientBuilder) {
     this.httpClient = httpClientBuilder.build();
     this.apiKey = apiKey;
   }
