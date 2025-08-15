@@ -15,6 +15,7 @@ import ee.carlrobert.llm.client.azure.AzureCompletionRequestParams;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
+import ee.carlrobert.llm.client.openai.completion.ChatCompletionResponseData;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
@@ -75,9 +76,9 @@ class AzureClientTest extends BaseTest {
                 .setPresencePenalty(0.1)
                 .setFrequencyPenalty(0.1)
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<ChatCompletionResponseData>() {
               @Override
-              public void onMessage(String message, EventSource eventSource) {
+              public void onMessage(ChatCompletionResponseData message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
 
@@ -245,9 +246,9 @@ class AzureClientTest extends BaseTest {
                 .setFrequencyPenalty(0.1)
                 .setOverriddenPath("/v1/deployments/%s/completions?api_version=%s")
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<ChatCompletionResponseData>() {
               @Override
-              public void onMessage(String message, EventSource eventSource) {
+              public void onMessage(ChatCompletionResponseData message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
 
@@ -282,7 +283,7 @@ class AzureClientTest extends BaseTest {
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")))
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<ChatCompletionResponseData>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
                 errorMessageBuilder.append(error.getMessage());
@@ -314,7 +315,7 @@ class AzureClientTest extends BaseTest {
             new OpenAIChatCompletionRequest.Builder(
                 List.of(new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")))
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<ChatCompletionResponseData>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
                 errorMessageBuilder.append(error.getMessage());

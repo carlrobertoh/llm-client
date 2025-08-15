@@ -20,6 +20,7 @@ import ee.carlrobert.llm.client.codegpt.request.chat.Metadata;
 import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.StreamHttpExchange;
+import ee.carlrobert.llm.client.openai.completion.ChatCompletionResponseData;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.Collections;
@@ -92,9 +93,9 @@ public class CodeGPTClientTest extends BaseTest {
                         "TEST_CONVERSATIONS_HISTORY"))
                 .setDocumentationDetails(new DocumentationDetails("TEST_DOC_NAME", "TEST_DOC_URL"))
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<ChatCompletionResponseData>() {
               @Override
-              public void onMessage(String message, EventSource eventSource) {
+              public void onMessage(ChatCompletionResponseData message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
               }
             });
