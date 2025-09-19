@@ -7,6 +7,7 @@ import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.codegpt.request.AutoApplyRequest;
 import ee.carlrobert.llm.client.codegpt.request.CodeCompletionRequest;
+import ee.carlrobert.llm.client.codegpt.request.InlineEditRequest;
 import ee.carlrobert.llm.client.codegpt.request.chat.ChatCompletionRequest;
 import ee.carlrobert.llm.client.codegpt.request.prediction.AutocompletionPredictionRequest;
 import ee.carlrobert.llm.client.codegpt.request.prediction.DirectPredictionRequest;
@@ -31,8 +32,12 @@ import okhttp3.RequestBody;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 import okhttp3.sse.EventSources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CodeGPTClient {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CodeGPTClient.class);
 
   private static final String BASE_URL = PropertiesLoader.getValue("codegpt.baseUrl");
   private static final MediaType APPLICATION_JSON = MediaType.parse("application/json");
@@ -71,6 +76,14 @@ public class CodeGPTClient {
     return createNewEventSource(
         buildCodeCompletionRequest(request),
         getCodeCompletionEventSourceListener(eventListener));
+  }
+
+  public EventSource getInlineEditAsync(
+      InlineEditRequest request,
+      CompletionEventListener<String> eventListener) {
+    return createNewEventSource(
+        buildInlineEditRequest(request),
+        getChatCompletionEventSourceListener(eventListener));
   }
 
   public OpenAIChatCompletionResponse getChatCompletion(ChatCompletionRequest request) {
@@ -155,6 +168,19 @@ public class CodeGPTClient {
           .build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to process request", e);
+    }
+  }
+
+  private Request buildInlineEditRequest(InlineEditRequest request) {
+    var headers = new HashMap<>(getRequiredHeaders());
+    try {
+      return new Request.Builder()
+          .url(BASE_URL + "/v1/inline-edit")
+          .headers(Headers.of(headers))
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to process inline edit request", e);
     }
   }
 
