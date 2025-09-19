@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.48] - 2025-09-19
+
+### Added
+
+- Inline Edit support (ProxyAI)
+
 ## [0.8.47] - 2025-09-03
 
 ### Added
@@ -404,7 +410,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.8.47]: https://github.com/carlrobertoh/llm-client/compare/316e5bdec07da96492d94af1cbc185c94a4763e8...HEAD
+[0.8.48]: https://github.com/carlrobertoh/llm-client/compare/b1120906304c778efa80b8efd31eb4334333fb04...HEAD
+[0.8.47]: https://github.com/carlrobertoh/llm-client/compare/316e5bdec07da96492d94af1cbc185c94a4763e8...b1120906304c778efa80b8efd31eb4334333fb04
 [0.8.46]: https://github.com/carlrobertoh/llm-client/compare/87f8d261398b14edc114321a7863754473bb13a9...316e5bdec07da96492d94af1cbc185c94a4763e8
 [0.8.45]: https://github.com/carlrobertoh/llm-client/compare/faeb1ab0b9f0042c5a8a525fbbffcfe93ff5b537...87f8d261398b14edc114321a7863754473bb13a9
 [0.8.44]: https://github.com/carlrobertoh/llm-client/compare/401f403a4e90d4726ff978aa7dd3063b13ee2a40...faeb1ab0b9f0042c5a8a525fbbffcfe93ff5b537
