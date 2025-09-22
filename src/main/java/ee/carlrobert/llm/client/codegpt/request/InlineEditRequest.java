@@ -12,6 +12,7 @@ public class InlineEditRequest implements CompletionRequest {
   private final String selectedText;
   private final String filePath;
   private final String fileContent;
+  private final int cursorOffset;
   private final String projectBasePath;
   private final List<ContextFile> contextFiles;
   private final String gitDiff;
@@ -27,6 +28,7 @@ public class InlineEditRequest implements CompletionRequest {
     this.selectedText = builder.selectedText;
     this.filePath = builder.filePath;
     this.fileContent = builder.fileContent;
+    this.cursorOffset = builder.cursorOffset;
     this.projectBasePath = builder.projectBasePath;
     this.contextFiles = builder.contextFiles;
     this.gitDiff = builder.gitDiff;
@@ -89,6 +91,10 @@ public class InlineEditRequest implements CompletionRequest {
     return metadata;
   }
 
+  public int getCursorOffset() {
+    return cursorOffset;
+  }
+
   public static class Builder {
 
     private final String systemTemplate;
@@ -99,6 +105,7 @@ public class InlineEditRequest implements CompletionRequest {
     private String selectedText;
     private String filePath;
     private String fileContent;
+    private int cursorOffset;
     private String projectBasePath;
     private List<ContextFile> contextFiles;
     private String gitDiff;
@@ -133,6 +140,11 @@ public class InlineEditRequest implements CompletionRequest {
 
     public Builder setFileContent(String fileContent) {
       this.fileContent = fileContent;
+      return this;
+    }
+
+    public Builder setCursorOffset(int cursorOffset) {
+      this.cursorOffset = cursorOffset;
       return this;
     }
 
