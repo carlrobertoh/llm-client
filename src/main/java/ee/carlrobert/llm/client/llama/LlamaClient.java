@@ -11,6 +11,9 @@ import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest;
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionResponse;
 import ee.carlrobert.llm.client.llama.completion.LlamaInfillRequest;
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
+import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.response.OpenAIChatCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 import java.io.IOException;
@@ -38,19 +41,30 @@ public class LlamaClient {
     this.apiKey = builder.apiKey;
   }
 
-  public EventSource getChatCompletionAsync(
+  public EventSource getCodeCompletionAsync(
       LlamaCompletionRequest request,
       CompletionEventListener<String> eventListener) {
     return EventSources.createFactory(httpClient)
-        .newEventSource(buildCompletionHttpRequest(request), getEventSourceListener(eventListener));
+        .newEventSource(
+            buildCompletionHttpRequest(request),
+            new OpenAIChatCompletionEventSourceListener(eventListener));
   }
 
-  public LlamaCompletionResponse getChatCompletion(LlamaCompletionRequest request) {
-    try (var response = httpClient.newCall(buildCompletionHttpRequest(request)).execute()) {
-      return DeserializationUtil.mapResponse(response, LlamaCompletionResponse.class);
+  public EventSource getChatCompletionAsync(
+      OpenAIChatCompletionRequest request,
+      CompletionEventListener<String> eventListener) {
+    return EventSources.createFactory(httpClient)
+        .newEventSource(
+            buildChatCompletionRequest(request),
+            new OpenAIChatCompletionEventSourceListener(eventListener));
+  }
+
+  public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
+    try (var response =
+        httpClient.newCall(buildChatCompletionRequest(request)).execute()) {
+      return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
-      throw new RuntimeException(
-          "Could not get llama completion for the given request:\n" + request, e);
+      throw new RuntimeException(e);
     }
   }
 
@@ -65,7 +79,7 @@ public class LlamaClient {
 
   public EventSource getInfillAsync(
       LlamaInfillRequest request,
-      CompletionEventListener eventListener) {
+      CompletionEventListener<String> eventListener) {
     return EventSources.createFactory(httpClient).newEventSource(
         buildHttpRequest(request, "/infill"),
         getEventSourceListener(eventListener));
@@ -75,11 +89,28 @@ public class LlamaClient {
     return buildHttpRequest(request, "/completion");
   }
 
+  private Request buildChatCompletionRequest(OpenAIChatCompletionRequest request) {
+    try {
+      var baseHost = port == null ? BASE_URL : format("http://localhost:%d", port);
+      var url = (host == null ? baseHost : host) + "/v1/chat/completions";
+      return new Request.Builder()
+          .url(url)
+          .header("Cache-Control", "no-cache")
+          .header("Content-Type", "application/json")
+          .header("Accept", request.isStream() ? "text/event-stream" : "text/json")
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to process request", e);
+    }
+  }
+
   private Request buildHttpRequest(LlamaCompletionRequest request, String path) {
     try {
       var baseHost = port == null ? BASE_URL : format("http://localhost:%d", port);
+      var url = (host == null ? baseHost : host) + path;
       Request.Builder builder = new Request.Builder()
-          .url((host == null ? baseHost : host) + path)
+          .url(url)
           .header("Cache-Control", "no-cache")
           .header("Content-Type", "application/json")
           .header("Accept", request.isStream() ? "text/event-stream" : "text/json")
@@ -93,9 +124,9 @@ public class LlamaClient {
     }
   }
 
-  private CompletionEventSourceListener getEventSourceListener(
-      CompletionEventListener eventListener) {
-    return new CompletionEventSourceListener(eventListener) {
+  private CompletionEventSourceListener<String> getEventSourceListener(
+      CompletionEventListener<String> eventListener) {
+    return new CompletionEventSourceListener<>(eventListener) {
       @Override
       protected String getMessage(String data) {
         try {

@@ -303,7 +303,6 @@ public class GoogleClient {
               .orElse("");
         } catch (JacksonException e) {
           // ignore
-          System.out.println();
         }
         return "";
       }

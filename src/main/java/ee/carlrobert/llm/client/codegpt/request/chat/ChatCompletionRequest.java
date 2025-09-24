@@ -1,6 +1,7 @@
 package ee.carlrobert.llm.client.codegpt.request.chat;
 
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionMessage;
+import ee.carlrobert.llm.client.openai.completion.request.Tool;
 import ee.carlrobert.llm.completion.CompletionRequest;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +18,8 @@ public class ChatCompletionRequest implements CompletionRequest {
   private final DocumentationDetails documentationDetails;
   private final AdditionalRequestContext context;
   private final Metadata metadata;
+  private final List<Tool> tools;
+  private final String toolChoice;
 
   private ChatCompletionRequest(Builder builder) {
     this.model = builder.model;
@@ -29,6 +32,8 @@ public class ChatCompletionRequest implements CompletionRequest {
     this.documentationDetails = builder.documentationDetails;
     this.context = builder.context;
     this.metadata = builder.metadata;
+    this.tools = builder.tools;
+    this.toolChoice = builder.toolChoice;
   }
 
   public Double getTemperature() {
@@ -71,6 +76,14 @@ public class ChatCompletionRequest implements CompletionRequest {
     return metadata;
   }
 
+  public List<Tool> getTools() {
+    return tools;
+  }
+
+  public String getToolChoice() {
+    return toolChoice;
+  }
+
   public static class Builder {
 
     private Double temperature = 0.9;
@@ -83,6 +96,8 @@ public class ChatCompletionRequest implements CompletionRequest {
     private DocumentationDetails documentationDetails;
     private AdditionalRequestContext context;
     private Metadata metadata;
+    private List<Tool> tools;
+    private String toolChoice;
 
     public Builder(List<OpenAIChatCompletionMessage> messages) {
       this.messages = messages;
@@ -130,6 +145,16 @@ public class ChatCompletionRequest implements CompletionRequest {
 
     public Builder setMetadata(Metadata metadata) {
       this.metadata = metadata;
+      return this;
+    }
+
+    public Builder setTools(List<Tool> tools) {
+      this.tools = tools;
+      return this;
+    }
+
+    public Builder setToolChoice(String toolChoice) {
+      this.toolChoice = toolChoice;
       return this;
     }
 

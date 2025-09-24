@@ -1,6 +1,8 @@
 package ee.carlrobert.llm.completion;
 
 import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
+import ee.carlrobert.llm.client.openai.completion.response.ToolCall;
+import java.util.List;
 import okhttp3.sse.EventSource;
 
 public interface CompletionEventListener<T> {
@@ -27,5 +29,8 @@ public interface CompletionEventListener<T> {
   }
 
   default void onError(ErrorDetails error, Throwable ex) {
+  }
+
+  default void onToolCall(ToolCall toolCall) {
   }
 }

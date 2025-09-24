@@ -20,7 +20,7 @@ public abstract class CompletionEventSourceListener<T> extends EventSourceListen
 
   private static final Logger LOG = LoggerFactory.getLogger(CompletionEventSourceListener.class);
 
-  private final CompletionEventListener<T> listener;
+  protected final CompletionEventListener<T> listener;
   private final StringBuilder messageBuilder = new StringBuilder();
   private final boolean retryOnReadTimeout;
   private final Consumer<String> onRetry;

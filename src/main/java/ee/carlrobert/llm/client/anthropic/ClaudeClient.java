@@ -5,11 +5,10 @@ import static ee.carlrobert.llm.client.DeserializationUtil.OBJECT_MAPPER;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
-import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionErrorDetails;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionEventSourceListener;
+import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionException;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionRequest;
 import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionResponse;
-import ee.carlrobert.llm.client.anthropic.completion.ClaudeCompletionStreamResponse;
-import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import ee.carlrobert.llm.completion.CompletionEventSourceListener;
 import java.io.IOException;
@@ -32,14 +31,6 @@ public class ClaudeClient {
   private final String apiVersion;
   private final String host;
 
-  @Deprecated
-  public ClaudeClient(String apiKey, String apiVersion, OkHttpClient.Builder httpClientBuilder) {
-    this.httpClient = httpClientBuilder.build();
-    this.apiKey = apiKey;
-    this.apiVersion = apiVersion;
-    this.host = PropertiesLoader.getValue("anthropic.baseUrl");
-  }
-
   public ClaudeClient(Builder builder, OkHttpClient.Builder httpClientBuilder) {
     this.apiKey = builder.apiKey;
     this.apiVersion = builder.apiVersion;
@@ -59,7 +50,7 @@ public class ClaudeClient {
     try (var response = httpClient.newCall(buildCompletionRequest(request)).execute()) {
       return DeserializationUtil.mapResponse(response, ClaudeCompletionResponse.class);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new ClaudeCompletionException("Failed to communicate with Claude API", e);
     }
   }
 
@@ -75,7 +66,7 @@ public class ClaudeClient {
           .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
           .build();
     } catch (JsonProcessingException e) {
-      throw new RuntimeException("Unable to process request", e);
+      throw new ClaudeCompletionException("Failed to serialize request to JSON", e);
     }
   }
 
@@ -85,39 +76,7 @@ public class ClaudeClient {
 
   private CompletionEventSourceListener<String> getCompletionEventSourceListener(
       CompletionEventListener<String> eventListener) {
-    return new CompletionEventSourceListener<>(eventListener) {
-      @Override
-      protected String getMessage(String data) {
-        try {
-          var delta = OBJECT_MAPPER.readValue(data, ClaudeCompletionStreamResponse.class)
-              .getDelta();
-
-          if (delta.getThinking() != null) {
-            eventListener.onThinking(delta.getThinking());
-            return "";
-          }
-
-          return delta.getText();
-        } catch (Exception e) {
-          try {
-            return OBJECT_MAPPER.readValue(data, ClaudeCompletionErrorDetails.class)
-                .getError()
-                .getMessage();
-          } catch (Exception ex) {
-            return "";
-          }
-        }
-      }
-
-      @Override
-      protected ErrorDetails getErrorDetails(String error) {
-        try {
-          return OBJECT_MAPPER.readValue(error, ClaudeCompletionErrorDetails.class).getError();
-        } catch (JsonProcessingException e) {
-          throw new RuntimeException(e);
-        }
-      }
-    };
+    return new ClaudeCompletionEventSourceListener(eventListener);
   }
 
   public static class Builder {

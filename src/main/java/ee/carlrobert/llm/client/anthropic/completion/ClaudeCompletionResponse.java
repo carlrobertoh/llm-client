@@ -12,6 +12,7 @@ public class ClaudeCompletionResponse implements CompletionResponse {
   private String role;
   private List<ClaudeCompletionResponseMessage> content;
   private ClaudeCompletionResponseUsage usage;
+  private String stopReason;
 
   public String getId() {
     return id;
@@ -41,8 +42,7 @@ public class ClaudeCompletionResponse implements CompletionResponse {
     return content;
   }
 
-  public void setContent(
-      List<ClaudeCompletionResponseMessage> content) {
+  public void setContent(List<ClaudeCompletionResponseMessage> content) {
     this.content = content;
   }
 
@@ -50,8 +50,15 @@ public class ClaudeCompletionResponse implements CompletionResponse {
     return usage;
   }
 
-  public void setUsage(
-      ClaudeCompletionResponseUsage usage) {
+  public void setUsage(ClaudeCompletionResponseUsage usage) {
     this.usage = usage;
+  }
+
+  public String getStopReason() {
+    return stopReason;
+  }
+
+  public void setStopReason(String stopReason) {
+    this.stopReason = stopReason;
   }
 }

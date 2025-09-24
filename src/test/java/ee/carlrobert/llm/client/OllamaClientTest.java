@@ -12,15 +12,18 @@ import ee.carlrobert.llm.client.http.ResponseEntity;
 import ee.carlrobert.llm.client.http.exchange.BasicHttpExchange;
 import ee.carlrobert.llm.client.http.exchange.NdJsonStreamHttpExchange;
 import ee.carlrobert.llm.client.ollama.OllamaClient;
-import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionMessage;
-import ee.carlrobert.llm.client.ollama.completion.request.OllamaChatCompletionRequest;
-import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest;
-import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest.Builder;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaEmbeddingRequest;
-import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters;
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaPullRequest;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaModel;
 import ee.carlrobert.llm.client.ollama.completion.response.OllamaPullResponse;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionAssistantMessage;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionStandardMessage;
+import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionToolMessage;
+import ee.carlrobert.llm.client.openai.completion.request.Tool;
+import ee.carlrobert.llm.client.openai.completion.request.ToolFunction;
+import ee.carlrobert.llm.client.openai.completion.request.ToolFunctionParameters;
+import ee.carlrobert.llm.client.openai.completion.response.ToolCall;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,84 +36,59 @@ public class OllamaClientTest extends BaseTest {
   private static final OllamaClient client = new OllamaClient.Builder().build();
 
   @Test
-  void shouldStreamOllamaCompletion() {
-    expectOllama((NdJsonStreamHttpExchange) request -> {
-      assertThat(request.getUri().getPath()).isEqualTo("/api/generate");
-      assertThat(request.getMethod()).isEqualTo("POST");
-      assertThat(request.getBody())
-          .extracting("model", "prompt", "options", "system", "stream")
-          .containsExactly("codellama:7b", "TEST_PROMPT", Map.of("temperature", 0.8),
-              "SYSTEM_PROMPT", true);
-      return List.of(
-          jsonMapResponse(e("response", "Hel"), e("done", false)),
-          jsonMapResponse(e("response", "lo"), e("done", false)),
-          jsonMapResponse(e("response", "!"), e("done", true)));
-    });
-
-    var resultMessageBuilder = new StringBuilder();
-    client.getCompletionAsync(
-        new OllamaCompletionRequest.Builder("codellama:7b",
-            "TEST_PROMPT")
-            .setSystem("SYSTEM_PROMPT")
-            .setStream(true)
-            .setOptions(new OllamaParameters.Builder().temperature(0.8).build())
-            .build(),
-        new CompletionEventListener<>() {
-          @Override
-          public void onMessage(String message, EventSource eventSource) {
-            resultMessageBuilder.append(message);
-          }
-        });
-
-    await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
-  }
-
-  @Test
   void shouldStreamOllamaChatCompletion() {
     expectOllama((NdJsonStreamHttpExchange) request -> {
-      assertThat(request.getUri().getPath()).isEqualTo("/api/chat");
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
-          .extracting("model", "messages", "options", "stream")
+          .extracting("model", "messages", "temperature", "stream")
           .containsExactly("codellama:7b",
               List.of(Map.of("role", "user", "content", "TEST_PROMPT")),
-              Map.of("temperature", 0.8),
+              0.8,
               true);
       return List.of(
           jsonMapResponse(
               e("model", "codellama:7b"),
-              e("message", jsonMap(
-                  e("role", "assistant"),
-                  e("content", "Hel")
-              )),
-              e("done", "false")
+              e("choices", jsonArray(
+                  jsonMap(
+                      e("delta", jsonMap(
+                          e("role", "assistant"),
+                          e("content", "Hel")
+                      ))
+                  )
+              ))
           ),
           jsonMapResponse(
               e("model", "codellama:7b"),
-              e("message", jsonMap(
-                  e("role", "assistant"),
-                  e("content", "lo")
-              )),
-              e("done", "false")
+              e("choices", jsonArray(
+                  jsonMap(
+                      e("delta", jsonMap(
+                          e("content", "lo")
+                      ))
+                  )
+              ))
           ),
           jsonMapResponse(
               e("model", "codellama:7b"),
-              e("message", jsonMap(
-                  e("role", "assistant"),
-                  e("content", "!")
-              )),
-              e("done", "true")
+              e("choices", jsonArray(
+                  jsonMap(
+                      e("delta", jsonMap(
+                          e("content", "!")
+                      ))
+                  )
+              ))
           ));
     });
 
     var resultMessageBuilder = new StringBuilder();
     client.getChatCompletionAsync(
-        new OllamaChatCompletionRequest.Builder("codellama:7b",
+        new OpenAIChatCompletionRequest.Builder(
             List.of(
-                new OllamaChatCompletionMessage("user", "TEST_PROMPT", null)
+                new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")
             ))
+            .setModel("codellama:7b")
             .setStream(true)
-            .setOptions(new OllamaParameters.Builder().temperature(0.8).build())
+            .setTemperature(0.8)
             .build(),
         new CompletionEventListener<>() {
           @Override
@@ -123,27 +101,9 @@ public class OllamaClientTest extends BaseTest {
   }
 
   @Test
-  void shouldGetOllamaCompletion() {
-    expectOllama((BasicHttpExchange) request -> {
-      assertThat(request.getUri().getPath()).isEqualTo("/api/generate");
-      assertThat(request.getMethod()).isEqualTo("POST");
-      assertThat(request.getBody())
-          .extracting("prompt", "stream")
-          .containsExactly("TEST_PROMPT", false);
-      return new ResponseEntity(jsonMapResponse("response", "Hello!"));
-    });
-
-    var response = client.getCompletion(new Builder("codellama:7b", "TEST_PROMPT")
-        .setStream(false)
-        .build());
-
-    assertThat(response.getResponse()).isEqualTo("Hello!");
-  }
-
-  @Test
   void shouldGetOllamaChatCompletion() {
     expectOllama((BasicHttpExchange) request -> {
-      assertThat(request.getUri().getPath()).isEqualTo("/api/chat");
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/chat/completions");
       assertThat(request.getMethod()).isEqualTo("POST");
       assertThat(request.getBody())
           .extracting("model", "messages", "stream")
@@ -160,25 +120,28 @@ public class OllamaClientTest extends BaseTest {
       return new ResponseEntity(
           jsonMapResponse(
               e("model", "codellama:7b"),
-              e("message", jsonMap(
-                  e("role", "assistant"),
-                  e("content", "Hello!")
-              )),
-              e("done", "true")
+              e("choices", jsonArray(
+                  jsonMap(
+                      e("message", jsonMap(
+                          e("role", "assistant"),
+                          e("content", "Hello!")
+                      ))
+                  )
+              ))
           )
       );
     });
 
-    var response = client.getChatCompletion(new OllamaChatCompletionRequest.Builder(
-        "codellama:7b",
+    var response = client.getChatCompletion(new OpenAIChatCompletionRequest.Builder(
         List.of(
-            new OllamaChatCompletionMessage("user", "TEST_PROMPT", null)
+            new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")
         )
     )
+        .setModel("codellama:7b")
         .setStream(false)
         .build());
 
-    assertThat(response.getMessage().getContent()).isEqualTo("Hello!");
+    assertThat(response.getChoices().get(0).getMessage().getContent()).isEqualTo("Hello!");
   }
 
   @Test

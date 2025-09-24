@@ -9,7 +9,6 @@ import ee.carlrobert.llm.PropertiesLoader;
 import ee.carlrobert.llm.client.DeserializationUtil;
 import ee.carlrobert.llm.client.codegpt.response.CodeGPTException;
 import ee.carlrobert.llm.client.openai.completion.ApiResponseError;
-import ee.carlrobert.llm.client.openai.completion.ErrorDetails;
 import ee.carlrobert.llm.client.openai.completion.OpenAIChatCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.OpenAITextCompletionEventSourceListener;
 import ee.carlrobert.llm.client.openai.completion.request.OpenAIChatCompletionRequest;

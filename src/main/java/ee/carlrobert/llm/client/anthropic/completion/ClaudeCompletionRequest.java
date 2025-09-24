@@ -20,6 +20,9 @@ public class ClaudeCompletionRequest implements CompletionRequest {
   @JsonProperty("stop_sequences")
   private List<String> stopSequences;
   private ClaudeCompletionRequestThinking thinking;
+  private List<ClaudeTool> tools;
+  @JsonProperty("tool_choice")
+  private ClaudeToolChoice toolChoice;
 
   public String getModel() {
     return model;
@@ -99,5 +102,21 @@ public class ClaudeCompletionRequest implements CompletionRequest {
 
   public void setThinking(ClaudeCompletionRequestThinking thinking) {
     this.thinking = thinking;
+  }
+
+  public List<ClaudeTool> getTools() {
+    return tools;
+  }
+
+  public void setTools(List<ClaudeTool> tools) {
+    this.tools = tools;
+  }
+
+  public ClaudeToolChoice getToolChoice() {
+    return toolChoice;
+  }
+
+  public void setToolChoice(ClaudeToolChoice toolChoice) {
+    this.toolChoice = toolChoice;
   }
 }
