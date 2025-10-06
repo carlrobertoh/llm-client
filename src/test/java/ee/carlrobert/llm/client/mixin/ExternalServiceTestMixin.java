@@ -85,6 +85,10 @@ public interface ExternalServiceTestMixin {
     addExpectation(MISTRAL, exchange);
   }
 
+  default void expectInception(Exchange exchange) {
+    addExpectation(ExternalService.INCEPTION, exchange);
+  }
+
   private void addExpectation(ExternalService externalService, Exchange exchange) {
     Expectation expectation;
     if (exchange instanceof StreamHttpExchange) {

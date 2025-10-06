@@ -47,7 +47,7 @@ public class LlamaClient {
     return EventSources.createFactory(httpClient)
         .newEventSource(
             buildCompletionHttpRequest(request),
-            new OpenAIChatCompletionEventSourceListener(eventListener));
+            getEventSourceListener(eventListener));
   }
 
   public EventSource getChatCompletionAsync(

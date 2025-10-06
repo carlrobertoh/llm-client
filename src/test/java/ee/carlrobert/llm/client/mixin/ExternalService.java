@@ -11,7 +11,8 @@ public enum ExternalService implements Service {
   LLAMA("llama.baseUrl"),
   OLLAMA("ollama.baseUrl"),
   GOOGLE("google.baseUrl"),
-  MISTRAL("mistral.baseUrl");
+  MISTRAL("mistral.baseUrl"),
+  INCEPTION("inception.baseUrl");
 
   private final String urlProperty;
 
