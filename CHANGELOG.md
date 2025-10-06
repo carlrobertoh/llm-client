@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.52] - 2025-10-06
+
+### Added
+
+- Inception client
+
 ## [0.8.51] - 2025-09-24
 
 ### Revert
@@ -428,7 +434,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade OpenAI chat models: **gpt-4-0125-preview**, **gpt-3.5-turbo-0125**
 
-[0.8.51]: https://github.com/carlrobertoh/llm-client/compare/46892693e6327f5d6e8b764f9d1f10b97f587848...HEAD
+[0.8.52]: https://github.com/carlrobertoh/llm-client/compare/73cd0d21eb6defcc5e54d94a88ab07e8e4136c4a...HEAD
+[0.8.51]: https://github.com/carlrobertoh/llm-client/compare/46892693e6327f5d6e8b764f9d1f10b97f587848...73cd0d21eb6defcc5e54d94a88ab07e8e4136c4a
 [0.8.50]: https://github.com/carlrobertoh/llm-client/compare/d1bb3a0ac2a1c403b4ed6e6c723aa701ec5e44b8...46892693e6327f5d6e8b764f9d1f10b97f587848
 [0.8.49]: https://github.com/carlrobertoh/llm-client/compare/fed3dc5094f28d13f4556913f81adc797598046c...d1bb3a0ac2a1c403b4ed6e6c723aa701ec5e44b8
 [0.8.48]: https://github.com/carlrobertoh/llm-client/compare/b1120906304c778efa80b8efd31eb4334333fb04...fed3dc5094f28d13f4556913f81adc797598046c
