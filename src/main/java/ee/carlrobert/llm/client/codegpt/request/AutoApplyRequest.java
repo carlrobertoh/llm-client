@@ -2,22 +2,25 @@ package ee.carlrobert.llm.client.codegpt.request;
 
 public class AutoApplyRequest {
 
-  private String suggestedChanges;
-  private String fileContent;
+  private final String model;
+  private final String code;
+  private final String update;
 
-  public String getSuggestedChanges() {
-    return suggestedChanges;
+  public AutoApplyRequest(String model, String code, String update) {
+    this.model = model;
+    this.code = code;
+    this.update = update;
   }
 
-  public void setSuggestedChanges(String suggestedChanges) {
-    this.suggestedChanges = suggestedChanges;
+  public String getModel() {
+    return model;
   }
 
-  public String getFileContent() {
-    return fileContent;
+  public String getCode() {
+    return code;
   }
 
-  public void setFileContent(String fileContent) {
-    this.fileContent = fileContent;
+  public String getUpdate() {
+    return update;
   }
 }

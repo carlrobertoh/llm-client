@@ -2,13 +2,13 @@ package ee.carlrobert.llm.client.codegpt.response;
 
 public class AutoApplyResponse {
 
-  private String modifiedFileContent;
+  private String mergedCode;
 
-  public String getModifiedFileContent() {
-    return modifiedFileContent;
+  public String getMergedCode() {
+    return mergedCode;
   }
 
-  public void setModifiedFileContent(String modifiedFileContent) {
-    this.modifiedFileContent = modifiedFileContent;
+  public void setMergedCode(String mergedCode) {
+    this.mergedCode = mergedCode;
   }
 }

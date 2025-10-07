@@ -86,6 +86,14 @@ public class CodeGPTClient {
         getChatCompletionEventSourceListener(eventListener));
   }
 
+  public AutoApplyResponse applyChanges(AutoApplyRequest request) {
+    try (var response = httpClient.newCall(buildApplyRequest(request)).execute()) {
+      return DeserializationUtil.mapResponse(response, AutoApplyResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to apply suggested changes", e);
+    }
+  }
+
   public OpenAIChatCompletionResponse getChatCompletion(ChatCompletionRequest request) {
     try (var response = httpClient.newCall(buildChatCompletionRequest(request)).execute()) {
       if (!response.isSuccessful()) {
@@ -100,14 +108,6 @@ public class CodeGPTClient {
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException("Unable to get chat completion", e);
-    }
-  }
-
-  public AutoApplyResponse applySuggestedChanges(AutoApplyRequest request) {
-    try (var response = httpClient.newCall(buildAutoApplyRequest(request)).execute()) {
-      return DeserializationUtil.mapResponse(response, AutoApplyResponse.class);
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to apply suggested changes", e);
     }
   }
 
@@ -192,10 +192,10 @@ public class CodeGPTClient {
         .build();
   }
 
-  private Request buildAutoApplyRequest(AutoApplyRequest request) {
+  private Request buildApplyRequest(AutoApplyRequest request) {
     try {
       return new Request.Builder()
-          .url(BASE_URL + "/v1/files/apply-changes")
+          .url(BASE_URL + "/v1/code/apply")
           .header("Authorization", "Bearer " + apiKey)
           .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
           .build();
