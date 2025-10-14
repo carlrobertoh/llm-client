@@ -19,6 +19,9 @@ import ee.carlrobert.llm.client.openai.embeddings.EmbeddingRequest;
 import ee.carlrobert.llm.client.openai.embeddings.EmbeddingResponse;
 import ee.carlrobert.llm.client.openai.imagegen.request.OpenAIImageGenerationRequest;
 import ee.carlrobert.llm.client.openai.imagegen.response.OpenAiImageGenerationResponse;
+import ee.carlrobert.llm.client.openai.response.OpenAIResponseTextEventSourceListener;
+import ee.carlrobert.llm.client.openai.response.request.OpenAIResponseCompletionRequest;
+import ee.carlrobert.llm.client.openai.response.response.OpenAIResponseCompletionResponse;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.io.IOException;
 import java.util.Collection;
@@ -66,6 +69,25 @@ public class OpenAIClient {
         .newEventSource(buildTextCompletionRequest(request), eventListener);
   }
 
+  public EventSource getResponseCompletionAsync(
+      OpenAIResponseCompletionRequest request,
+      CompletionEventListener<String> eventListener) {
+    return EventSources.createFactory(httpClient)
+        .newEventSource(
+            buildResponseRequest(request),
+            new OpenAIResponseTextEventSourceListener(eventListener));
+  }
+
+  public OpenAIResponseCompletionResponse getResponseCompletion(
+      OpenAIResponseCompletionRequest request) {
+    try (var response = httpClient.newCall(buildResponseRequest(request)).execute()) {
+      handleErrorResponse(response);
+      return DeserializationUtil.mapResponse(response, OpenAIResponseCompletionResponse.class);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public EventSource getChatCompletionAsync(
       OpenAIChatCompletionRequest request,
       CompletionEventListener<String> eventListener) {
@@ -83,19 +105,7 @@ public class OpenAIClient {
 
   public OpenAIChatCompletionResponse getChatCompletion(OpenAIChatCompletionRequest request) {
     try (var response = httpClient.newCall(buildChatCompletionRequest(request)).execute()) {
-      if (!response.isSuccessful()) {
-        var body = response.body();
-        if (body == null) {
-          throw new RuntimeException("Unable to get response body");
-        }
-
-        var error = OBJECT_MAPPER.readValue(body.string(), ApiResponseError.class);
-        var ex = new CodeGPTException();
-        ex.setDetail(error.getError().getMessage());
-        ex.setStatus(response.code());
-        throw ex;
-      }
-
+      handleErrorResponse(response);
       return DeserializationUtil.mapResponse(response, OpenAIChatCompletionResponse.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -157,6 +167,22 @@ public class OpenAIClient {
         .build();
   }
 
+  private Request buildResponseRequest(OpenAIResponseCompletionRequest request) {
+    var headers = new HashMap<>(getHeaders());
+    if (request.isStream()) {
+      headers.put("Accept", "text/event-stream");
+    }
+    try {
+      return new Request.Builder()
+          .url(host + "/v1/responses")
+          .headers(Headers.of(headers))
+          .post(RequestBody.create(OBJECT_MAPPER.writeValueAsString(request), APPLICATION_JSON))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to process request", e);
+    }
+  }
+
   public Request buildImageRequest(OpenAIImageGenerationRequest imageRequest) {
     var headers = new HashMap<>(getHeaders());
     headers.put("Content-Type", "application/json");
@@ -206,6 +232,21 @@ public class OpenAIClient {
           .build();
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Unable to process request", e);
+    }
+  }
+
+  private void handleErrorResponse(okhttp3.Response response) throws IOException {
+    if (!response.isSuccessful()) {
+      var body = response.body();
+      if (body == null) {
+        throw new RuntimeException("Unable to get response body");
+      }
+
+      var error = OBJECT_MAPPER.readValue(body.string(), ApiResponseError.class);
+      var ex = new CodeGPTException();
+      ex.setDetail(error.getError().getMessage());
+      ex.setStatus(response.code());
+      throw ex;
     }
   }
 

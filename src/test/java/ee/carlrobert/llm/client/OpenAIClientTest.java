@@ -23,9 +23,11 @@ import ee.carlrobert.llm.client.openai.completion.request.ResponseFormat;
 import ee.carlrobert.llm.client.openai.completion.request.Tool;
 import ee.carlrobert.llm.client.openai.completion.request.ToolFunction;
 import ee.carlrobert.llm.client.openai.completion.request.ToolFunctionParameters;
+import ee.carlrobert.llm.client.openai.response.request.OpenAIResponseCompletionRequest;
 import ee.carlrobert.llm.completion.CompletionEventListener;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 import okhttp3.sse.EventSource;
 import org.junit.jupiter.api.Test;
@@ -90,7 +92,7 @@ class OpenAIClientTest extends BaseTest {
                 .setFrequencyPenalty(0.1)
                 .setResponseFormat(responseFormat)
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<>() {
               @Override
               public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
@@ -153,7 +155,7 @@ class OpenAIClientTest extends BaseTest {
                 .setPresencePenalty(0.1)
                 .setFrequencyPenalty(0.1)
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<>() {
               @Override
               public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
@@ -161,6 +163,162 @@ class OpenAIClientTest extends BaseTest {
             });
 
     await().atMost(5, SECONDS).until(() -> "Hello!".contentEquals(resultMessageBuilder));
+  }
+
+  @Test
+  void shouldStreamResponseCompletion() {
+    expectOpenAI((StreamHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/responses");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("Openai-organization").get(0))
+          .isEqualTo("TEST_ORGANIZATION");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
+      assertThat(request.getHeaders().get("Accept").get(0))
+          .isEqualTo("text/event-stream");
+      assertThat(request.getBody())
+          .extracting(
+              "model",
+              "stream",
+              "input")
+          .containsExactly(
+              "gpt-4o-mini",
+              true,
+              Map.of("role", "user", "content", "TEST_INPUT"));
+
+      return List.of(
+          jsonMapResponse(
+              e("id", "resp_1"),
+              e("object", "response"),
+              e("model", "gpt-4o-mini"),
+              e("output", jsonArray(jsonMap(
+                  e("type", "message"),
+                  e("role", "assistant"),
+                  e("content", "Hello"))))),
+          jsonMapResponse(
+              e("id", "resp_2"),
+              e("object", "response"),
+              e("model", "gpt-4o-mini"),
+              e("output", jsonArray(jsonMap(
+                  e("type", "message"),
+                  e("role", "assistant"),
+                  e("content", "!")))))
+      );
+    });
+    var req = new OpenAIResponseCompletionRequest();
+    req.setModel("gpt-4o-mini");
+    req.setInput(Map.of("role", "user", "content", "TEST_INPUT"));
+    req.setStream(true);
+    var resultMessageBuilder = new CopyOnWriteArrayList<String>();
+
+    new OpenAIClient.Builder("TEST_API_KEY")
+        .setOrganization("TEST_ORGANIZATION")
+        .build()
+        .getResponseCompletionAsync(
+            req,
+            new CompletionEventListener<>() {
+              @Override
+              public void onMessage(String message, EventSource eventSource) {
+                resultMessageBuilder.add(message);
+              }
+            });
+
+    await().atMost(5, SECONDS).until(() -> resultMessageBuilder.size() == 2);
+    assertThat(resultMessageBuilder.get(0)).isEqualTo("Hello");
+    assertThat(resultMessageBuilder.get(1)).isEqualTo("!");
+  }
+
+  @Test
+  void shouldGetResponseCompletion() {
+    expectOpenAI((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/responses");
+      assertThat(request.getMethod()).isEqualTo("POST");
+      assertThat(request.getHeaders().get("Authorization").get(0)).isEqualTo("Bearer TEST_API_KEY");
+      assertThat(request.getHeaders().get("X-llm-application-tag").get(0))
+          .isEqualTo("codegpt");
+
+      return new ResponseEntity(jsonMapResponse(
+          e("id", "resp_sync"),
+          e("object", "response"),
+          e("model", "gpt-4o-mini"),
+          e("output", jsonArray(jsonMap(
+              e("type", "message"),
+              e("role", "assistant"),
+              e("content", "SYNC"))))));
+    });
+    var req = new OpenAIResponseCompletionRequest();
+    req.setModel("gpt-4o-mini");
+    req.setInput(Map.of("role", "user", "content", "TEST_INPUT"));
+
+    var response = new OpenAIClient.Builder("TEST_API_KEY")
+        .build()
+        .getResponseCompletion(req);
+
+    assertThat(response.getId()).isEqualTo("resp_sync");
+    assertThat(response.getOutput()).hasSize(1);
+    assertThat(response.getOutput().get(0).getContent()).isEqualTo("SYNC");
+  }
+
+  @Test
+  void shouldHandleInvalidApiKeyErrorForResponses() {
+    var errorResponse = jsonMapResponse("error", jsonMap(
+        e("message", "Incorrect API key provided"),
+        e("type", "invalid_request_error"),
+        e("code", "invalid_api_key")));
+    expectOpenAI((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/responses");
+      return new ResponseEntity(401, errorResponse);
+    });
+    var req = new OpenAIResponseCompletionRequest();
+    req.setModel("gpt-4o-mini");
+    req.setInput(Map.of("role", "user", "content", "TEST_INPUT"));
+    var errorMessageBuilder = new StringBuilder();
+
+    new OpenAIClient.Builder("TEST_API_KEY")
+        .build()
+        .getResponseCompletionAsync(
+            req,
+            new CompletionEventListener<>() {
+              @Override
+              public void onError(ErrorDetails error, Throwable t) {
+                assertThat(error.getCode()).isEqualTo("invalid_api_key");
+                assertThat(error.getType()).isEqualTo("invalid_request_error");
+                errorMessageBuilder.append(error.getMessage());
+              }
+            });
+
+    await().atMost(5, SECONDS)
+        .until(() -> "Incorrect API key provided".contentEquals(errorMessageBuilder));
+  }
+
+  @Test
+  void shouldHandleUnknownApiErrorForResponses() {
+    final var errorMessageBuilder = new StringBuilder();
+    var errorResponse = jsonMapResponse("error_details", "Server error");
+    expectOpenAI((BasicHttpExchange) request -> {
+      assertThat(request.getUri().getPath()).isEqualTo("/v1/responses");
+      return new ResponseEntity(500, errorResponse);
+    });
+    var req = new OpenAIResponseCompletionRequest();
+    req.setModel("gpt-4o-mini");
+    req.setInput(Map.of("role", "user", "content", "TEST_INPUT"));
+
+    new OpenAIClient.Builder("TEST_API_KEY")
+        .build()
+        .getResponseCompletionAsync(
+            req,
+            new CompletionEventListener<>() {
+              @Override
+              public void onError(ErrorDetails error, Throwable t) {
+                errorMessageBuilder.append(error.getMessage());
+              }
+            });
+
+    await().atMost(5, SECONDS)
+        .until(() -> ("Unknown API response. "
+            + "Code: 500, "
+            + "Body: {\"error_details\":\"Server error\"}").contentEquals(errorMessageBuilder));
   }
 
   @Test
@@ -219,7 +377,7 @@ class OpenAIClientTest extends BaseTest {
                 .setFrequencyPenalty(0.1)
                 .setOverriddenPath("/v1/test/segment")
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<>() {
               @Override
               public void onMessage(String message, EventSource eventSource) {
                 resultMessageBuilder.append(message);
@@ -407,7 +565,7 @@ class OpenAIClientTest extends BaseTest {
                 List.of(new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
                 assertThat(error.getCode()).isEqualTo("invalid_api_key");
@@ -436,7 +594,7 @@ class OpenAIClientTest extends BaseTest {
                 List.of(new OpenAIChatCompletionStandardMessage("user", "TEST_PROMPT")))
                 .setModel(OpenAIChatCompletionModel.GPT_3_5)
                 .build(),
-            new CompletionEventListener<String>() {
+            new CompletionEventListener<>() {
               @Override
               public void onError(ErrorDetails error, Throwable t) {
                 errorMessageBuilder.append(error.getMessage());
