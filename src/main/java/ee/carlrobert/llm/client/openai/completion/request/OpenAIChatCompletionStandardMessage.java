@@ -4,7 +4,6 @@ public class OpenAIChatCompletionStandardMessage implements OpenAIChatCompletion
 
   private final String role;
   private final String content;
-  private String toolCallId;
 
   public OpenAIChatCompletionStandardMessage(String role, String content) {
     this.role = role;
@@ -17,13 +16,5 @@ public class OpenAIChatCompletionStandardMessage implements OpenAIChatCompletion
 
   public String getContent() {
     return content;
-  }
-
-  public String getToolCallId() {
-    return toolCallId;
-  }
-
-  public void setToolCallId(String toolCallId) {
-    this.toolCallId = toolCallId;
   }
 }
